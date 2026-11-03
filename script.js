@@ -43,21 +43,21 @@ const NUMERO_WHATSAPP = "573178341120";
 const tiendasFresura = [
 
     {
-        nombre: "Fresura - Calle 45",
+        nombre: "Sede U Nacional",
 
-        direccion: "Cl. 45 #28-10, Bogotá",
+        direccion: "Calle 45 #28-10, Bogotá",
 
-        lat: 4.6350,
-        lng: -74.0780
+        lat: 4.6347,
+        lng: -74.0785
     },
 
     {
-        nombre: "Fresura Javeriana",
+        nombre: "Sede U Javeriana",
 
-        direccion: "Cl. 41 #8-56, Bogotá",
+        direccion: "Calle 41 #8-56, Bogotá",
 
-        lat: 4.6260,
-        lng: -74.0650
+        lat: 4.6287,
+        lng: -74.0656
     }
 
 ];
@@ -602,8 +602,8 @@ function crearTarjetasTiendas() {
 
                Por ejemplo:
 
-               0 = Calle 45
-               1 = Javeriana
+               0 = Sede U Nacional
+               1 = Sede U Javeriana
             */
 
             botonMapa.dataset.tienda =
