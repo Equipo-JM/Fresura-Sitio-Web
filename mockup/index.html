@@ -1,0 +1,1505 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup Fresura</title>
+<meta name="description" content="Mockup navegable del sitio de Fresura: inicio, ficha de producto, pedido por WhatsApp y cambio de precio en el panel. Datos de ejemplo por validar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* Paleta oficial (M1 p.4). No se usan otros colores. */
+:root {
+    --we-peep: #FADAD7;
+    --flamingo: #EC72A8;
+    --platinum: #EFE8D7;
+    --porcini: #CFA67B;
+    --court-bouillon: #CFCB9A;
+    --peat-brown: #5B3B24;
+    --dust-storm: #E6D2B8;
+
+    /* Restora Neue no tiene licencia web todavía: se deja el nombre y un respaldo genérico */
+    --serif: "Restora Neue", "Iowan Old Style", Georgia, serif;
+    --sans: "Plus Jakarta Sans", system-ui, sans-serif;
+
+    --radio: 18px;
+    --radio-chico: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--dust-storm);
+    color: var(--peat-brown);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+    outline: 3px solid var(--peat-brown);
+    outline-offset: 2px;
+}
+
+/* ---------- Envoltura del mockup ---------- */
+
+.portada {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 24px 8px;
+}
+
+.portada h1 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    line-height: 1.1;
+    margin: 0 0 8px;
+}
+
+.portada p { max-width: 70ch; margin: 0 0 12px; }
+
+.aviso {
+    display: inline-block;
+    background: var(--court-bouillon);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: .875rem;
+}
+
+.indice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.indice a {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 2px solid var(--peat-brown);
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: .875rem;
+}
+
+.pantallas {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px 32px;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.pantalla {
+    width: 390px;
+    max-width: 100%;
+    scroll-margin-top: 16px;
+}
+
+.pantalla > header { margin-bottom: 12px; }
+
+.pantalla > header .numero {
+    font-weight: 700;
+    font-size: .8125rem;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.pantalla > header h2 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2px 0 4px;
+}
+
+.pantalla > header p { margin: 0; font-size: .9375rem; }
+
+.telefono {
+    background: var(--platinum);
+    border: 10px solid var(--peat-brown);
+    border-radius: 36px;
+    overflow: hidden;
+}
+
+/* ---------- Piezas del sitio ---------- */
+
+.barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--platinum);
+    border-bottom: 1px solid var(--dust-storm);
+}
+
+.logo { display: block; color: var(--flamingo); }
+.logo svg { display: block; width: 100%; height: auto; }
+
+.barra .logo { width: 104px; }
+
+.menu-boton {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--peat-brown);
+    border-radius: 50%;
+    background: transparent;
+    display: grid;
+    place-content: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.menu-boton span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: var(--peat-brown);
+}
+
+.volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Rayas verticales: elemento gráfico observado en M1 p.1 y M2 p.1 */
+.rayas {
+    background: repeating-linear-gradient(90deg, var(--platinum) 0 22px, var(--we-peep) 22px 44px);
+}
+
+.heroe {
+    padding: 28px 20px 26px;
+    text-align: center;
+    border-bottom: 6px solid var(--flamingo);
+}
+
+.heroe .tarjeta-heroe {
+    background: var(--platinum);
+    border-radius: 160px 160px var(--radio) var(--radio);
+    padding: 34px 22px 24px;
+}
+
+.heroe h3 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 2rem;
+    line-height: 1.1;
+    margin: 0 0 10px;
+}
+
+.heroe p { margin: 0 0 18px; }
+
+.boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 12px 22px;
+    border: 2px solid var(--peat-brown);
+    border-radius: 999px;
+    background: var(--peat-brown);
+    color: var(--platinum);
+    font: 700 1rem/1.2 var(--sans);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.boton.secundario {
+    background: transparent;
+    color: var(--peat-brown);
+}
+
+.boton.ancho { width: 100%; }
+
+.boton[disabled] {
+    background: var(--dust-storm);
+    border-color: var(--dust-storm);
+    color: var(--peat-brown);
+    cursor: not-allowed;
+}
+
+.seccion { padding: 26px 18px; }
+
+.seccion + .seccion { border-top: 1px solid var(--dust-storm); }
+
+.seccion h3 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0 0 4px;
+}
+
+.seccion .bajada { margin: 0 0 16px; font-size: .9375rem; }
+
+.por-validar {
+    display: inline-block;
+    background: var(--court-bouillon);
+    color: var(--peat-brown);
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: .75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.promo {
+    background: var(--we-peep);
+    border-radius: var(--radio);
+    padding: 18px;
+    border-left: 8px solid var(--flamingo);
+}
+
+.promo h4 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.375rem;
+    margin: 6px 0 6px;
+}
+
+.promo dl { margin: 10px 0 0; font-size: .875rem; }
+.promo dt { font-weight: 700; display: inline; }
+.promo dd { display: inline; margin: 0; }
+.promo dd::after { content: ""; display: block; margin-bottom: 4px; }
+
+.catalogo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.producto {
+    display: block;
+    background: var(--we-peep);
+    border-radius: var(--radio);
+    overflow: hidden;
+    text-decoration: none;
+}
+
+.producto .cuerpo { padding: 10px 12px 14px; }
+
+.producto h4 {
+    font-family: var(--serif);
+    font-size: 1.0625rem;
+    line-height: 1.2;
+    margin: 0 0 4px;
+}
+
+.producto .precio { font-size: .875rem; margin: 0; }
+
+.foto {
+    position: relative;
+    display: grid;
+    place-content: center;
+    aspect-ratio: 1;
+    color: var(--peat-brown);
+    font-size: .75rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.foto span {
+    background: var(--platinum);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+.foto.grande { aspect-ratio: 4 / 3; }
+
+
+.opiniones {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    background: var(--platinum);
+    border: 2px solid var(--court-bouillon);
+    border-radius: var(--radio);
+    padding: 16px;
+}
+
+.opiniones .nota {
+    font-family: var(--serif);
+    font-size: 2.5rem;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.opiniones p { margin: 0; font-size: .875rem; }
+
+.sedes { display: grid; gap: 12px; }
+
+.sede {
+    background: var(--dust-storm);
+    border-radius: var(--radio);
+    padding: 14px 16px;
+    font-size: .9375rem;
+}
+
+.sede h4 { margin: 0 0 2px; font-size: 1rem; }
+.sede p { margin: 0; }
+
+.etiqueta-sede {
+    display: inline-block;
+    margin-top: 8px;
+    background: var(--peat-brown);
+    color: var(--platinum);
+    font-size: .75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 999px;
+}
+
+.pie {
+    background: var(--peat-brown);
+    color: var(--platinum);
+    padding: 24px 18px;
+    font-size: .875rem;
+    text-align: center;
+}
+
+.pie .logo { color: var(--court-bouillon); width: 110px; margin: 0 auto 12px; }
+.pie p { margin: 4px 0; }
+
+/* Ficha */
+
+.ficha h3 {
+    font-family: var(--serif);
+    font-size: 1.875rem;
+    line-height: 1.1;
+    margin: 6px 0 8px;
+}
+
+.lista-tamanos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-radius: var(--radio-chico);
+    overflow: hidden;
+    border: 2px solid var(--dust-storm);
+}
+
+.lista-tamanos li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--platinum);
+}
+
+.lista-tamanos li + li { border-top: 2px solid var(--dust-storm); }
+.lista-tamanos small { display: block; font-size: .8125rem; }
+.lista-tamanos strong { white-space: nowrap; }
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chips li {
+    background: var(--we-peep);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: .875rem;
+}
+
+.fija {
+    position: sticky;
+    bottom: 0;
+    padding: 14px 18px;
+    background: var(--platinum);
+    border-top: 2px solid var(--dust-storm);
+}
+
+/* Formulario */
+
+fieldset {
+    border: 0;
+    margin: 0 0 22px;
+    padding: 0;
+}
+
+legend, .rotulo {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+legend small, .rotulo small { font-weight: 400; }
+
+.opcion {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 10px 14px;
+    border: 2px solid var(--peat-brown);
+    border-radius: var(--radio-chico);
+    background: var(--platinum);
+    cursor: pointer;
+}
+
+.opcion + .opcion { margin-top: 8px; }
+
+.opcion input {
+    width: 22px;
+    height: 22px;
+    margin: 0;
+    accent-color: var(--peat-brown);
+}
+
+.opcion .texto { flex: 1; }
+.opcion small { display: block; font-size: .8125rem; }
+
+.opcion:has(input:checked) { background: var(--we-peep); }
+
+.opcion:has(input:disabled) {
+    border-style: dashed;
+    cursor: not-allowed;
+}
+
+.rejilla-toppings {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.rejilla-toppings .opcion { margin: 0; min-height: 48px; font-size: .9375rem; }
+
+.ubicacion {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: var(--radio-chico);
+    background: var(--dust-storm);
+    font-size: .875rem;
+}
+
+.ubicacion p { margin: 0 0 10px; }
+
+.simulador {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.simulador button {
+    min-height: 40px;
+    padding: 6px 12px;
+    border: 2px solid var(--peat-brown);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--peat-brown);
+    font: 600 .8125rem var(--sans);
+    cursor: pointer;
+}
+
+.simulador button[aria-pressed="true"] {
+    background: var(--peat-brown);
+    color: var(--platinum);
+}
+
+.estado-cobertura {
+    margin-top: 10px;
+    font-weight: 700;
+}
+
+.campo { margin-bottom: 14px; }
+
+.campo input, .campo textarea {
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 12px;
+    border: 2px solid var(--peat-brown);
+    border-radius: var(--radio-chico);
+    background: var(--platinum);
+    color: var(--peat-brown);
+    font: 400 1rem var(--sans);
+}
+
+.campo textarea { min-height: 84px; resize: vertical; }
+
+.campo .ayuda { font-size: .8125rem; margin: 4px 0 0; }
+
+.resumen {
+    background: var(--we-peep);
+    border-radius: var(--radio);
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.resumen h4 { margin: 0 0 8px; font-family: var(--serif); font-size: 1.25rem; }
+
+.resumen dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    margin: 0;
+    font-size: .9375rem;
+}
+
+.resumen dt { font-weight: 700; }
+.resumen dd { margin: 0; }
+
+.resumen .total {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid var(--platinum);
+    font-weight: 700;
+}
+
+.nota-pie { font-size: .8125rem; margin: 10px 0 0; text-align: center; }
+
+/* WhatsApp */
+
+.chat-barra {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--peat-brown);
+    color: var(--platinum);
+}
+
+.avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--we-peep);
+    display: grid;
+    place-content: center;
+    color: var(--flamingo);
+    padding: 6px;
+}
+
+.avatar svg { width: 30px; height: auto; display: block; }
+
+.chat-barra strong { display: block; }
+.chat-barra small { font-size: .8125rem; }
+
+.chat {
+    padding: 20px 14px 28px;
+    min-height: 420px;
+}
+
+.burbuja {
+    margin-left: auto;
+    max-width: 92%;
+    background: var(--we-peep);
+    border-radius: 16px 16px 4px 16px;
+    padding: 12px 14px 8px;
+    white-space: pre-wrap;
+    font-size: .9375rem;
+}
+
+.burbuja .hora { display: block; text-align: right; font-size: .75rem; margin-top: 4px; }
+
+.explicacion {
+    margin: 18px 4px 0;
+    padding: 14px;
+    border: 2px dashed var(--porcini);
+    border-radius: var(--radio-chico);
+    font-size: .875rem;
+}
+
+.explicacion p { margin: 0 0 6px; }
+.explicacion p:last-child { margin: 0; }
+
+/* Panel */
+
+.panel-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: var(--peat-brown);
+    color: var(--platinum);
+}
+
+.panel-barra .logo { color: var(--court-bouillon); width: 92px; }
+.panel-barra small { font-size: .8125rem; }
+
+.migas { font-size: .875rem; margin: 0 0 6px; }
+
+.tabla-precios {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+}
+
+.tabla-precios caption { text-align: left; font-weight: 700; margin-bottom: 8px; }
+.tabla-precios th, .tabla-precios td { padding: 10px 6px; text-align: left; }
+.tabla-precios th { font-size: .8125rem; border-bottom: 2px solid var(--peat-brown); }
+.tabla-precios td { border-bottom: 1px solid var(--dust-storm); }
+
+.tabla-precios input {
+    width: 112px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 2px solid var(--peat-brown);
+    border-radius: var(--radio-chico);
+    background: var(--platinum);
+    color: var(--peat-brown);
+    font: 600 1rem var(--sans);
+}
+
+.tabla-precios tr.cambiado td { background: var(--we-peep); }
+
+.vista-previa {
+    border: 3px dashed var(--peat-brown);
+    border-radius: var(--radio);
+    padding: 14px;
+    margin-bottom: 16px;
+}
+
+.vista-previa .titulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.vista-previa .producto { max-width: 190px; }
+
+.acciones { display: grid; gap: 10px; }
+
+.mensaje-estado {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    border-radius: var(--radio-chico);
+    background: var(--court-bouillon);
+    font-weight: 600;
+    font-size: .9375rem;
+}
+
+/* Notas finales */
+
+.notas {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 8px 24px 56px;
+}
+
+.notas-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.nota-caja {
+    background: var(--platinum);
+    border-radius: var(--radio);
+    padding: 18px 20px;
+}
+
+.nota-caja h2 {
+    font-family: var(--serif);
+    font-size: 1.375rem;
+    margin: 0 0 8px;
+}
+
+.nota-caja ul, .nota-caja ol { margin: 0; padding-left: 20px; }
+.nota-caja li + li { margin-top: 6px; }
+
+[hidden] { display: none !important; }
+
+.sr-solo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* En el celular, cada pantalla ocupa todo el ancho y el marco desaparece */
+@media (max-width: 480px) {
+    .portada { padding: 28px 16px 4px; }
+    .pantallas { padding: 16px; gap: 36px; }
+    .notas { padding: 8px 16px 40px; }
+    .telefono { border-width: 4px; border-radius: 24px; }
+}
+
+.barra-derecha { display: flex; align-items: center; gap: 10px; }
+
+.carrito-boton {
+    position: relative;
+    display: grid;
+    place-content: center;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--peat-brown);
+    border-radius: 50%;
+    color: var(--peat-brown);
+}
+
+.carrito-boton svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+}
+
+.contador {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--peat-brown);
+    color: var(--platinum);
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 22px;
+    text-align: center;
+}
+
+.fila-cantidad {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.fila-cantidad .rotulo { margin: 0; }
+
+.cantidad {
+    display: inline-flex;
+    align-items: center;
+    border: 2px solid var(--peat-brown);
+    border-radius: 999px;
+}
+
+.cantidad button {
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--peat-brown);
+    font: 700 1.25rem var(--sans);
+    cursor: pointer;
+}
+
+.cantidad output { min-width: 28px; text-align: center; font-weight: 700; }
+
+.cantidad.chica button { width: 38px; height: 38px; font-size: 1.125rem; }
+
+.carrito-lista { list-style: none; margin: 0 0 22px; padding: 0; display: grid; gap: 10px; }
+
+.item {
+    background: var(--we-peep);
+    border-radius: var(--radio-chico);
+    padding: 12px 14px;
+}
+
+.item-cabeza { display: flex; justify-content: space-between; gap: 10px; }
+.item p { margin: 2px 0 8px; font-size: .875rem; }
+.item-acciones { display: flex; align-items: center; justify-content: space-between; }
+
+.quitar {
+    min-height: 44px;
+    padding: 0 6px;
+    border: 0;
+    background: transparent;
+    color: var(--peat-brown);
+    font: 600 .875rem var(--sans);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.carrito-vacio { margin: 0 0 22px; }
+
+[aria-disabled] { pointer-events: none; opacity: .6; }
+
+/* Modo captura: ?captura=p1 muestra solo esa pantalla, sin marco, para exportar PNG */
+.modo-captura body { background: var(--platinum); }
+.modo-captura .portada,
+.modo-captura .notas,
+.modo-captura .pantalla > header,
+.modo-captura .pantalla:not(.activa) { display: none; }
+.modo-captura .pantallas { padding: 0; display: block; }
+.modo-captura .pantalla { width: 390px; max-width: 100%; }
+.modo-captura .telefono { min-height: 100vh; }
+.modo-captura .telefono { border: 0; border-radius: 0; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+        <symbol id="logo-fresura" viewBox="805.5 461.7 308.1 151.3"><g fill="currentColor"><path d="M 1026.32 574.54 C 1026.35 569.48 1026.52 566.76 1027.66 563.15 C 1024.41 566.75 1017.55 567.87 1012.82 567.87 C 1014.85 570.23 1015.07 574.48 1015.07 580.55 L 1015.07 586.91 C 1015.07 591.22 1015.30 592.39 1017.26 593.77 C 1020.56 590.48 1022.78 587.94 1026.32 583.78 Z M 1026.32 574.54 "/><path d="M 1046.12 591.82 C 1046.34 587.10 1046.89 580.60 1047.45 575.88 C 1044.19 579.48 1034.73 587.06 1034.86 595.55 L 1034.73 599.62 C 1034.66 602.98 1034.41 607.11 1032.61 609.25 L 1048.35 609.25 C 1046.55 607.11 1045.98 602.31 1045.98 596.80 C 1045.98 596.80 1045.96 593.48 1046.12 591.82 "/><path d="M 1071.69 575.35 C 1071.67 568.73 1065.19 563.83 1058.78 563.82 C 1054.09 563.76 1049.80 565.85 1046.00 568.38 C 1037.85 573.98 1032.46 582.45 1026.19 589.78 C 1019.77 596.80 1010.78 607.37 1000.94 607.05 C 999.46 607.00 998.10 606.17 997.41 604.87 C 997.40 604.86 997.40 604.85 997.39 604.85 C 996.5 603.18 995.10 599.96 994.83 594.97 L 994.83 591.71 C 994.83 580.69 995.06 572.71 996.18 563.15 C 992.92 566.75 986.06 567.87 981.34 567.87 C 983.36 570.23 983.59 576.64 983.59 582.83 L 983.59 594.52 C 983.66 601.69 986.62 606.08 990.63 608.22 C 991.55 608.71 992.53 609.03 993.53 609.29 C 996.33 609.98 999.34 610.22 1002.23 610.13 C 1004.95 610.04 1007.71 609.06 1010.13 607.84 C 1013.19 606.28 1015.94 604.16 1018.41 601.79 C 1021.87 598.53 1025.12 595.08 1028.18 591.45 C 1034.13 584.31 1039.06 576.21 1046.53 570.64 C 1048.10 569.45 1049.77 568.38 1051.55 567.54 C 1052.96 566.87 1054.78 565.98 1056.38 566.25 C 1061.35 567.08 1064.07 572.50 1064.29 577.12 C 1064.37 578.81 1064.08 580.26 1063.74 581.37 C 1063.65 581.39 1063.57 581.41 1063.49 581.43 C 1063.49 581.43 1063.52 581.63 1063.57 581.88 C 1063.46 582.17 1063.36 582.45 1063.26 582.68 C 1063.42 582.68 1063.57 582.67 1063.72 582.67 C 1063.74 582.80 1063.76 582.88 1063.76 582.88 C 1064.31 582.79 1064.82 582.66 1065.31 582.51 C 1068.21 582.00 1071.17 579.92 1071.60 576.82 C 1071.67 576.32 1071.70 575.83 1071.69 575.35 "/><path d="M 937.73 600.16 C 937.73 596.67 940.76 593.64 946.61 593.64 C 945.60 595.21 945.03 597.13 945.03 599.26 C 945.03 603.65 947.96 608.48 955.15 608.48 C 959.87 608.48 964.14 605.90 964.14 601.51 C 964.14 591.51 938.51 588.02 938.51 575.54 C 938.51 565.42 949.42 562.61 958.30 562.61 C 964.26 562.61 967.74 563.40 971.68 563.40 C 972.80 563.40 973.93 563.28 975.16 563.17 L 967.63 573.74 C 966.96 568.23 963.92 563.96 958.30 563.96 C 953.80 563.96 949.76 566.21 949.76 570.71 C 949.76 580.82 975.39 584.31 975.39 596.90 C 975.39 605.90 965.38 609.94 955.26 609.94 C 944.25 609.94 937.73 605.56 937.73 600.16 "/><path d="M 1099.10 593.64 C 1099.10 582.28 1099.10 579.14 1098.88 575.88 C 1096.30 583.86 1076.39 586.89 1076.39 600.05 C 1076.39 605.78 1081.34 608.14 1086.17 608.14 C 1092.25 608.14 1099.10 603.98 1099.10 593.64 M 1065.15 598.48 C 1065.15 582.06 1096.07 584.53 1098.77 572.84 C 1097.87 566.66 1094.16 563.96 1090.33 563.96 C 1085.50 563.96 1082.01 567.33 1082.01 572.50 C 1082.01 573.85 1082.24 575.09 1082.80 576.21 C 1077.52 576.21 1074.71 573.85 1074.71 570.93 C 1074.71 567 1079.66 562.61 1089.89 562.61 C 1099.33 562.61 1110.35 567.33 1110.35 583.52 L 1110.35 586.67 C 1110.35 597.91 1110.35 600.16 1111.58 609.27 C 1107.65 607.47 1104.73 607.13 1101.92 607.13 C 1094.94 607.13 1091.23 609.83 1081.79 609.83 C 1073.69 609.83 1065.15 606.68 1065.15 598.48 "/><path d="M 861.37 590.30 C 861.60 585.58 862.15 580.91 862.71 576.19 C 859.45 579.78 852.59 588.39 847.87 588.39 C 849.89 590.75 850.07 594.09 850.12 597.40 L 850.12 596.45 C 850.12 601.96 849.67 607.13 847.87 609.27 L 863.61 609.27 C 861.81 607.13 861.24 602.33 861.24 596.82 C 861.24 596.82 861.22 591.96 861.37 590.30 "/><path d="M 887.01 575.38 C 887.01 573.23 886.28 571.66 885.72 570.57 C 884.73 568.66 883.43 567.35 882.42 566.52 C 881.66 565.98 880.61 565.34 879.29 564.80 C 879.29 564.80 877.76 564.13 876.13 563.86 C 871.96 563.16 867.74 564.36 864.14 566.28 C 860.51 568.23 857.38 570.90 854.46 573.62 C 850.96 576.95 847.71 580.42 843.33 582.48 C 838.75 584.77 833.91 585.29 829.39 584.29 C 824.53 583.21 821.10 578.89 821.13 573.92 L 821.16 569.78 C 821.19 565.16 822.25 560.57 824.46 556.50 C 827.26 551.32 831.55 547.32 837.04 547.32 C 842.89 547.32 845.92 552.16 845.92 555.98 C 845.92 557.89 845.59 559.35 844.91 560.59 C 850.42 560.59 853.23 557.66 853.23 554.51 C 853.23 550.33 846.10 545.80 839.52 545.18 C 831.33 544.42 825.14 549.81 822.99 551.67 C 821.71 552.79 818.47 555.81 815.22 562.51 C 812.91 567.28 809.31 576.54 809.72 589.76 L 809.72 596.67 C 809.72 602.18 809.27 607.35 807.48 609.48 L 823.21 609.48 C 821.42 607.35 820.97 602.18 820.97 596.67 L 821.03 587.76 C 821.74 588.05 822.46 588.33 823.19 588.56 C 831.52 591.39 841.05 589.51 847.87 584.23 C 854.18 579.43 858.33 572.14 865.18 568.12 C 866.31 567.43 867.51 566.84 868.76 566.37 C 869.89 566.12 871.14 566.07 872.44 566.45 C 874.64 567.09 876.39 568.66 877.57 570.59 C 878.66 572.38 879.35 574.50 879.52 576.58 C 879.60 577.71 879.57 578.84 879.35 579.95 C 879.25 580.5 879.16 581.04 879 581.57 C 878.85 582.00 878.75 582.32 878.52 582.71 C 879 582.67 879.60 582.62 879.73 582.61 C 880.26 582.57 880.79 582.47 881.31 582.33 C 883.10 581.86 884.78 580.90 885.83 579.34 C 886.61 578.17 887.01 576.78 887.01 575.38 "/><path d="M 925.73 594.21 C 926.74 595.78 927.30 597.69 927.30 599.82 C 927.30 602.82 925.94 606.01 922.79 607.74 C 920.34 608.91 917.60 609.37 914.94 608.59 C 912.28 607.80 910.31 605.90 909.56 603.37 C 909.30 602.52 909.14 601.58 909.26 600.67 C 909.36 599.94 909.72 599.32 910.09 598.69 C 910.69 597.72 911.41 596.82 912.19 596.00 C 913.87 594.26 915.85 592.83 917.84 591.47 C 919.91 590.05 922.04 588.71 924.04 587.19 C 925.96 585.74 927.78 584.12 929.15 582.13 C 930.56 580.09 931.38 577.73 931.52 575.25 C 931.53 574.98 931.54 574.70 931.54 574.42 C 931.54 566.55 923.90 562.62 915.46 562.62 C 901.30 562.62 890.62 572.74 890.62 587.58 C 890.62 598.01 896.92 607.71 909.52 609.53 C 908.00 607.57 906.99 605.21 906.67 602.65 C 906.64 602.44 906.62 602.22 906.60 602.01 C 906.44 600.05 905.69 598.19 904.66 596.52 C 902.90 593.65 901.86 590.03 901.86 585.67 C 901.86 571.17 910.07 563.97 915.91 563.97 C 919.40 563.97 921.98 566.33 921.98 570.94 C 921.98 582.86 912.41 588.09 908.80 596.89 C 908.29 598.12 907.86 599.28 907.78 600.62 C 907.58 604.16 909.51 607.60 912.66 609.23 C 916.03 610.98 920.16 610.93 923.76 609.96 C 926.91 609.11 930.03 607.52 932.33 605.17 C 933.48 604 934.61 602.44 934.61 600.73 C 934.61 597.24 931.57 594.21 925.73 594.21 "/><path d="M 920.78 479.90 L 941.99 479.90 C 942.08 479.89 942.18 479.89 942.28 479.89 L 944.53 479.90 L 944.54 479.90 L 950.27 479.92 C 946.47 470.32 936.83 475.88 936.83 475.88 C 938.22 470.45 937.55 468.67 936.31 466.25 C 935.02 463.73 932.90 463.72 931.64 466.25 C 929.52 470.50 931.06 475.88 931.06 475.88 C 921.42 471.26 917.29 479.92 917.29 479.92 L 920.78 479.92 Z M 920.78 479.90 "/><path d="M 970.30 474.92 C 969.60 479.76 968.62 484.52 966.99 489.15 C 966.94 489.27 966.46 490.41 966.51 490.46 C 964.93 489.15 963.61 487.56 962.70 485.66 C 960.46 481.11 961.48 474.28 965.68 471.17 C 966.62 470.48 967.93 469.91 969.12 470.12 C 971.32 470.52 970.51 473.43 970.30 474.92 M 947.32 531.60 C 946.00 533.58 944.32 535.5 942.14 535.84 C 939.25 536.31 936.76 534.63 934.69 532.79 C 932.37 530.75 930.55 528.21 928.87 525.64 C 926.30 521.71 924.27 517.42 922.88 512.94 C 921.23 507.66 919.69 501.25 922.31 496.02 C 923.41 493.83 925.85 492.40 928.31 492.64 C 932.61 493.08 935.37 497.5 937.53 500.75 C 940.26 504.84 943.22 508.79 946.39 512.55 C 947.59 513.97 948.81 515.35 950.11 516.67 C 950.39 516.96 953.65 519.91 953.61 520 C 952.12 522.95 950.64 525.92 949 528.79 C 948.51 529.63 947.96 530.62 947.32 531.60 M 999.63 486.57 C 999.48 486.39 998.11 485.00 998.14 484.92 C 997.77 485.88 997.32 486.80 996.78 487.67 C 995.07 490.41 992.51 492.51 989.49 493.63 C 987.43 494.40 985.25 494.76 983.07 494.97 C 981.19 495.15 979.30 495.22 977.42 495.01 C 977.05 494.97 972.57 494.08 972.64 493.85 C 974.14 489.20 975.58 484.35 975.73 479.43 C 975.78 477.93 975.68 476.42 975.35 474.96 C 974.80 472.53 973.41 469.45 970.89 468.55 C 968.58 467.73 966.10 468.91 964.35 470.40 C 963.26 471.33 962.31 472.48 961.68 473.78 C 958.41 480.10 960.57 488.01 965.68 492.67 C 964.09 496.76 962.28 500.79 960.61 504.81 C 959.40 507.53 958.17 510.30 956.92 513.04 C 954.72 511.49 952.82 509.19 951.08 507.15 C 949.10 504.82 947.30 502.34 945.39 499.94 C 941.98 495.64 938 491.07 932.42 489.80 C 928.02 488.80 923.24 490.01 920.76 493.99 C 920.57 494.31 920.39 494.64 920.22 494.97 C 916.39 503.25 922.73 519.63 927.53 526.84 C 930.91 532.03 935.24 538.72 942.31 538.51 C 944.75 538.36 946.98 537.22 948.94 535.87 C 953.71 532.72 957.00 528.10 959.63 523.16 C 959.68 523.07 959.73 522.98 959.78 522.87 C 966.69 525.90 976.53 527.14 981.96 523.21 C 983.10 522.39 984.18 520.84 984.18 519.5 C 979.15 521.33 978.42 521.35 975.22 521.55 C 970.52 521.83 965.98 520.63 962.11 518.25 C 965.33 511.66 969.77 501.96 971.64 496.76 C 971.53 497.10 976.61 499.01 977.08 499.18 C 979.30 500.01 981.58 500.68 983.89 501.19 C 986.29 501.73 988.74 502.08 991.19 501.92 C 993.64 501.76 996.09 501.05 998.07 499.59 C 1000.05 498.12 1001.23 496.07 1001.66 493.66 C 1002.10 491.13 1001.16 488.58 999.63 486.57 "/></g></symbol>
+    </defs>
+</svg>
+
+<div class="portada">
+    <span class="aviso">Mockup · 6 de noviembre de 2026 · Datos de ejemplo por validar</span>
+    <h1>Así se vería el sitio de Fresura en el celular</h1>
+    <p>
+        Esta es una propuesta para revisar el aspecto y el recorrido del pedido antes de construir el sitio.
+        Los productos, precios, fotos, horarios y la calificación son de ejemplo: los cambiaremos por los reales
+        cuando nos los compartan. Pueden tocar los botones y elegir opciones para ver cómo funciona.
+    </p>
+    <ul class="indice">
+        <li><a href="#p1">1 · Inicio</a></li>
+        <li><a href="#p2">2 · Producto</a></li>
+        <li><a href="#p3">3 · Personalizar</a></li>
+        <li><a href="#p4">4 · Carrito</a></li>
+        <li><a href="#p5">5 · WhatsApp</a></li>
+        <li><a href="#p6">6 · Panel</a></li>
+    </ul>
+</div>
+
+<main class="pantallas">
+
+    <!-- ================= 1. INICIO ================= -->
+    <section class="pantalla" id="p1" aria-labelledby="p1-titulo">
+        <header>
+            <span class="numero">Pantalla 1</span>
+            <h2 id="p1-titulo">Inicio y catálogo</h2>
+            <p>La marca, una promoción con sus condiciones, los productos, la calificación en Google y las sedes.</p>
+        </header>
+        <div class="telefono">
+            <div class="barra">
+                <span class="logo" aria-label="Fresura"><svg viewBox="0 0 308.1 151.3" aria-hidden="true"><use href="#logo-fresura"/></svg></span>
+                <span class="barra-derecha"><a class="carrito-boton" href="#p4" aria-label="Carrito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="contador" data-contador>3</span></a><button class="menu-boton" type="button" aria-label="Abrir el menú"><span></span><span></span><span></span></button></span>
+            </div>
+
+            <div class="heroe rayas">
+                <div class="tarjeta-heroe">
+                    <h3>Ven, date un gusto bonito</h3>
+                    <p>Fresas con crema hechas a tu manera: elige el tamaño, tus toppings y pídelas por WhatsApp.</p>
+                    <a class="boton" href="#catalogo">Ver productos</a>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <div class="promo">
+                    <span class="por-validar">Promoción de ejemplo</span>
+                    <h4>Martes de fresas: 2 × 1 en tamaño personal</h4>
+                    <dl>
+                        <dt>Vigencia: </dt><dd>martes de noviembre de 2026.</dd>
+                        <dt>Producto: </dt><dd>Fresas con crema, tamaño personal.</dd>
+                        <dt>Condiciones: </dt><dd>en la sede U Nacional, no acumulable con otras promociones.</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="seccion" id="catalogo">
+                <h3>Nuestros productos</h3>
+                <p class="bajada">Todos se personalizan. <span class="por-validar">Por validar</span></p>
+                <div class="catalogo">
+                    <a class="producto" href="#p2">
+                        <div class="foto rayas"><span>Foto por validar</span></div>
+                        <div class="cuerpo">
+                            <h4>Fresas con crema</h4>
+                            <p class="precio">Desde <strong data-precio-desde>$12.000</strong></p>
+                        </div>
+                    </a>
+                    <a class="producto" href="#p2">
+                        <div class="foto rayas"><span>Foto por validar</span></div>
+                        <div class="cuerpo">
+                            <h4>Fresas con chocolate</h4>
+                            <p class="precio">Desde <strong>$14.000</strong></p>
+                        </div>
+                    </a>
+                    <a class="producto" href="#p2">
+                        <div class="foto rayas"><span>Foto por validar</span></div>
+                        <div class="cuerpo">
+                            <h4>Fresas con brownie</h4>
+                            <p class="precio">Desde <strong>$15.000</strong></p>
+                        </div>
+                    </a>
+                    <a class="producto" href="#p2">
+                        <div class="foto rayas"><span>Foto por validar</span></div>
+                        <div class="cuerpo">
+                            <h4>Malteada de fresa</h4>
+                            <p class="precio">Desde <strong>$11.000</strong></p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <h3>Lo que dicen de nosotros</h3>
+                <p class="bajada">Calificación tomada de nuestra ficha de Google Maps.</p>
+                <div class="opiniones">
+                    <span class="nota" aria-hidden="true">4,8</span>
+                    <div>
+                        <p><strong>4,8 de 5 en Google</strong> · 120 opiniones</p>
+                        <p>Corte al 1 de noviembre de 2026 · <span class="por-validar">Por validar</span></p>
+                        <p><a href="#p1">Ver las opiniones en Google Maps</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="seccion">
+                <h3>Nuestras sedes</h3>
+                <p class="bajada">Mismos productos y precios en las dos.</p>
+                <div class="sedes">
+                    <div class="sede">
+                        <h4>Sede U Nacional</h4>
+                        <p>Calle 45 #28-10, Bogotá</p>
+                        <p>Lunes a sábado · horario por validar</p>
+                        <span class="etiqueta-sede">Pedidos, recogida y domicilios</span>
+                    </div>
+                    <div class="sede">
+                        <h4>Sede U Javeriana</h4>
+                        <p>Calle 41 #8-56, Bogotá</p>
+                        <p>Lunes a sábado · horario por validar</p>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="pie">
+                <span class="logo" aria-label="Fresura"><svg viewBox="0 0 308.1 151.3" aria-hidden="true"><use href="#logo-fresura"/></svg></span>
+                <p>Instagram · TikTok · Facebook</p>
+                <p>Preguntas frecuentes · Política de datos</p>
+            </footer>
+        </div>
+    </section>
+
+    <!-- ================= 2. FICHA ================= -->
+    <section class="pantalla" id="p2" aria-labelledby="p2-titulo">
+        <header>
+            <span class="numero">Pantalla 2</span>
+            <h2 id="p2-titulo">Ficha de producto</h2>
+            <p>Aquí se consultan los tamaños, los precios y los toppings. La selección se hace al tocar «Elegir y agregar al carrito».</p>
+        </header>
+        <div class="telefono">
+            <div class="barra">
+                <a class="volver" href="#p1">← Productos</a>
+                <a class="carrito-boton" href="#p4" aria-label="Carrito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="contador" data-contador>3</span></a>
+            </div>
+            <div class="foto grande rayas"><span>Foto por validar</span></div>
+
+            <div class="seccion ficha">
+                <span class="por-validar">Producto de ejemplo</span>
+                <h3>Fresas con crema</h3>
+                <p>Fresas frescas con nuestra crema de la casa, servidas en vaso. Elige el tamaño y hasta tres toppings.</p>
+            </div>
+
+            <div class="seccion">
+                <h3>Tamaños</h3>
+                <p class="bajada">Precios de ejemplo.</p>
+                <ul class="lista-tamanos">
+                    <li><span>Personal <small>Porción individual</small></span><strong data-precio="personal">$12.000</strong></li>
+                    <li><span>Mediano <small>Más fresas y más toppings</small></span><strong data-precio="mediano">$16.000</strong></li>
+                    <li><span>Grande <small>Para compartir</small></span><strong data-precio="grande">$22.000</strong></li>
+                </ul>
+            </div>
+
+            <div class="seccion">
+                <h3>Toppings</h3>
+                <p class="bajada">Hasta 3 incluidos en el precio.</p>
+                <ul class="chips">
+                    <li>Chocolate</li><li>Leche condensada</li><li>Arequipe</li><li>Chispas de chocolate</li>
+                    <li>Galleta triturada</li><li>Brownie</li><li>Marshmallows</li><li>Barquillo</li><li>Maní</li><li>Cereal</li>
+                </ul>
+            </div>
+
+            <div class="seccion">
+                <div class="promo">
+                    <span class="por-validar">Promoción de ejemplo</span>
+                    <h4>2 × 1 los martes en tamaño personal</h4>
+                    <dl>
+                        <dt>Condiciones: </dt><dd>martes de noviembre de 2026, en la sede U Nacional, no acumulable.</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="fija">
+                <a class="boton ancho" href="#p3">Elegir y agregar al carrito</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 3. PERSONALIZAR ================= -->
+    <section class="pantalla" id="p3" aria-labelledby="p3-titulo">
+        <header>
+            <span class="numero">Pantalla 3</span>
+            <h2 id="p3-titulo">Personalizar y agregar</h2>
+            <p>Se elige el tamaño, los toppings y la cantidad, y el producto pasa al carrito. Pueden probar las opciones.</p>
+        </header>
+        <div class="telefono">
+            <div class="barra">
+                <a class="volver" href="#p2">← Fresas con crema</a>
+                <a class="carrito-boton" href="#p4" aria-label="Carrito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="contador" data-contador>3</span></a>
+            </div>
+
+            <form class="seccion" id="personalizar" novalidate>
+                <h3>Fresas con crema</h3>
+                <p class="bajada">Personaliza tu vaso.</p>
+
+                <fieldset>
+                    <legend>Tamaño</legend>
+                    <label class="opcion"><input type="radio" name="tamano" value="personal"><span class="texto">Personal</span><strong data-precio="personal">$12.000</strong></label>
+                    <label class="opcion"><input type="radio" name="tamano" value="mediano" checked><span class="texto">Mediano</span><strong data-precio="mediano">$16.000</strong></label>
+                    <label class="opcion"><input type="radio" name="tamano" value="grande"><span class="texto">Grande</span><strong data-precio="grande">$22.000</strong></label>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Toppings <small id="toppings-cuenta">(2 de 3)</small></legend>
+                    <div class="rejilla-toppings">
+                        <label class="opcion"><input type="checkbox" name="topping" value="Chocolate" checked>Chocolate</label>
+                        <label class="opcion"><input type="checkbox" name="topping" value="Arequipe">Arequipe</label>
+                        <label class="opcion"><input type="checkbox" name="topping" value="Leche condensada" checked>Leche cond.</label>
+                        <label class="opcion"><input type="checkbox" name="topping" value="Brownie">Brownie</label>
+                        <label class="opcion"><input type="checkbox" name="topping" value="Galleta triturada">Galleta</label>
+                        <label class="opcion"><input type="checkbox" name="topping" value="Marshmallows">Marshmallows</label>
+                    </div>
+                </fieldset>
+
+                <div class="campo">
+                    <label class="rotulo" for="nota-producto">Indicaciones para este vaso <small>(opcional)</small></label>
+                    <input id="nota-producto" name="nota" value="Sin mucha crema">
+                </div>
+
+                <div class="fila-cantidad">
+                    <span class="rotulo" id="cantidad-rotulo">Cantidad</span>
+                    <div class="cantidad" role="group" aria-labelledby="cantidad-rotulo">
+                        <button type="button" data-paso="-1" aria-label="Quitar uno">−</button>
+                        <output id="cantidad" aria-live="polite">1</output>
+                        <button type="button" data-paso="1" aria-label="Agregar uno">+</button>
+                    </div>
+                </div>
+
+                <a class="boton ancho" href="#p4" id="agregar">Agregar al carrito · <span id="subtotal">$16.000</span></a>
+                <p class="nota-pie" id="agregado" aria-live="polite"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- ================= 4. CARRITO ================= -->
+    <section class="pantalla" id="p4" aria-labelledby="p4-titulo">
+        <header>
+            <span class="numero">Pantalla 4</span>
+            <h2 id="p4-titulo">Carrito y entrega</h2>
+            <p>Se pueden juntar varios productos en un solo pedido. El sitio no cobra ni guarda datos: solo arma el mensaje para WhatsApp.</p>
+        </header>
+        <div class="telefono">
+            <div class="barra">
+                <a class="volver" href="#p1">← Seguir comprando</a>
+                <a class="carrito-boton" href="#p4" aria-label="Carrito"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg><span class="contador" data-contador>3</span></a>
+            </div>
+
+            <form class="seccion" id="pedido" novalidate>
+                <h3>Tu carrito</h3>
+                <p class="bajada" id="carrito-cuenta">2 productos</p>
+                <ul class="carrito-lista" id="carrito-lista"></ul>
+                <p class="carrito-vacio" id="carrito-vacio" hidden>Tu carrito está vacío. <a href="#p1">Ver productos</a></p>
+
+                <fieldset>
+                    <legend>Entrega <small>· sede U Nacional</small></legend>
+                    <label class="opcion"><input type="radio" name="entrega" value="Recoger en la sede U Nacional"><span class="texto">Recoger en la sede<small>Calle 45 #28-10</small></span></label>
+                    <label class="opcion"><input type="radio" name="entrega" value="Domicilio" checked><span class="texto">Domicilio<small>Hasta 5 km de la sede U Nacional</small></span></label>
+
+                    <div class="ubicacion" id="ubicacion">
+                        <p>Si nos das permiso, revisamos en tu celular si estás dentro de los 5 km. Tu ubicación no se envía ni se guarda.</p>
+                        <div class="simulador" role="group" aria-label="Simular la ubicación">
+                            <button type="button" data-cobertura="sin" aria-pressed="false">Sin permiso</button>
+                            <button type="button" data-cobertura="dentro" aria-pressed="true">Dentro de 5 km</button>
+                            <button type="button" data-cobertura="fuera" aria-pressed="false">Fuera de 5 km</button>
+                        </div>
+                        <p class="estado-cobertura" id="estado-cobertura" aria-live="polite">Estás dentro de la zona de domicilios.</p>
+                    </div>
+                </fieldset>
+
+                <div class="campo">
+                    <label class="rotulo" for="nombre">Tu nombre</label>
+                    <input id="nombre" name="nombre" autocomplete="given-name" value="Laura">
+                </div>
+                <div id="campos-domicilio">
+                    <div class="campo">
+                        <label class="rotulo" for="direccion">Dirección de entrega</label>
+                        <input id="direccion" name="direccion" autocomplete="street-address" value="Carrera 30 #45-20, apto 302">
+                    </div>
+                    <div class="campo">
+                        <label class="rotulo" for="barrio">Barrio</label>
+                        <input id="barrio" name="barrio" value="Galerías">
+                        <p class="ayuda">Fresura te confirma por WhatsApp si llega a tu dirección.</p>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label class="rotulo" for="observaciones">Observaciones del pedido <small>(opcional)</small></label>
+                    <textarea id="observaciones" name="observaciones">Timbre dañado, llamar al llegar.</textarea>
+                </div>
+
+                <div class="resumen" aria-live="polite">
+                    <h4>Resumen</h4>
+                    <dl>
+                        <dt>Productos</dt><dd id="r-productos">3 vasos</dd>
+                        <dt>Entrega</dt><dd id="r-entrega">Domicilio</dd>
+                    </dl>
+                    <div class="total"><span>Total estimado</span><span id="r-total">$44.000</span></div>
+                </div>
+
+                <a class="boton ancho" href="#p5" id="enviar">Enviar pedido por WhatsApp</a>
+                <p class="nota-pie">El total, el domicilio y el pago se confirman por WhatsApp.</p>
+            </form>
+        </div>
+    </section>
+
+    <!-- ================= 5. WHATSAPP ================= -->
+    <section class="pantalla" id="p5" aria-labelledby="p5-titulo">
+        <header>
+            <span class="numero">Pantalla 5</span>
+            <h2 id="p5-titulo">El mensaje en WhatsApp</h2>
+            <p>Al tocar «Enviar pedido» se abre WhatsApp con este mensaje ya escrito. La persona solo lo envía.</p>
+        </header>
+        <div class="telefono">
+            <div class="chat-barra">
+                <span class="avatar"><svg viewBox="0 0 308.1 151.3" aria-hidden="true"><use href="#logo-fresura"/></svg></span>
+                <div><strong>Fresura</strong><small>WhatsApp oficial · número por validar</small></div>
+            </div>
+            <div class="chat">
+                <div class="burbuja"><span id="mensaje"></span><span class="hora">Mensaje listo para enviar</span></div>
+                <div class="explicacion">
+                    <p><strong>¿Qué pasa después?</strong></p>
+                    <p>Fresura recibe el pedido por WhatsApp y confirma ahí el total, el pago y, si es domicilio, si llega a esa dirección.</p>
+                    <p>El sitio no cobra en línea ni guarda los datos del cliente.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= 6. PANEL ================= -->
+    <section class="pantalla" id="p6" aria-labelledby="p6-titulo">
+        <header>
+            <span class="numero">Pantalla 6</span>
+            <h2 id="p6-titulo">Panel: cambiar un precio</h2>
+            <p>Solo para quien administre el sitio, con usuario y contraseña. Prueben cambiar un precio y verlo antes de publicarlo.</p>
+        </header>
+        <div class="telefono">
+            <div class="panel-barra">
+                <span class="logo" aria-label="Fresura"><svg viewBox="0 0 308.1 151.3" aria-hidden="true"><use href="#logo-fresura"/></svg></span>
+                <small>Panel de administración</small>
+            </div>
+
+            <div class="seccion">
+                <p class="migas">Productos › Fresas con crema</p>
+                <h3>Precios</h3>
+                <p class="bajada">Escribe el nuevo precio y revisa cómo queda antes de publicarlo.</p>
+
+                <table class="tabla-precios">
+                    <caption class="sr-solo">Precios por tamaño</caption>
+                    <thead><tr><th scope="col">Tamaño</th><th scope="col">Precio en pesos</th></tr></thead>
+                    <tbody>
+                        <tr><td>Personal</td><td><label><span hidden>Precio personal</span><input inputmode="numeric" data-tamano="personal" value="12000"></label></td></tr>
+                        <tr><td>Mediano</td><td><label><span hidden>Precio mediano</span><input inputmode="numeric" data-tamano="mediano" value="16000"></label></td></tr>
+                        <tr><td>Grande</td><td><label><span hidden>Precio grande</span><input inputmode="numeric" data-tamano="grande" value="22000"></label></td></tr>
+                    </tbody>
+                </table>
+
+                <div class="vista-previa" id="vista-previa" hidden>
+                    <div class="titulo"><span>Vista previa</span><span class="por-validar">Sin publicar</span></div>
+                    <div class="producto">
+                        <div class="foto rayas" style="aspect-ratio:16/10"><span>Foto</span></div>
+                        <div class="cuerpo">
+                            <h4>Fresas con crema</h4>
+                            <p class="precio">Desde <strong id="vp-desde">$12.000</strong></p>
+                        </div>
+                    </div>
+                    <ul class="lista-tamanos" style="margin-top:12px" id="vp-tamanos"></ul>
+                </div>
+
+                <div class="acciones">
+                    <button class="boton secundario ancho" type="button" id="ver-vista">Ver vista previa</button>
+                    <button class="boton ancho" type="button" id="publicar" disabled>Publicar cambios</button>
+                </div>
+                <p class="mensaje-estado" id="estado-panel" hidden aria-live="polite"></p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<section class="notas" aria-label="Notas del mockup">
+    <div class="notas-rejilla">
+        <div class="nota-caja">
+            <h2>Nos ayudan con</h2>
+            <ol>
+                <li>¿Les gustan los colores, la letra y el estilo?</li>
+                <li>¿El recorrido para pedir es claro, con el carrito para juntar varios productos? ¿Le falta o le sobra algo?</li>
+                <li>Nombres de los tamaños, precios y cuántos toppings van incluidos.</li>
+                <li>¿Quieren que el sitio diga hasta dónde llegan los domicilios?</li>
+                <li>Fotos reales de los productos y horarios de cada sede.</li>
+            </ol>
+        </div>
+        <div class="nota-caja">
+            <h2>Del manual de marca</h2>
+            <ul>
+                <li>Solo los siete colores de la paleta oficial.</li>
+                <li>Logotipo tomado del manual, en la combinación rosa sobre crema y verde sobre café.</li>
+                <li>Frase «Ven, date un gusto bonito» y rayas del toldo, tomadas de las piezas de marca.</li>
+            </ul>
+        </div>
+        <div class="nota-caja">
+            <h2>Pendiente para la versión final</h2>
+            <ul>
+                <li>La letra de los títulos (Restora Neue) necesita licencia para web; aquí se ve una letra parecida de reemplazo.</li>
+                <li>Archivos originales del logotipo (SVG o AI).</li>
+                <li>Fotos autorizadas, precios, horarios, número de WhatsApp y enlaces de redes.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<script>
+const formatoPeso = (valor) => "$" + Number(valor).toLocaleString("es-CO");
+const nombresTamano = { personal: "Personal", mediano: "Mediano", grande: "Grande" };
+
+/* Precios de ejemplo por producto y tamaño; el panel cambia los de «crema» */
+const precios = {
+    crema: { personal: 12000, mediano: 16000, grande: 22000 },
+    chocolate: { personal: 14000, mediano: 18000, grande: 24000 },
+};
+const nombresProducto = { crema: "Fresas con crema", chocolate: "Fresas con chocolate" };
+
+/* El carrito vive solo en la página: no se envía ni se guarda en ningún servidor */
+const carrito = [
+    { producto: "chocolate", tamano: "personal", toppings: ["Arequipe"], nota: "", cantidad: 2 },
+];
+
+/* ---------- Personalizar ---------- */
+const formPersonalizar = document.getElementById("personalizar");
+const MAX_TOPPINGS = 3;
+let cantidad = 1;
+
+function seleccionActual() {
+    return {
+        producto: "crema",
+        tamano: formPersonalizar.querySelector("input[name=tamano]:checked").value,
+        toppings: [...formPersonalizar.querySelectorAll("input[name=topping]:checked")].map((t) => t.value),
+        nota: document.getElementById("nota-producto").value.trim(),
+        cantidad,
+    };
+}
+
+function actualizarPersonalizar() {
+    const sel = seleccionActual();
+    formPersonalizar.querySelectorAll("input[name=topping]").forEach((t) => {
+        t.disabled = !t.checked && sel.toppings.length >= MAX_TOPPINGS;
+    });
+    document.getElementById("toppings-cuenta").textContent = `(${sel.toppings.length} de ${MAX_TOPPINGS})`;
+    document.getElementById("cantidad").textContent = cantidad;
+    document.getElementById("subtotal").textContent = formatoPeso(precios.crema[sel.tamano] * cantidad);
+}
+
+function agregarAlCarrito() {
+    const sel = seleccionActual();
+    const igual = carrito.find((item) => item.producto === sel.producto && item.tamano === sel.tamano
+        && item.nota === sel.nota && item.toppings.join() === sel.toppings.join());
+    if (igual) igual.cantidad += sel.cantidad;
+    else carrito.push(sel);
+    document.getElementById("agregado").textContent = `Agregado al carrito: ${nombresProducto[sel.producto]}, ${nombresTamano[sel.tamano].toLowerCase()}.`;
+    cantidad = 1;
+    actualizarPersonalizar();
+    actualizarPedido();
+}
+
+formPersonalizar.addEventListener("change", actualizarPersonalizar);
+formPersonalizar.addEventListener("input", actualizarPersonalizar);
+formPersonalizar.querySelectorAll("[data-paso]").forEach((b) => b.addEventListener("click", () => {
+    cantidad = Math.min(10, Math.max(1, cantidad + Number(b.dataset.paso)));
+    actualizarPersonalizar();
+}));
+document.getElementById("agregar").addEventListener("click", agregarAlCarrito);
+
+/* ---------- Carrito y pedido ---------- */
+const form = document.getElementById("pedido");
+
+function lineaPrecio(item) {
+    return precios[item.producto][item.tamano] * item.cantidad;
+}
+
+function pintarCarrito() {
+    const lista = document.getElementById("carrito-lista");
+    lista.innerHTML = carrito.map((item, i) => `
+        <li class="item">
+            <div class="item-cabeza">
+                <strong>${nombresProducto[item.producto]}</strong>
+                <strong>${formatoPeso(lineaPrecio(item))}</strong>
+            </div>
+            <p>${nombresTamano[item.tamano]} · ${item.toppings.join(", ") || "Sin toppings"}${item.nota ? ` · «${item.nota}»` : ""}</p>
+            <div class="item-acciones">
+                <div class="cantidad chica" role="group" aria-label="Cantidad de ${nombresProducto[item.producto]}">
+                    <button type="button" data-item="${i}" data-paso="-1" aria-label="Quitar uno">−</button>
+                    <output>${item.cantidad}</output>
+                    <button type="button" data-item="${i}" data-paso="1" aria-label="Agregar uno">+</button>
+                </div>
+                <button type="button" class="quitar" data-quitar="${i}">Quitar</button>
+            </div>
+        </li>`).join("");
+    document.getElementById("carrito-vacio").hidden = carrito.length > 0;
+}
+
+function actualizarPedido() {
+    const entrega = form.querySelector("input[name=entrega]:checked").value;
+    const esDomicilio = entrega === "Domicilio";
+    const unidades = carrito.reduce((suma, item) => suma + item.cantidad, 0);
+    const total = carrito.reduce((suma, item) => suma + lineaPrecio(item), 0);
+
+    pintarCarrito();
+    document.querySelectorAll("[data-contador]").forEach((c) => { c.textContent = unidades; });
+    document.querySelectorAll(".carrito-boton").forEach((c) => c.setAttribute("aria-label", `Carrito, ${unidades} productos`));
+    document.getElementById("carrito-cuenta").textContent = `${carrito.length} ${carrito.length === 1 ? "producto" : "productos"}`;
+    document.getElementById("ubicacion").hidden = !esDomicilio && cobertura !== "fuera";
+    document.getElementById("campos-domicilio").hidden = !esDomicilio;
+    document.getElementById("r-productos").textContent = `${unidades} ${unidades === 1 ? "vaso" : "vasos"}`;
+    document.getElementById("r-entrega").textContent = entrega;
+    document.getElementById("r-total").textContent = formatoPeso(total);
+    const enviar = document.getElementById("enviar");
+    enviar.toggleAttribute("aria-disabled", carrito.length === 0);
+
+    const nombre = document.getElementById("nombre").value.trim() || "(tu nombre)";
+    const obs = document.getElementById("observaciones").value.trim();
+    let mensaje = "¡Hola, Fresura!\n\nQuisiera hacer este pedido:\n\n";
+    carrito.forEach((item, i) => {
+        mensaje += `${i + 1}. *${nombresProducto[item.producto]}*, ${nombresTamano[item.tamano].toLowerCase()} × ${item.cantidad}: ${formatoPeso(lineaPrecio(item))}\n`;
+        mensaje += `   Toppings: ${item.toppings.join(", ") || "ninguno"}\n`;
+        if (item.nota) mensaje += `   Indicaciones: ${item.nota}\n`;
+    });
+    mensaje += `\n*Total estimado:* ${formatoPeso(total)}\n`;
+    mensaje += `*Entrega:* ${entrega}\n`;
+    if (esDomicilio) {
+        mensaje += `*Dirección:* ${document.getElementById("direccion").value.trim()}\n`;
+        mensaje += `*Barrio:* ${document.getElementById("barrio").value.trim()}\n`;
+    }
+    mensaje += `*Nombre:* ${nombre}\n`;
+    if (obs) mensaje += `*Observaciones:* ${obs}\n`;
+    // En WhatsApp, *texto* se ve en negrita: la vista lo muestra igual
+    const seguro = mensaje.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+    document.getElementById("mensaje").innerHTML = seguro.replace(/\*([^*\n]+)\*/g, "<strong>$1</strong>");
+}
+
+let cobertura = "dentro";
+
+function aplicarCobertura(valor) {
+    cobertura = valor;
+    document.querySelectorAll("[data-cobertura]").forEach((b) => {
+        b.setAttribute("aria-pressed", String(b.dataset.cobertura === valor));
+    });
+    const domicilio = form.querySelector("input[name=entrega][value=Domicilio]");
+    const recoger = form.querySelector("input[name=entrega][value^=Recoger]");
+    const estado = document.getElementById("estado-cobertura");
+
+    if (valor === "fuera") {
+        domicilio.disabled = true;
+        recoger.checked = true;
+        estado.textContent = "Estás a más de 5 km: por ahora te ofrecemos recoger en la sede U Nacional.";
+    } else {
+        domicilio.disabled = false;
+        estado.textContent = valor === "dentro"
+            ? "Estás dentro de la zona de domicilios."
+            : "Sin tu ubicación te mostramos las dos opciones. Fresura confirma la cobertura por WhatsApp.";
+    }
+    actualizarPedido();
+}
+
+form.addEventListener("input", actualizarPedido);
+form.addEventListener("change", actualizarPedido);
+form.addEventListener("click", (e) => {
+    const paso = e.target.closest("[data-item]");
+    const quitar = e.target.closest("[data-quitar]");
+    if (paso) {
+        const item = carrito[Number(paso.dataset.item)];
+        item.cantidad = Math.min(10, Math.max(1, item.cantidad + Number(paso.dataset.paso)));
+    } else if (quitar) {
+        carrito.splice(Number(quitar.dataset.quitar), 1);
+    } else return;
+    actualizarPedido();
+});
+document.querySelectorAll("[data-cobertura]").forEach((b) => {
+    b.addEventListener("click", () => aplicarCobertura(b.dataset.cobertura));
+});
+
+/* Estado inicial: el vaso de la pantalla 3 ya está en el carrito, junto al de chocolate */
+actualizarPersonalizar();
+agregarAlCarrito();
+document.getElementById("agregado").textContent = "";
+
+/* ---------- Panel ---------- */
+const entradas = [...document.querySelectorAll(".tabla-precios input")];
+const vista = document.getElementById("vista-previa");
+const botonPublicar = document.getElementById("publicar");
+const estadoPanel = document.getElementById("estado-panel");
+
+function preciosEditados() {
+    return Object.fromEntries(entradas.map((e) => [e.dataset.tamano, Number(e.value.replace(/\D/g, "")) || 0]));
+}
+
+entradas.forEach((e) => e.addEventListener("input", () => {
+    const editados = preciosEditados();
+    e.closest("tr").classList.toggle("cambiado", editados[e.dataset.tamano] !== precios.crema[e.dataset.tamano]);
+    vista.hidden = true;
+    botonPublicar.disabled = true;
+    estadoPanel.hidden = true;
+}));
+
+document.getElementById("ver-vista").addEventListener("click", () => {
+    const editados = preciosEditados();
+    document.getElementById("vp-desde").textContent = formatoPeso(Math.min(...Object.values(editados)));
+    document.getElementById("vp-tamanos").innerHTML = Object.entries(editados)
+        .map(([k, v]) => `<li><span>${nombresTamano[k]}</span><strong>${formatoPeso(v)}</strong></li>`).join("");
+    vista.hidden = false;
+    botonPublicar.disabled = false;
+});
+
+botonPublicar.addEventListener("click", () => {
+    const editados = preciosEditados();
+    Object.entries(editados).forEach(([k, v]) => {
+        precios.crema[k] = v;
+        document.querySelectorAll(`[data-precio="${k}"]`).forEach((el) => { el.textContent = formatoPeso(v); });
+    });
+    document.querySelector("[data-precio-desde]").textContent = formatoPeso(Math.min(...Object.values(editados)));
+    document.querySelectorAll(".tabla-precios tr").forEach((tr) => tr.classList.remove("cambiado"));
+    vista.hidden = true;
+    botonPublicar.disabled = true;
+    estadoPanel.textContent = "Listo, el sitio ya muestra los nuevos precios. Si te equivocaste, puedes volver a la versión anterior.";
+    estadoPanel.hidden = false;
+    actualizarPersonalizar();
+    actualizarPedido();
+});
+
+/* ---------- Modo captura ---------- */
+const captura = new URLSearchParams(location.search).get("captura");
+if (captura) {
+    document.documentElement.classList.add("modo-captura");
+    document.getElementById(captura)?.classList.add("activa");
+    addEventListener("load", () => { document.body.dataset.alto = document.documentElement.scrollHeight; });
+    if (captura === "p6") {
+        const mediano = document.querySelector('.tabla-precios input[data-tamano="mediano"]');
+        mediano.value = "17000";
+        mediano.dispatchEvent(new Event("input"));
+        document.getElementById("ver-vista").click();
+    }
+}
+</script>
+</body>
+</html>
