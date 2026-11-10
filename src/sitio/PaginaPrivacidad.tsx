@@ -12,28 +12,32 @@ export function PaginaPrivacidad() {
 	}, []);
 
 	return (
-		<main>
-			<h1>Política de tratamiento de datos</h1>
-			<p>
-				<strong>La política completa está en revisión.</strong> La publicaremos
-				aquí cuando esté lista.
-			</p>
+		<section className="seccion">
+			<div className="envoltura texto-largo">
+				<h1>Política de tratamiento de datos</h1>
+				<p>
+					<strong>La política completa está en revisión.</strong> La
+					publicaremos aquí cuando esté lista.
+				</p>
 
-			<h2>Tus datos en el pedido</h2>
-			<p>
-				Tus datos van solo en el mensaje que envías por WhatsApp, para atender
-				tu pedido. Este sitio no los guarda.
-			</p>
+				<h2>Tus datos en el pedido</h2>
+				<p>
+					Tus datos van solo en el mensaje que envías por WhatsApp, para atender
+					tu pedido. Este sitio no los guarda.
+				</p>
 
-			<h2>Tu ubicación</h2>
-			<p>
-				Usamos tu ubicación solo para ver si llegamos a tu zona. No se envía ni
-				se guarda.
-			</p>
+				<h2>Tu ubicación</h2>
+				<p>
+					Usamos tu ubicación solo para ver si llegamos a tu zona. No se envía
+					ni se guarda.
+				</p>
 
-			<p>
-				<Link to="/">Volver al inicio</Link>
-			</p>
-		</main>
+				<p>
+					<Link className="enlace-texto" to="/">
+						Volver al inicio
+					</Link>
+				</p>
+			</div>
+		</section>
 	);
 }

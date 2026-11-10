@@ -10,6 +10,7 @@
 		"includes": [
 			"**",
 			"!prototipo",
+			"!package-lock.json",
 			"!mockup",
 			"!docs-proyecto",
 			"!.claude",
