@@ -1,0 +1,52 @@
+/* Copiado de docs-proyecto/branding/kit-diseno/tokens.css (10 nov 2026).
+   Si el kit cambia, se copia de nuevo aquí. */
+/* Sistema de diseño de Fresura.
+   Oficial: los siete colores y las dos familias.
+   Propuesta del equipo: roles, tamaños, radios, espacios y puntos de corte. */
+:root {
+	/* Paleta oficial */
+	--color-we-peep: #fadad7;
+	--color-flamingo: #ec72a8;
+	--color-platinum: #efe8d7;
+	--color-porcini: #cfa67b;
+	--color-court-bouillon: #cfcb9a;
+	--color-peat-brown: #5b3b24;
+	--color-dust-storm: #e6d2b8;
+
+	/* Roles */
+	--fondo: var(--color-platinum);
+	--superficie: var(--color-we-peep);
+	--superficie-alterna: var(--color-dust-storm);
+	--superficie-verde: var(--color-court-bouillon);
+	--superficie-oscura: var(--color-peat-brown);
+	--texto: var(--color-peat-brown);
+	--texto-sobre-oscuro: var(--color-platinum);
+	--acento-decorativo: var(
+		--color-flamingo
+	); /* Nunca texto normal, iconos informativos ni bordes de campos sobre fondos claros */
+	--boton-fondo: var(--color-peat-brown);
+	--boton-texto: var(--color-platinum);
+	--borde-campo: var(--color-peat-brown);
+	--foco: var(--color-peat-brown);
+
+	/* Tipografía */
+	--fuente-titulos:
+		"Restora Neue", "Iowan Old Style", Georgia, serif; /* Restora Neue requiere licencia web */
+	--fuente-texto: "Plus Jakarta Sans", system-ui, sans-serif;
+	--peso-ligero: 300;
+	--peso-normal: 400;
+	--peso-bold: 700;
+	--texto-base: 1rem;
+	--texto-chico: 0.875rem;
+	--interlineado: 1.5;
+
+	/* Forma y espacio */
+	--radio: 18px;
+	--radio-chico: 10px;
+	--radio-pildora: 999px;
+	--espacio-lateral-movil: 16px;
+	--ancho-maximo: 1180px;
+	--objetivo-tactil: 44px;
+
+	/* Anchos de prueba: 360, 390, 414, 768, 1366 y 1920 px */
+}

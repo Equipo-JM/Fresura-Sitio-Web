@@ -1,0 +1,276 @@
+/* Estilos base del sitio y del panel.
+   Colores y familias: oficiales (M1 p.4-6), vía tokens.css.
+   Medidas, radios, estados y puntos de corte: propuesta del equipo, tomada del
+   mockup aprobado (DT-01, DD-34 a DD-45). */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--fondo);
+	color: var(--texto);
+	font-family: var(--fuente-texto);
+	font-weight: var(--peso-normal);
+	font-size: var(--texto-base);
+	line-height: var(--interlineado);
+	-webkit-font-smoothing: antialiased;
+	overflow-x: clip;
+}
+
+/* El pie queda abajo aunque la página sea corta. */
+#raiz {
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+}
+
+#contenido {
+	flex: 1;
+}
+
+img {
+	display: block;
+	max-width: 100%;
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--fuente-titulos);
+	font-weight: var(--peso-normal);
+	line-height: 1.08;
+	margin: 0;
+	text-wrap: balance;
+}
+
+h1 {
+	font-size: clamp(2.5rem, 2rem + 2.6vw, 4.5rem);
+}
+
+h2 {
+	font-size: clamp(2.1rem, 1.8rem + 1.5vw, 3.25rem);
+}
+
+h3 {
+	font-size: 1.5rem;
+}
+
+h1 em,
+h2 em {
+	font-style: italic;
+}
+
+p {
+	margin: 0;
+	text-wrap: pretty;
+}
+
+a {
+	color: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+	font: inherit;
+	color: inherit;
+}
+
+main:focus {
+	outline: none;
+}
+
+/* Foco en Peat Brown: 8,2:1 sobre Platinum, por encima del 3:1 que pide WCAG. */
+:focus-visible {
+	outline: 3px solid var(--foco);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+.oscuro {
+	background: var(--superficie-oscura);
+	color: var(--texto-sobre-oscuro);
+}
+
+.oscuro :focus-visible {
+	outline-color: var(--color-platinum);
+}
+
+.oculto {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+.saltar {
+	position: fixed;
+	top: 8px;
+	left: 8px;
+	z-index: 100;
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+	padding: 12px 18px;
+	border-radius: var(--radio-chico);
+	transform: translateY(-200%);
+}
+
+.saltar:focus {
+	transform: none;
+	outline-color: var(--color-platinum);
+}
+
+.envoltura {
+	width: min(100% - 2 * var(--espacio-lateral-movil), var(--ancho-maximo));
+	margin-inline: auto;
+}
+
+.seccion {
+	padding-block: clamp(56px, 7vw, 112px);
+}
+
+.negrita {
+	font-weight: var(--peso-bold);
+}
+
+.ligero {
+	font-weight: var(--peso-ligero);
+}
+
+.chico {
+	font-size: var(--texto-chico);
+}
+
+.texto-largo {
+	max-width: 68ch;
+	display: grid;
+	gap: 16px;
+}
+
+.texto-largo h2 {
+	font-size: clamp(1.5rem, 1.3rem + 0.8vw, 2rem);
+	margin-top: 16px;
+}
+
+.boton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-height: 48px;
+	padding: 11px 24px;
+	border: 2px solid var(--boton-fondo);
+	border-radius: var(--radio-pildora);
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+	font-weight: var(--peso-bold);
+	text-decoration: none;
+	cursor: pointer;
+	text-align: center;
+	transition:
+		transform 0.16s ease,
+		background-color 0.16s ease,
+		color 0.16s ease;
+}
+
+.boton:hover {
+	background: var(--color-platinum);
+	color: var(--texto);
+}
+
+.boton:active {
+	transform: scale(0.97);
+}
+
+.boton.secundario {
+	background: transparent;
+	color: var(--texto);
+}
+
+.boton.secundario:hover {
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+}
+
+.enlace-texto {
+	font-weight: var(--peso-bold);
+	text-underline-offset: 3px;
+}
+
+/* Encabezado */
+.sitio-encabezado {
+	position: sticky;
+	top: 0;
+	z-index: 30;
+	background: var(--color-platinum);
+}
+
+.sitio-encabezado .fila {
+	display: flex;
+	align-items: center;
+	min-height: 66px;
+}
+
+/* El relleno da al logotipo un margen libre alrededor (M1 p.12). */
+.logo {
+	display: block;
+	padding: 18px;
+	margin-left: -18px;
+}
+
+.logo img {
+	width: 150px;
+	height: auto;
+}
+
+/* Pie */
+.pie {
+	padding-block: 48px 72px;
+}
+
+.pie-grid {
+	display: grid;
+	gap: 24px;
+}
+
+.pie-logo {
+	width: 200px;
+	height: auto;
+	padding: 24px;
+	margin-left: -24px;
+}
+
+.pie a {
+	display: inline-flex;
+	align-items: center;
+	min-height: var(--objetivo-tactil);
+	text-underline-offset: 4px;
+}
+
+.pie-legal {
+	margin-top: 32px;
+	padding-top: 16px;
+	border-top: 1px solid var(--color-platinum);
+	font-size: var(--texto-chico);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.boton {
+		transition: none;
+	}
+
+	.boton:active {
+		transform: none;
+	}
+}
