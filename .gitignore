@@ -15,7 +15,15 @@ opencode.json
 opencode.jsonc
 docs-proyecto/
 
+# Dependencias y archivos generados
+node_modules/
+dist/
+.wrangler/
+
 .DS_Store
 Thumbs.db
-.vscode/
+# La configuración compartida del editor sí se versiona (ADR-001, D14)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 .idea/
