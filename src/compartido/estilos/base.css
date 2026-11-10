@@ -274,3 +274,19 @@ main:focus {
 		transform: none;
 	}
 }
+
+/* Marca «Por validar» (DD-22): borde punteado además del texto. */
+.por-validar {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px;
+	padding: 1px 9px;
+	font-size: 0.8125rem;
+	font-weight: var(--peso-bold);
+	line-height: 1.2;
+	background: var(--color-platinum);
+	color: var(--texto);
+	border: 1px dashed var(--texto);
+	border-radius: var(--radio-pildora);
+	white-space: nowrap;
+}
