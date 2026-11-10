@@ -25,13 +25,14 @@ npm ci
 
 ## Estructura
 
-| Carpeta           | Contenido                                         |
-| ----------------- | ------------------------------------------------- |
-| `src/sitio/`      | Páginas públicas                                  |
-| `src/panel/`      | Panel `/admin` (etapa 3)                          |
-| `src/compartido/` | Lo que usan el sitio y el panel                   |
-| `public/`         | Archivos estáticos, como el contenido de respaldo |
-| `pruebas/`        | Pruebas de Vitest                                 |
-| `prototipo/`      | Prototipo anterior, solo como referencia          |
+| Carpeta                                | Contenido                                                                            |
+| -------------------------------------- | ------------------------------------------------------------------------------------ |
+| `src/sitio/`                           | Páginas públicas                                                                     |
+| `src/panel/`                           | Panel `/admin` (etapa 3)                                                             |
+| `src/compartido/`                      | Lo que usan el sitio y el panel                                                      |
+| `supabase/functions/_shared/esquemas/` | Esquemas Zod, únicos para el sitio, el panel y las funciones (contrato de contenido) |
+| `public/`                              | Archivos estáticos, como el contenido de respaldo                                    |
+| `pruebas/`                             | Pruebas de Vitest                                                                    |
+| `prototipo/`                           | Prototipo anterior, solo como referencia                                             |
 
 Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos semanas de publicadas.

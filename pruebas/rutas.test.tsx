@@ -1,13 +1,20 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { RutasDelSitio } from "../src/RutasDelSitio";
+import ejemplo from "./datos/contenido-1.0.1.ejemplo.json";
 
 function mostrarRuta(ruta: string) {
+	const cliente = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
 	render(
-		<MemoryRouter initialEntries={[ruta]}>
-			<RutasDelSitio />
-		</MemoryRouter>,
+		<QueryClientProvider client={cliente}>
+			<MemoryRouter initialEntries={[ruta]}>
+				<RutasDelSitio />
+			</MemoryRouter>
+		</QueryClientProvider>,
 	);
 }
 
@@ -19,6 +26,21 @@ describe("rutas del sitio", () => {
 		).toBeInTheDocument();
 		expect(screen.getByText(/está en revisión/i)).toBeInTheDocument();
 		expect(screen.getByText(/este sitio no los guarda/i)).toBeInTheDocument();
+	});
+
+	it("muestra en el inicio la presentación leída del contenido", async () => {
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			Response.json(structuredClone(ejemplo)),
+		);
+		mostrarRuta("/");
+		expect(
+			await screen.findByRole("heading", {
+				level: 1,
+				name: ejemplo.negocio.presentacion.titulo,
+			}),
+		).toBeInTheDocument();
+		expect(screen.getByText("Por validar")).toBeInTheDocument();
+		vi.restoreAllMocks();
 	});
 
 	it("enlaza la política de datos desde el inicio", () => {

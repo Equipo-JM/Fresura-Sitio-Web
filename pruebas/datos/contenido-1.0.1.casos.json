@@ -1,0 +1,251 @@
+[
+	{
+		"caso": "Promoción sin vigencia (RNF-16)",
+		"op": "quitar",
+		"ruta": ["promociones", 0, "vigencia"]
+	},
+	{
+		"caso": "Promoción sin condiciones (RNF-16)",
+		"op": "quitar",
+		"ruta": ["promociones", 0, "condiciones"]
+	},
+	{
+		"caso": "Promoción sin productos (RNF-16)",
+		"op": "poner",
+		"ruta": ["promociones", 0, "productos"],
+		"valor": []
+	},
+	{
+		"caso": "Foto sin texto alternativo (RNF-08)",
+		"op": "quitar",
+		"ruta": ["productos", 0, "imagen", "alt"]
+	},
+	{
+		"caso": "Foto sin ancho (RNF-04)",
+		"op": "quitar",
+		"ruta": ["productos", 0, "imagen", "ancho"]
+	},
+	{
+		"caso": "WhatsApp sin indicativo",
+		"op": "poner",
+		"ruta": ["negocio", "whatsapp"],
+		"valor": "3000000000"
+	},
+	{
+		"caso": "Precio como texto",
+		"op": "poner",
+		"ruta": ["productos", 0, "presentaciones", 0, "precio"],
+		"valor": "12000"
+	},
+	{
+		"caso": "Precio decimal",
+		"op": "poner",
+		"ruta": ["productos", 0, "presentaciones", 0, "precio"],
+		"valor": 12000.5
+	},
+	{
+		"caso": "Campo de más en la raíz",
+		"op": "poner",
+		"ruta": ["extra"],
+		"valor": true
+	},
+	{
+		"caso": "Correo personal agregado a negocio",
+		"op": "poner",
+		"ruta": ["negocio", "correo"],
+		"valor": "persona@ejemplo.invalid"
+	},
+	{
+		"caso": "Foto sin https",
+		"op": "poner",
+		"ruta": ["productos", 0, "imagen", "ruta"],
+		"valor": "http://ejemplo.invalid/a.webp"
+	},
+	{
+		"caso": "Id con mayúsculas",
+		"op": "poner",
+		"ruta": ["productos", 0, "id"],
+		"valor": "Fresas"
+	},
+	{
+		"caso": "Opiniones visibles sin fecha de corte (RF-12)",
+		"op": "poner",
+		"ruta": ["opiniones", "fecha_corte"],
+		"valor": null
+	},
+	{
+		"caso": "Producto sin presentaciones",
+		"op": "poner",
+		"ruta": ["productos", 0, "presentaciones"],
+		"valor": []
+	},
+	{
+		"caso": "RC-1: ninguna sede atiende pedidos",
+		"op": "poner",
+		"ruta": ["negocio", "sedes", 0, "atiende_pedidos"],
+		"valor": false,
+		"regla": "RC-1"
+	},
+	{
+		"caso": "RC-1: dos sedes atienden pedidos",
+		"op": "poner",
+		"ruta": ["negocio", "sedes", 1, "atiende_pedidos"],
+		"valor": true,
+		"regla": "RC-1"
+	},
+	{
+		"caso": "RC-1: radio en sede que no atiende pedidos",
+		"op": "poner",
+		"ruta": ["negocio", "sedes", 1, "radio_domicilio_km"],
+		"valor": 5,
+		"regla": "RC-1"
+	},
+	{
+		"caso": "RC-2: sedes con id repetido",
+		"op": "poner",
+		"ruta": ["negocio", "sedes", 1, "id"],
+		"valor": "u-nacional",
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-2: opciones con id repetido",
+		"op": "poner",
+		"ruta": ["productos", 0, "grupos_opciones", 0, "opciones", 1, "id"],
+		"valor": "merenguitos",
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-3: promoción de producto inexistente",
+		"op": "poner",
+		"ruta": ["promociones", 0, "productos"],
+		"valor": ["no-existe"],
+		"regla": "RC-3"
+	},
+	{
+		"caso": "RC-4: vigencia invertida",
+		"op": "poner",
+		"ruta": ["promociones", 0, "vigencia", "hasta"],
+		"valor": "2026-11-01",
+		"regla": "RC-4"
+	},
+	{
+		"caso": "RC-5: selección única con máximo 2",
+		"op": "poner",
+		"ruta": ["productos", 0, "grupos_opciones", 0, "tipo"],
+		"valor": "una",
+		"regla": "RC-5"
+	},
+	{
+		"caso": "RC-6: máximo mayor que las opciones",
+		"op": "poner",
+		"ruta": ["productos", 0, "grupos_opciones", 0, "maximo"],
+		"valor": 99,
+		"regla": "RC-6"
+	},
+	{
+		"caso": "RC-7: producto de categoría inexistente",
+		"op": "poner",
+		"ruta": ["productos", 0, "categoria"],
+		"valor": "no-existe",
+		"regla": "RC-7"
+	},
+	{
+		"caso": "RC-1: sede que atiende pedidos sin radio",
+		"op": "poner",
+		"ruta": ["negocio", "sedes", 0, "radio_domicilio_km"],
+		"valor": null,
+		"regla": "RC-1"
+	},
+	{
+		"caso": "RC-2: categorías con id repetido",
+		"op": "poner",
+		"ruta": ["categorias", 5, "id"],
+		"valor": "fresitas",
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-2: productos con id repetido",
+		"op": "poner",
+		"ruta": ["productos", 1],
+		"valor": {
+			"id": "arma-tu-fresota",
+			"categoria": "fresotas",
+			"nombre": "Producto repetido",
+			"descripcion": "Descripción de prueba.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/repetido.webp",
+				"alt": "Producto de prueba",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 1,
+			"presentaciones": [
+				{
+					"id": "13-oz",
+					"nombre": "13 oz",
+					"descripcion": null,
+					"precio": 20900
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-2: promociones con id repetido",
+		"op": "poner",
+		"ruta": ["promociones", 1],
+		"valor": {
+			"id": "martes-de-fresas",
+			"titulo": "Promoción repetida",
+			"productos": ["arma-tu-fresota"],
+			"vigencia": {
+				"desde": "2026-11-03",
+				"hasta": "2026-11-24"
+			},
+			"condiciones": "Condiciones de prueba."
+		},
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-2: preguntas con id repetido",
+		"op": "poner",
+		"ruta": ["preguntas_frecuentes", 1],
+		"valor": {
+			"id": "como-pido",
+			"pregunta": "¿Pregunta repetida?",
+			"respuesta": "Respuesta de prueba.",
+			"orden": 1
+		},
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-2: presentaciones con id repetido",
+		"op": "poner",
+		"ruta": ["productos", 0, "presentaciones", 1],
+		"valor": {
+			"id": "13-oz",
+			"nombre": "Repetida",
+			"descripcion": null,
+			"precio": 20900
+		},
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-2: grupos con id repetido",
+		"op": "poner",
+		"ruta": ["productos", 0, "grupos_opciones", 1, "id"],
+		"valor": "toppings",
+		"regla": "RC-2"
+	},
+	{
+		"caso": "RC-8: fecha que no existe en el calendario",
+		"op": "poner",
+		"ruta": ["promociones", 0, "vigencia", "hasta"],
+		"valor": "2026-11-31",
+		"regla": "RC-8"
+	}
+]

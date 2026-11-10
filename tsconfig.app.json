@@ -14,8 +14,9 @@
 		"verbatimModuleSyntax": true,
 		"allowImportingTsExtensions": true,
 		"moduleDetection": "force",
+		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"noEmit": true
 	},
-	"include": ["src", "pruebas"]
+	"include": ["src", "pruebas", "supabase/functions/_shared", "public/*.json"]
 }
