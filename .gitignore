@@ -13,7 +13,10 @@ CLAUDE.local.md
 .opencode/
 opencode.json
 opencode.jsonc
+.codex/
 docs-proyecto/
+# El mockup se retiró del repositorio público; se conserva solo en local
+mockup/
 
 # Dependencias y archivos generados
 node_modules/
