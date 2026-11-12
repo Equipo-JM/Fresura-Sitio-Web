@@ -2,6 +2,8 @@ import { Fragment, type RefObject, useRef } from "react";
 import { Link } from "react-router";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { Icono } from "../../compartido/componentes/Icono";
+import { CLAVE_PORTADA } from "../../compartido/fotos/almacenFotosDemo";
+import { useFotosDemo } from "../../compartido/fotos/useFotosDemo";
 import { useCintaDesplazamiento } from "../../compartido/movimiento/useCintaDesplazamiento";
 import { useEntradaPortada } from "../../compartido/movimiento/useEntradaPortada";
 import { FOTO_PORTADA } from "./copy";
@@ -21,6 +23,7 @@ export function Portada({
 }) {
 	const raiz = useRef<HTMLElement>(null);
 	useEntradaPortada(raiz);
+	const fotoCambiada = useFotosDemo()[CLAVE_PORTADA];
 
 	return (
 		<>
@@ -58,7 +61,16 @@ export function Portada({
 					</div>
 					<div className="portada-foto">
 						<div className="arco portada-arco">
-							<FotoEjemplo {...FOTO_PORTADA} prioridad />
+							{fotoCambiada ? (
+								<img
+									src={fotoCambiada.url}
+									alt={fotoCambiada.alt}
+									width={FOTO_PORTADA.ancho}
+									height={FOTO_PORTADA.alto}
+								/>
+							) : (
+								<FotoEjemplo {...FOTO_PORTADA} prioridad />
+							)}
 						</div>
 						<img
 							className="portada-sello"
