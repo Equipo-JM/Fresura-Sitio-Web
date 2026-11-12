@@ -10,6 +10,8 @@ import "@fontsource/plus-jakarta-sans/400.css";
 import "@fontsource/plus-jakarta-sans/700.css";
 import "./compartido/estilos/tokens.css";
 import "./compartido/estilos/base.css";
+import "./compartido/estilos/componentes.css";
+import "./compartido/estilos/panel.css";
 
 const raiz = document.getElementById("raiz");
 if (!raiz) {

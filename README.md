@@ -25,20 +25,45 @@ npm ci
 
 ## Estructura
 
-| Carpeta                                | Contenido                                                                            |
-| -------------------------------------- | ------------------------------------------------------------------------------------ |
-| `src/sitio/`                           | Páginas públicas                                                                     |
-| `src/panel/`                           | Panel `/admin` (etapa 3)                                                             |
-| `src/compartido/`                      | Lo que usan el sitio y el panel                                                      |
+| Carpeta                                | Contenido                                                                                    |
+| -------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `src/sitio/`                           | Páginas públicas                                                                             |
+| `src/panel/`                           | Panel `/admin` (etapa 3)                                                                     |
+| `src/compartido/`                      | Lo que usan el sitio y el panel                                                              |
 | `supabase/functions/_shared/esquemas/` | Esquemas Zod, únicos para el sitio, el panel y las funciones (contrato de contenido y guion) |
-| `supabase/functions/_shared/`          | Código común de las funciones: acceso de administrador, orígenes permitidos y respuestas |
-| `supabase/functions/ia/`               | Función `ia`: genera guiones con Gemini (`POST /guion`)                              |
-| `supabase/migrations/`                 | Tablas, permisos (RLS) y bucket de fotos                                             |
-| `public/`                              | Archivos estáticos, como el contenido de respaldo                                    |
-| `pruebas/`                             | Pruebas de Vitest                                                                    |
-| `prototipo/`                           | Prototipo anterior, solo como referencia                                             |
+| `supabase/functions/_shared/`          | Código común de las funciones: acceso de administrador, orígenes permitidos y respuestas     |
+| `supabase/functions/ia/`               | Función `ia`: genera guiones con Gemini (`POST /guion`)                                      |
+| `supabase/migrations/`                 | Tablas, permisos (RLS) y bucket de fotos                                                     |
+| `public/`                              | Archivos estáticos, como el contenido de respaldo                                            |
+| `pruebas/`                             | Pruebas de Vitest                                                                            |
+| `prototipo/`                           | Prototipo anterior, solo como referencia                                                     |
 
 Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos semanas de publicadas. Las de las funciones, que corren en Deno, se fijan en el `deno.json` de cada función.
+
+## Rutas del sitio
+
+| Ruta                | Pantalla                                                                                                            |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/`                 | Inicio: portada, «Hoy se me antoja…», menú por categorías, «Lo más reciente», calificación, sedes y preguntas       |
+| `/producto/:id`     | Ficha de un producto: tamaños, qué incluye y las acciones                                                           |
+| `/personalizar/:id` | Personalización: tamaño, opciones por grupo con límites, cantidad, indicaciones y agregar al carrito                |
+| `/carrito`          | Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje de WhatsApp                            |
+| `/privacidad`       | Aviso de tratamiento de datos (en revisión)                                                                         |
+| `/admin`            | Panel en modo demostración: acceso simulado y cambio de fotos (portada y productos), guardadas solo en el navegador |
+
+El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `src/compartido/carrito/reglas.ts` y tienen pruebas en `pruebas/carrito.test.ts`.
+
+## Movimiento
+
+Lenis (desplazamiento suave) y GSAP (entrada de la portada y cinta que responde al desplazamiento) están en `src/compartido/movimiento/`. Con «reducir movimiento» no se activan y todo queda visible. Versiones exactas: `gsap@3.15.0`, `lenis@1.3.27`.
+
+## Contenido de ejemplo
+
+`public/contenido-prueba.json` (fuente principal mientras no existe la API) y `public/contenido-respaldo.json` traen el menú del rediseño: 6 categorías y 24 productos. El primero incluye precios de ejemplo; el respaldo no publica precios (DD-14). Las fotos de producto se leen de `imagen.ruta` del contenido: mientras sean de ejemplo (dominio `.invalid`) se muestra el espacio «Foto del producto», y cuando el panel suba la foto al bucket `fotos` aparece sola. La portada y «Lo más reciente» usan fotos de referencia del kit de marca en `public/ejemplos/`, marcadas «Foto de ejemplo»: no consta que Fresura tenga sus derechos, así que se reemplazan antes de publicar. El contrato aún no tiene campo para esas fotos; mientras tanto se cambian en `src/sitio/inicio/copy.ts`. Los textos de presentación que el contrato no trae (frases de categoría, selector de antojos y «Lo más reciente») están en `src/sitio/inicio/copy.ts` y son propuesta por validar con Fresura.
+
+`/admin` es un panel de demostración (`src/panel/`) mientras se construye el real de la etapa 3. El acceso no comprueba nada y las fotos que se suben se reducen a WebP de hasta 300 KB (como DD-18) y se guardan en IndexedDB del navegador (`src/compartido/fotos/`): solo las ve quien las subió, en ese navegador. El panel real las subirá al bucket `fotos` y las publicará con vista previa.
+
+Pendiente por validar con Fresura: correo y casillas del paso de entrega (ver la nota de datos en la bóveda), el número de WhatsApp, los medios de pago y la licencia de Restora Neue (hoy se usa la serif de respaldo).
 
 ## Función `ia`
 
