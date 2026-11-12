@@ -61,13 +61,1253 @@
 	},
 	"productos": [
 		{
-			"id": "arma-tu-fresota",
+			"id": "fresitas-arma-tu-fresita",
+			"categoria": "fresitas",
+			"nombre": "Arma tu Fresita",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Arma tu Fresita, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": true,
+			"orden": 0,
+			"presentaciones": [
+				{
+					"id": "9-oz",
+					"nombre": "9 oz",
+					"descripcion": null,
+					"precio": 14900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresitas-caribena",
+			"categoria": "fresitas",
+			"nombre": "Caribeña",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Caribeña, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 1,
+			"presentaciones": [
+				{
+					"id": "9-oz",
+					"nombre": "9 oz",
+					"descripcion": null,
+					"precio": 14900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresitas-oscura",
+			"categoria": "fresitas",
+			"nombre": "Oscura",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Oscura, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 2,
+			"presentaciones": [
+				{
+					"id": "9-oz",
+					"nombre": "9 oz",
+					"descripcion": null,
+					"precio": 14900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresitas-chocolatosa",
+			"categoria": "fresitas",
+			"nombre": "Chocolatosa",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Chocolatosa, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 3,
+			"presentaciones": [
+				{
+					"id": "9-oz",
+					"nombre": "9 oz",
+					"descripcion": null,
+					"precio": 14900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresitas-frutos-secos",
+			"categoria": "fresitas",
+			"nombre": "Frutos Secos",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Frutos Secos, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 4,
+			"presentaciones": [
+				{
+					"id": "9-oz",
+					"nombre": "9 oz",
+					"descripcion": null,
+					"precio": 14900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresotas-arma-tu-fresota",
 			"categoria": "fresotas",
 			"nombre": "Arma tu Fresota",
 			"descripcion": "Descripción por validar.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
-				"alt": "Vaso de fresas con crema",
+				"alt": "Arma tu Fresota, foto por validar",
 				"ancho": 800,
 				"alto": 800
 			},
@@ -87,30 +1327,6 @@
 			],
 			"grupos_opciones": [
 				{
-					"id": "toppings",
-					"nombre": "Toppings",
-					"tipo": "varias",
-					"obligatorio": false,
-					"maximo": 2,
-					"opciones": [
-						{
-							"id": "merenguitos",
-							"nombre": "Merenguitos",
-							"adicional": 0
-						},
-						{
-							"id": "barquillos",
-							"nombre": "Barquillos",
-							"adicional": 0
-						},
-						{
-							"id": "moritas",
-							"nombre": "Moritas",
-							"adicional": 0
-						}
-					]
-				},
-				{
 					"id": "base",
 					"nombre": "Base",
 					"tipo": "una",
@@ -118,32 +1334,43 @@
 					"maximo": 1,
 					"opciones": [
 						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
 							"id": "arequipe",
 							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
 							"adicional": 0
 						},
 						{
 							"id": "nutella",
 							"nombre": "Nutella",
 							"adicional": 3000
-						}
-					]
-				},
-				{
-					"id": "adicionales",
-					"nombre": "Adicionales",
-					"tipo": "varias",
-					"obligatorio": false,
-					"maximo": 2,
-					"opciones": [
-						{
-							"id": "arandanos",
-							"nombre": "Arándanos",
-							"adicional": 3000
 						},
 						{
-							"id": "helado",
-							"nombre": "Helado",
+							"id": "nucita",
+							"nombre": "Nucita",
 							"adicional": 3000
 						}
 					]
@@ -166,8 +1393,23 @@
 							"adicional": 0
 						},
 						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
 							"id": "coco-rallado",
 							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
 							"adicional": 0
 						}
 					]
@@ -190,20 +1432,2591 @@
 							"adicional": 0
 						},
 						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
 							"id": "maracuya",
 							"nombre": "Maracuyá",
 							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
 						}
 					]
 				}
 			]
+		},
+		{
+			"id": "fresotas-chocolatosa",
+			"categoria": "fresotas",
+			"nombre": "Chocolatosa",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Chocolatosa, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 1,
+			"presentaciones": [
+				{
+					"id": "13-oz",
+					"nombre": "13 oz",
+					"descripcion": null,
+					"precio": 20900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresotas-acida",
+			"categoria": "fresotas",
+			"nombre": "Ácida",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Ácida, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 2,
+			"presentaciones": [
+				{
+					"id": "13-oz",
+					"nombre": "13 oz",
+					"descripcion": null,
+					"precio": 20900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresotas-sorpresa",
+			"categoria": "fresotas",
+			"nombre": "Sorpresa",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Sorpresa, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 3,
+			"presentaciones": [
+				{
+					"id": "13-oz",
+					"nombre": "13 oz",
+					"descripcion": null,
+					"precio": 20900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresotas-explosiva",
+			"categoria": "fresotas",
+			"nombre": "Explosiva",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Explosiva, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 4,
+			"presentaciones": [
+				{
+					"id": "13-oz",
+					"nombre": "13 oz",
+					"descripcion": null,
+					"precio": 20900
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresuras-arma-tu-fresura",
+			"categoria": "fresuras",
+			"nombre": "Arma tu Fresura",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Arma tu Fresura, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": true,
+			"orden": 0,
+			"presentaciones": [
+				{
+					"id": "16-oz",
+					"nombre": "16 oz",
+					"descripcion": null,
+					"precio": 24500
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresuras-acida",
+			"categoria": "fresuras",
+			"nombre": "Ácida",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Ácida, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 1,
+			"presentaciones": [
+				{
+					"id": "16-oz",
+					"nombre": "16 oz",
+					"descripcion": null,
+					"precio": 24500
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresuras-top",
+			"categoria": "fresuras",
+			"nombre": "Top",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Top, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 2,
+			"presentaciones": [
+				{
+					"id": "16-oz",
+					"nombre": "16 oz",
+					"descripcion": null,
+					"precio": 24500
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresuras-dulce",
+			"categoria": "fresuras",
+			"nombre": "Dulce",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Dulce, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 3,
+			"presentaciones": [
+				{
+					"id": "16-oz",
+					"nombre": "16 oz",
+					"descripcion": null,
+					"precio": 24500
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "fresuras-fit",
+			"categoria": "fresuras",
+			"nombre": "Fit",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fit, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 4,
+			"presentaciones": [
+				{
+					"id": "16-oz",
+					"nombre": "16 oz",
+					"descripcion": null,
+					"precio": 24500
+				}
+			],
+			"caracteristicas": [
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+			],
+			"grupos_opciones": [
+				{
+					"id": "base",
+					"nombre": "Base",
+					"tipo": "una",
+					"obligatorio": false,
+					"maximo": 1,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "espolvoreados",
+					"nombre": "Espolvoreados",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "oreo",
+							"nombre": "Oreo",
+							"adicional": 0
+						},
+						{
+							"id": "milo",
+							"nombre": "Milo",
+							"adicional": 0
+						},
+						{
+							"id": "leche-en-polvo",
+							"nombre": "Leche en polvo",
+							"adicional": 0
+						},
+						{
+							"id": "coco-rallado",
+							"nombre": "Coco rallado",
+							"adicional": 0
+						},
+						{
+							"id": "mani-triturado",
+							"nombre": "Maní triturado",
+							"adicional": 0
+						},
+						{
+							"id": "quipitos",
+							"nombre": "Quipitos",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "salsas",
+					"nombre": "Salsas",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "leche-condensada",
+							"nombre": "Leche condensada",
+							"adicional": 0
+						},
+						{
+							"id": "chocolate",
+							"nombre": "Chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "arequipe",
+							"nombre": "Arequipe",
+							"adicional": 0
+						},
+						{
+							"id": "maracuya",
+							"nombre": "Maracuyá",
+							"adicional": 0
+						},
+						{
+							"id": "lulo",
+							"nombre": "Lulo",
+							"adicional": 0
+						},
+						{
+							"id": "cereza",
+							"nombre": "Cereza",
+							"adicional": 0
+						},
+						{
+							"id": "nutella",
+							"nombre": "Nutella",
+							"adicional": 3000
+						},
+						{
+							"id": "nucita",
+							"nombre": "Nucita",
+							"adicional": 3000
+						}
+					]
+				},
+				{
+					"id": "toppings",
+					"nombre": "Toppings",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 2,
+					"opciones": [
+						{
+							"id": "bubols",
+							"nombre": "Bubols",
+							"adicional": 0
+						},
+						{
+							"id": "merenguitos",
+							"nombre": "Merenguitos",
+							"adicional": 0
+						},
+						{
+							"id": "m-m-s",
+							"nombre": "M&M's",
+							"adicional": 0
+						},
+						{
+							"id": "chips-de-chocolate",
+							"nombre": "Chips de chocolate",
+							"adicional": 0
+						},
+						{
+							"id": "barquillos",
+							"nombre": "Barquillos",
+							"adicional": 0
+						},
+						{
+							"id": "moritas",
+							"nombre": "Moritas",
+							"adicional": 0
+						},
+						{
+							"id": "flips",
+							"nombre": "Flips",
+							"adicional": 0
+						},
+						{
+							"id": "minichips",
+							"nombre": "Minichips",
+							"adicional": 0
+						},
+						{
+							"id": "queso-rallado",
+							"nombre": "Queso rallado",
+							"adicional": 0
+						}
+					]
+				},
+				{
+					"id": "adicionales",
+					"nombre": "Adicionales",
+					"tipo": "varias",
+					"obligatorio": false,
+					"maximo": 4,
+					"opciones": [
+						{
+							"id": "boscolatta",
+							"nombre": "Boscolatta",
+							"adicional": 3000
+						},
+						{
+							"id": "hersheys",
+							"nombre": "Hersheys",
+							"adicional": 3000
+						},
+						{
+							"id": "arandanos",
+							"nombre": "Arándanos",
+							"adicional": 3000
+						},
+						{
+							"id": "helado",
+							"nombre": "Helado",
+							"adicional": 3000
+						}
+					]
+				}
+			]
+		},
+		{
+			"id": "chocolate-fresitas",
+			"categoria": "chocolate",
+			"nombre": "Fresitas",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fresitas, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 0,
+			"presentaciones": [
+				{
+					"id": "9-oz",
+					"nombre": "9 oz",
+					"descripcion": null,
+					"precio": 14500
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "chocolate-fresotas",
+			"categoria": "chocolate",
+			"nombre": "Fresotas",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fresotas, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 1,
+			"presentaciones": [
+				{
+					"id": "12-oz",
+					"nombre": "12 oz",
+					"descripcion": null,
+					"precio": 20500
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "chocolate-fresuras",
+			"categoria": "chocolate",
+			"nombre": "Fresuras",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fresuras, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 2,
+			"presentaciones": [
+				{
+					"id": "16-oz",
+					"nombre": "16 oz",
+					"descripcion": null,
+					"precio": 24100
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "miti-fresitas",
+			"categoria": "miti",
+			"nombre": "Fresitas",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fresitas, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 0,
+			"presentaciones": [
+				{
+					"id": "unica",
+					"nombre": "Presentación única",
+					"descripcion": null,
+					"precio": 15700
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "miti-fresotas",
+			"categoria": "miti",
+			"nombre": "Fresotas",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fresotas, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 1,
+			"presentaciones": [
+				{
+					"id": "unica",
+					"nombre": "Presentación única",
+					"descripcion": null,
+					"precio": 21700
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "miti-fresuras",
+			"categoria": "miti",
+			"nombre": "Fresuras",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fresuras, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 2,
+			"presentaciones": [
+				{
+					"id": "unica",
+					"nombre": "Presentación única",
+					"descripcion": null,
+					"precio": 26100
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "compartir-ensalada-de-frutas",
+			"categoria": "compartir",
+			"nombre": "Ensalada de frutas",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Ensalada de frutas, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 0,
+			"presentaciones": [
+				{
+					"id": "24-oz",
+					"nombre": "24 oz",
+					"descripcion": null,
+					"precio": 25900
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "compartir-merengon",
+			"categoria": "compartir",
+			"nombre": "Merengón",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Merengón, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 1,
+			"presentaciones": [
+				{
+					"id": "unica",
+					"nombre": "Presentación única",
+					"descripcion": null,
+					"precio": 21500
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
+		},
+		{
+			"id": "compartir-fresubowl",
+			"categoria": "compartir",
+			"nombre": "Fresubowl",
+			"descripcion": "Descripción por validar.",
+			"imagen": {
+				"ruta": "https://ejemplo.invalid/fresas.webp",
+				"alt": "Fresubowl, foto por validar",
+				"ancho": 800,
+				"alto": 800
+			},
+			"vigente": true,
+			"destacado": false,
+			"orden": 2,
+			"presentaciones": [
+				{
+					"id": "unica",
+					"nombre": "Presentación única",
+					"descripcion": null,
+					"precio": 21000
+				}
+			],
+			"caracteristicas": [],
+			"grupos_opciones": []
 		}
 	],
 	"promociones": [
 		{
 			"id": "martes-de-fresas",
 			"titulo": "Martes de fresas: 2 × 1 en Fresotas",
-			"productos": ["arma-tu-fresota"],
+			"productos": [
+				"fresitas-arma-tu-fresita",
+				"fresitas-caribena",
+				"fresitas-oscura",
+				"fresitas-chocolatosa",
+				"fresitas-frutos-secos"
+			],
 			"vigencia": {
 				"desde": "2026-11-03",
 				"hasta": "2026-11-24"
@@ -213,10 +4026,40 @@
 	],
 	"preguntas_frecuentes": [
 		{
-			"id": "como-pido",
+			"id": "como-hago-mi-pedido",
 			"pregunta": "¿Cómo hago mi pedido?",
-			"respuesta": "Arma tu pedido en el sitio y envíalo por WhatsApp.",
+			"respuesta": "Elige tu producto, ponle tu toque y envía el pedido por WhatsApp. Allí te confirmamos el total, el domicilio y el pago.",
 			"orden": 0
+		},
+		{
+			"id": "puedo-pagar-en-el-sitio",
+			"pregunta": "¿Puedo pagar en el sitio?",
+			"respuesta": "No. El pedido termina en WhatsApp y el pago se confirma por allí.",
+			"orden": 1
+		},
+		{
+			"id": "hasta-donde-llegan-los-domicilios",
+			"pregunta": "¿Hasta dónde llegan los domicilios?",
+			"respuesta": "Salen de la sede U Nacional y llegan hasta 5 km en línea recta. En el carrito puedes comprobar si llegamos a tu zona.",
+			"orden": 2
+		},
+		{
+			"id": "desde-que-sede-se-atiende-mi-pedido",
+			"pregunta": "¿Desde qué sede se atiende mi pedido?",
+			"respuesta": "Los pedidos de este sitio, para recoger o a domicilio, se atienden en la sede U Nacional. La sede U Javeriana es punto de venta.",
+			"orden": 3
+		},
+		{
+			"id": "tienen-lo-mismo-en-las-dos-sedes",
+			"pregunta": "¿Tienen lo mismo en las dos sedes?",
+			"respuesta": "Sí: los mismos productos y los mismos precios.",
+			"orden": 4
+		},
+		{
+			"id": "que-pasa-con-mis-datos",
+			"pregunta": "¿Qué pasa con mis datos?",
+			"respuesta": "Tus datos van solo en el mensaje que envías por WhatsApp. Puedes leer más en la Política de datos.",
+			"orden": 5
 		}
 	],
 	"opiniones": {

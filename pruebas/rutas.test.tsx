@@ -40,7 +40,7 @@ describe("rutas del sitio", () => {
 				name: ejemplo.negocio.presentacion.titulo,
 			}),
 		).toBeInTheDocument();
-		expect(screen.getByText("Por validar")).toBeInTheDocument();
+		expect(screen.getAllByText("Por validar").length).toBeGreaterThan(0);
 		vi.restoreAllMocks();
 	});
 
