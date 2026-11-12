@@ -393,6 +393,11 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# La función valida el JWT en su código contra SUPABASE_JWKS, porque
+# `verify_jwt` no autentica (DT-01, DD-04).
+[functions.ia]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
