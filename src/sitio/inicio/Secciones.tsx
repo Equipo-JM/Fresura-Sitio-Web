@@ -1,8 +1,8 @@
 import type { Contenido } from "../../../supabase/functions/_shared/esquemas/contenido";
-import { FotoPendiente } from "../../compartido/componentes/FotoPendiente";
+import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { Icono } from "../../compartido/componentes/Icono";
 import { MarcaPorValidar } from "../MarcaPorValidar";
-import { TEXTO_RECIENTE } from "./copy";
+import { FOTOS_RECIENTE, TEXTO_RECIENTE } from "./copy";
 
 /** «Lo más reciente»: fotos tipo polaroid con enlace a Instagram. Son espacios por validar. */
 export function LoMasReciente({ contenido }: { contenido: Contenido }) {
@@ -10,7 +10,6 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 	const usuario = instagram
 		? `@${instagram.replace(/\/$/, "").split("/").pop()}`
 		: "@fresura";
-	const cintas = ["flamingo", "verde", "porcini"] as const;
 	return (
 		<section
 			className="seccion fondo-peep reciente"
@@ -42,13 +41,18 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 					)}
 				</div>
 				<ul className="polaroids">
-					{cintas.map((cinta, i) => (
-						<li className={`polaroid p${i + 1}`} key={cinta}>
-							<span className={`adhesivo cinta-${cinta}`} aria-hidden="true" />
+					{FOTOS_RECIENTE.map((foto, i) => (
+						<li className={`polaroid p${i + 1}`} key={foto.src}>
+							<span
+								className={`adhesivo cinta-${foto.cinta}`}
+								aria-hidden="true"
+							/>
 							<div className="polaroid-foto">
-								<FotoPendiente
-									color={i === 1 ? "verde" : "beige"}
-									texto="Publicación por validar"
+								<FotoEjemplo
+									src={foto.src}
+									alt={foto.alt}
+									ancho={600}
+									alto={600}
 								/>
 							</div>
 							<p className="polaroid-pie">{usuario}</p>

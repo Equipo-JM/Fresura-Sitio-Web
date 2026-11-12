@@ -1,9 +1,10 @@
 import { Fragment, type RefObject, useRef } from "react";
 import { Link } from "react-router";
-import { FotoPendiente } from "../../compartido/componentes/FotoPendiente";
+import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { Icono } from "../../compartido/componentes/Icono";
 import { useCintaDesplazamiento } from "../../compartido/movimiento/useCintaDesplazamiento";
 import { useEntradaPortada } from "../../compartido/movimiento/useEntradaPortada";
+import { FOTO_PORTADA } from "./copy";
 
 /**
  * Portada del inicio: el título del contrato, dos acciones y la foto en arco.
@@ -57,7 +58,7 @@ export function Portada({
 					</div>
 					<div className="portada-foto">
 						<div className="arco portada-arco">
-							<FotoPendiente texto="Foto de portada por validar" />
+							<FotoEjemplo {...FOTO_PORTADA} prioridad />
 						</div>
 						<img
 							className="portada-sello"

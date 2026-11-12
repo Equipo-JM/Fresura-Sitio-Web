@@ -99,6 +99,88 @@
 	position: absolute;
 	inset: 0;
 }
+/* Espacio de foto pendiente: textura fotográfica teñida con un color de la
+   paleta, marco punteado e icono de imagen, para que se lea como «aquí va una
+   foto» y no como un bloque de texto. */
+.foto-pendiente {
+	gap: 8px;
+	color: var(--texto);
+	background-color: var(--color-we-peep);
+	background-image:
+		linear-gradient(var(--tinte-foto), var(--tinte-foto)),
+		url(/ejemplos/textura-crema.webp);
+	background-size: cover;
+	background-position: center;
+	--tinte-foto: rgba(250, 218, 215, 0.6);
+}
+.foto-pendiente.tinte-verde {
+	background-color: var(--color-court-bouillon);
+	--tinte-foto: rgba(207, 203, 154, 0.6);
+}
+.foto-pendiente.tinte-beige {
+	background-color: var(--color-dust-storm);
+	--tinte-foto: rgba(230, 210, 184, 0.6);
+}
+.foto-pendiente-marco {
+	position: absolute;
+	inset: 10px;
+	border: 2px dashed var(--color-porcini);
+	border-radius: inherit;
+	pointer-events: none;
+}
+.foto-pendiente-icono {
+	display: grid;
+	place-items: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--color-platinum);
+	box-shadow: 0 6px 16px rgba(91, 59, 36, 0.12);
+}
+.foto-pendiente-icono .icono {
+	width: 28px;
+	height: 28px;
+}
+.foto-pendiente-texto {
+	position: relative;
+	padding: 2px 10px;
+	border-radius: var(--radio-pildora);
+	background: rgba(239, 232, 215, 0.85);
+	font-size: var(--texto-chico);
+}
+/* La tarjeta ya tiene esquinas redondeadas: el marco las sigue. */
+.tarjeta-foto .foto-pendiente,
+.ficha-foto .foto-pendiente,
+.arco .foto-pendiente,
+.miniatura .foto-pendiente {
+	border-radius: inherit;
+}
+.miniatura .foto-pendiente-marco {
+	inset: 5px;
+	border-width: 1.5px;
+}
+.miniatura .foto-pendiente-icono {
+	width: 34px;
+	height: 34px;
+	box-shadow: none;
+}
+.miniatura .foto-pendiente-icono .icono {
+	width: 18px;
+	height: 18px;
+}
+
+/* Fotos de ejemplo del kit de marca: etiqueta visible sobre la foto. */
+.foto-ejemplo-marca {
+	position: absolute;
+	left: 50%;
+	bottom: 14px;
+	transform: translateX(-50%);
+	z-index: 1;
+}
+.portada-foto .arco img {
+	object-position: 50% 45%;
+}
+
 .ficha-foto {
 	aspect-ratio: 4 / 5;
 	overflow: hidden;
@@ -571,7 +653,8 @@ button.paso-num {
 	width: 26px;
 	height: auto;
 }
-.miniatura .foto-pendiente span,
+/* En la miniatura solo caben el marco y el icono de foto. */
+.miniatura .foto-pendiente .foto-pendiente-texto,
 .miniatura .foto-pendiente .por-validar {
 	display: none;
 }

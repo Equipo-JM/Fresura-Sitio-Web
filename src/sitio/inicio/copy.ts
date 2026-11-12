@@ -43,3 +43,34 @@ export const ANTOJOS = [
 /** Textos de «Lo más reciente»: publicaciones de ejemplo, sin fotos reales todavía. */
 export const TEXTO_RECIENTE =
 	"Fotos y videos de tus fresas favoritas. Síguenos para enterarte primero.";
+
+/**
+ * Fotos de ejemplo del inicio, tomadas del kit de marca (`referencia/`) solo
+ * para el prototipo. El contrato de contenido aún no tiene campo para la foto
+ * de portada ni para «Lo más reciente»: hasta que exista, se cambian aquí.
+ */
+export const FOTO_PORTADA = {
+	src: "/ejemplos/portada-vaso.webp",
+	alt: "Mano sosteniendo un vaso de fresas mientras cae chocolate encima",
+	ancho: 800,
+	alto: 1200,
+} as const;
+
+/** Tres publicaciones de ejemplo para las polaroids de «Lo más reciente». */
+export const FOTOS_RECIENTE = [
+	{
+		src: "/ejemplos/reciente-vaso.webp",
+		alt: "Vaso de fresas con chocolate",
+		cinta: "flamingo",
+	},
+	{
+		src: "/ejemplos/reciente-interior.webp",
+		alt: "Sillas rosadas bajo el arco con el logo de Fresura",
+		cinta: "verde",
+	},
+	{
+		src: "/ejemplos/reciente-toldo.webp",
+		alt: "Toldo de rayas con el logo de Fresura",
+		cinta: "porcini",
+	},
+] as const;
