@@ -1,54 +1,67 @@
-import { useContenido } from "../compartido/contenido/useContenido";
+import { useEffect } from "react";
+import { useLocation } from "react-router";
+import { ConContenido } from "./ConContenido";
+import { Antojos } from "./inicio/Antojos";
+import { Categorias } from "./inicio/Categorias";
+import { Portada } from "./inicio/Portada";
+import {
+	Calificacion,
+	LoMasReciente,
+	Preguntas,
+	Sedes,
+} from "./inicio/Secciones";
 import { MarcaPorValidar } from "./MarcaPorValidar";
 
-/**
- * Inicio provisional: muestra la presentación del negocio leída del contenido,
- * para comprobar la lectura de punta a punta. El catálogo, la ficha y el pedido
- * llegan en los siguientes pasos de la etapa 2.
- */
+/** Inicio: portada, selector de antojos, menú por categorías, reciente, calificación, sedes y preguntas. */
 export function PaginaInicio() {
-	const { data, isPending, isError } = useContenido();
+	const { hash } = useLocation();
 
-	if (isPending) {
-		return (
-			<section className="seccion" aria-busy="true">
-				<div className="envoltura texto-largo">
-					<p>Cargando…</p>
-				</div>
-			</section>
-		);
-	}
-
-	if (isError) {
-		return (
-			<section className="seccion">
-				<div className="envoltura texto-largo">
-					<h1>No pudimos cargar el menú</h1>
-					<p>Revisa tu conexión y vuelve a intentarlo en un momento.</p>
-				</div>
-			</section>
-		);
-	}
-
-	const { contenido, origen } = data;
-	const { presentacion } = contenido.negocio;
+	// Los enlaces del encabezado apuntan a secciones: al llegar, se baja hasta ella.
+	useEffect(() => {
+		if (!hash) return;
+		document.getElementById(hash.slice(1))?.scrollIntoView();
+	}, [hash]);
 
 	return (
-		<section className="seccion">
-			<div className="envoltura texto-largo">
-				{contenido.estado === "ejemplo" && (
-					<p>
-						<MarcaPorValidar />
-					</p>
-				)}
-				<h1>{presentacion.titulo}</h1>
-				<p>{presentacion.texto}</p>
-				{origen === "respaldo" && (
-					<p role="status" className="negrita">
-						Consulta precios por WhatsApp.
-					</p>
-				)}
+		<ConContenido>
+			{(contenido) => {
+				const { presentacion, sedes } = contenido.negocio;
+				return (
+					<>
+						<AvisoDomicilio
+							sede={sedes.find((s) => s.atiende_pedidos)?.nombre}
+						/>
+						<Portada
+							titulo={presentacion.titulo}
+							texto={presentacion.texto}
+							sedes={sedes.length}
+						/>
+						<Antojos />
+						<Categorias contenido={contenido} />
+						<LoMasReciente contenido={contenido} />
+						<Calificacion
+							opiniones={contenido.opiniones}
+							estado={contenido.estado}
+						/>
+						<Sedes contenido={contenido} />
+						<Preguntas contenido={contenido} />
+					</>
+				);
+			}}
+		</ConContenido>
+	);
+}
+
+/** Barra fina con el dato de domicilios: qué sede atiende pedidos. */
+function AvisoDomicilio({ sede }: { sede: string | undefined }) {
+	return (
+		<div className="anuncio">
+			<div className="envoltura">
+				<p>
+					Domicilios desde <strong>{sede ?? "nuestra sede"}</strong>, hasta 5 km{" "}
+					<MarcaPorValidar />
+				</p>
 			</div>
-		</section>
+		</div>
 	);
 }
