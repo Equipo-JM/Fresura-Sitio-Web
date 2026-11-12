@@ -196,3 +196,28 @@
 	width: 18px;
 	height: 18px;
 }
+
+/* Acceso real: widget de Turnstile, código QR y clave manual */
+.panel-turnstile {
+	min-height: 65px;
+}
+.panel-qr {
+	justify-self: center;
+	width: 200px;
+	height: 200px;
+	padding: 8px;
+	border-radius: var(--radio-chico);
+	background: #fff;
+}
+.panel-secreto code {
+	display: block;
+	padding: 8px 10px;
+	border-radius: var(--radio-chico);
+	background: var(--color-dust-storm);
+	font-size: var(--texto-chico);
+	word-break: break-all;
+}
+.panel-codigo {
+	display: grid;
+	gap: 16px;
+}

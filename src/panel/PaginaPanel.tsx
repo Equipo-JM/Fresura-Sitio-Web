@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { type ReactNode, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 import type { Contenido } from "../../supabase/functions/_shared/esquemas/contenido";
 import { Icono } from "../compartido/componentes/Icono";
 import { tieneFoto } from "../compartido/contenido/fotos";
@@ -10,8 +10,16 @@ import {
 	claveProducto,
 } from "../compartido/fotos/almacenFotosDemo";
 import { useFotosDemo } from "../compartido/fotos/useFotosDemo";
+import {
+	obtenerClientePanel,
+	panelConfigurado,
+} from "../compartido/supabase/clientePanel";
 import { FOTO_PORTADA } from "../sitio/inicio/copy";
 import { AccesoDemo } from "./AccesoDemo";
+import { MarcoAcceso } from "./acceso/MarcoAcceso";
+import { PantallaCodigo, Salir } from "./acceso/PantallaCodigo";
+import { PantallaEntrar } from "./acceso/PantallaEntrar";
+import { useSesionPanel } from "./acceso/useSesionPanel";
 import { CambiarFoto } from "./CambiarFoto";
 
 /** Clave de la sesión simulada: dura lo que la pestaña. */
@@ -35,12 +43,67 @@ function guardarSesion(abierta: boolean) {
 }
 
 /**
- * `/admin` en modo demostración: acceso simulado y cambio de fotos guardado en
- * este navegador. Enseña el flujo mientras se construye el panel real (etapa 3).
+ * `/admin`. Con Supabase configurado, el acceso es real: contraseña con
+ * Turnstile y código de la app autenticadora (etapa 3). Sin configuración, o
+ * con `?demo`, queda el modo demostración con acceso simulado.
  */
 export function PaginaPanel() {
-	const [sesion, setSesion] = useState(leerSesion);
+	const [busqueda] = useSearchParams();
+	if (panelConfigurado() && !busqueda.has("demo")) return <PanelReal />;
+	return <PanelDemo />;
+}
 
+function PanelReal() {
+	const cliente = obtenerClientePanel();
+	const { estado, refrescar } = useSesionPanel(cliente);
+
+	switch (estado) {
+		case "cargando":
+			return (
+				<MarcoAcceso titulo="Panel de Fresura">
+					<p>Cargando…</p>
+				</MarcoAcceso>
+			);
+		case "sin-sesion":
+			return <PantallaEntrar cliente={cliente} />;
+		case "registrar-codigo":
+		case "pedir-codigo":
+			return (
+				<PantallaCodigo
+					cliente={cliente}
+					registrar={estado === "registrar-codigo"}
+					onListo={() => void refrescar()}
+				/>
+			);
+		case "sin-permiso":
+			return (
+				<MarcoAcceso titulo="Esta cuenta no tiene acceso">
+					<p>
+						Entraste bien, pero esta cuenta no es de administración. Si crees
+						que es un error, avisa al equipo.
+					</p>
+					<Salir cliente={cliente} />
+				</MarcoAcceso>
+			);
+		case "dentro":
+			return (
+				<ContenidoPanel
+					etiqueta="Sesión verificada"
+					aviso={
+						<>
+							<strong>Entraste con tu cuenta y tu código.</strong> Por ahora las
+							fotos que cambies se guardan solo en este navegador; subirlas a la
+							nube y publicarlas con vista previa es el siguiente paso.
+						</>
+					}
+					onSalir={() => void cliente.auth.signOut()}
+				/>
+			);
+	}
+}
+
+function PanelDemo() {
+	const [sesion, setSesion] = useState(leerSesion);
 	if (!sesion) {
 		return (
 			<AccesoDemo
@@ -51,7 +114,35 @@ export function PaginaPanel() {
 			/>
 		);
 	}
+	return (
+		<ContenidoPanel
+			etiqueta="Modo demostración"
+			aviso={
+				<>
+					<strong>Estás en una demostración.</strong> Las fotos que cambies se
+					guardan solo en este navegador y se ven al instante en el sitio. En la
+					versión final se suben a la nube, con vista previa antes de publicar y
+					opción de volver a la versión anterior.
+				</>
+			}
+			onSalir={() => {
+				guardarSesion(false);
+				setSesion(false);
+			}}
+		/>
+	);
+}
 
+/** Encabezado y sección de fotos, iguales en el panel real y en la demostración. */
+function ContenidoPanel({
+	etiqueta,
+	aviso,
+	onSalir,
+}: {
+	etiqueta: string;
+	aviso: ReactNode;
+	onSalir: () => void;
+}) {
 	return (
 		<div className="panel">
 			<header className="panel-h">
@@ -62,20 +153,13 @@ export function PaginaPanel() {
 						width="150"
 						height="27"
 					/>
-					<span className="panel-demo-etiqueta">Modo demostración</span>
+					<span className="panel-demo-etiqueta">{etiqueta}</span>
 					<nav className="panel-h-acciones" aria-label="Panel">
 						<Link className="boton secundario compacto" to="/" target="_blank">
 							Ver el sitio
 							<span className="oculto"> (se abre en otra pestaña)</span>
 						</Link>
-						<button
-							type="button"
-							className="boton-texto"
-							onClick={() => {
-								guardarSesion(false);
-								setSesion(false);
-							}}
-						>
+						<button type="button" className="boton-texto" onClick={onSalir}>
 							Salir
 						</button>
 					</nav>
@@ -85,12 +169,7 @@ export function PaginaPanel() {
 				<h1>Fotos</h1>
 				<div className="panel-aviso" role="note">
 					<Icono nombre="alerta" />
-					<p>
-						<strong>Estás en una demostración.</strong> Las fotos que cambies se
-						guardan solo en este navegador y se ven al instante en el sitio. En
-						la versión final se suben a la nube, con vista previa antes de
-						publicar y opción de volver a la versión anterior.
-					</p>
+					<p>{aviso}</p>
 				</div>
 				<ContenidoFotos />
 			</main>

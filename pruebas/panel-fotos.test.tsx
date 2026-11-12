@@ -55,7 +55,7 @@ describe("fotos del panel de demostración", () => {
 	});
 });
 
-describe("ruta /admin", () => {
+describe("ruta /admin?demo (modo demostración)", () => {
 	it("pide entrar y, tras los dos pasos, muestra la sección de fotos", () => {
 		sessionStorage.clear();
 		const cliente = new QueryClient({
@@ -63,7 +63,7 @@ describe("ruta /admin", () => {
 		});
 		render(
 			<QueryClientProvider client={cliente}>
-				<MemoryRouter initialEntries={["/admin"]}>
+				<MemoryRouter initialEntries={["/admin?demo"]}>
 					<RutasDelSitio />
 				</MemoryRouter>
 			</QueryClientProvider>,
