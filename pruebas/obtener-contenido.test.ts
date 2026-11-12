@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { obtenerContenido } from "../src/compartido/contenido/obtenerContenido";
+import {
+	leerContenidoPrincipal,
+	obtenerContenido,
+} from "../src/compartido/contenido/obtenerContenido";
 import ejemplo from "./datos/contenido-1.0.1.ejemplo.json";
 
 const fallar = () => Promise.reject(new Error("sin red"));
@@ -46,6 +49,38 @@ describe("obtenerContenido", () => {
 	it("lanza un error si también falla el respaldo", async () => {
 		vi.spyOn(console, "warn").mockImplementation(() => {});
 		await expect(obtenerContenido(fallar, fallar)).rejects.toThrow();
+	});
+});
+
+describe("leerContenidoPrincipal", () => {
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("pide solo la columna json de la versión publicada", async () => {
+		const espia = vi
+			.spyOn(globalThis, "fetch")
+			.mockImplementation(async () =>
+				Response.json({ json: structuredClone(ejemplo) }),
+			);
+		await expect(leerContenidoPrincipal()).resolves.toEqual(ejemplo);
+		const [entrada] = espia.mock.calls[0];
+		const url = new URL(
+			entrada instanceof Request ? entrada.url : String(entrada),
+		);
+		expect(url.pathname).toBe("/rest/v1/versiones_contenido");
+		expect(url.searchParams.get("select")).toBe("json");
+		expect(url.searchParams.get("estado")).toBe("eq.publicada");
+	});
+
+	it("lanza un error si Supabase responde con error", async () => {
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+			Response.json(
+				{ code: "42501", message: "permission denied" },
+				{ status: 401 },
+			),
+		);
+		await expect(leerContenidoPrincipal()).rejects.toThrow(/versión publicada/);
 	});
 });
 
