@@ -39,13 +39,13 @@ Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos
 
 ## Rutas del sitio
 
-| Ruta | Pantalla |
-| --- | --- |
-| `/` | Inicio: portada, «Hoy se me antoja…», menú por categorías, «Lo más reciente», calificación, sedes y preguntas |
-| `/producto/:id` | Ficha de un producto: tamaños, qué incluye y las acciones |
-| `/personalizar/:id` | Personalización: tamaño, opciones por grupo con límites, cantidad, indicaciones y agregar al carrito |
-| `/carrito` | Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje de WhatsApp |
-| `/privacidad` | Aviso de tratamiento de datos (en revisión) |
+| Ruta                | Pantalla                                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `/`                 | Inicio: portada, «Hoy se me antoja…», menú por categorías, «Lo más reciente», calificación, sedes y preguntas |
+| `/producto/:id`     | Ficha de un producto: tamaños, qué incluye y las acciones                                                     |
+| `/personalizar/:id` | Personalización: tamaño, opciones por grupo con límites, cantidad, indicaciones y agregar al carrito          |
+| `/carrito`          | Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje de WhatsApp                      |
+| `/privacidad`       | Aviso de tratamiento de datos (en revisión)                                                                   |
 
 El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `src/compartido/carrito/reglas.ts` y tienen pruebas en `pruebas/carrito.test.ts`.
 

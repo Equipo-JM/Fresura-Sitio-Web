@@ -1639,7 +1639,7 @@ dialog::backdrop {
 		font-size: var(--texto-chico);
 		font-weight: 700;
 	}
-		.desplegable,
+	.desplegable,
 	.desplegable[hidden] {
 		display: block;
 		position: static;
