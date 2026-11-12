@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import { desplazarA } from "../../compartido/movimiento/desplazar";
 import { ANTOJOS } from "./copy";
 
 /**
@@ -12,11 +13,7 @@ export function Antojos() {
 	function elegir(texto: string, categoria: string) {
 		setElegido(texto);
 		const destino = document.getElementById(`cat-${categoria}`);
-		destino?.scrollIntoView({
-			behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-				? "auto"
-				: "smooth",
-		});
+		if (destino) desplazarA(destino, true);
 	}
 
 	return (

@@ -9,14 +9,17 @@ import { Icono } from "../../compartido/componentes/Icono";
 import { useCobertura } from "../../compartido/ubicacion/useCobertura";
 import { MarcaPorValidar } from "../MarcaPorValidar";
 
-/** Mensaje y estado de la comprobación de cobertura. */
-const MENSAJES_COBERTURA = {
-	dentro: "¡Llegamos a tu zona! Puedes recoger o pedir domicilio.",
-	fuera:
-		"Por ahora no llegamos a tu zona. Puedes recoger en la sede U Nacional.",
-	"sin-permiso":
-		"No pudimos ver tu ubicación. Puedes elegir recoger o domicilio y lo confirmamos por WhatsApp.",
-} as const;
+/** Mensaje de la comprobación de cobertura; la sede sale del contenido. */
+function mensajeCobertura(
+	estado: "dentro" | "fuera" | "sin-permiso",
+	nombreSede: string,
+): string {
+	if (estado === "dentro")
+		return "¡Llegamos a tu zona! Puedes recoger o pedir domicilio.";
+	if (estado === "fuera")
+		return `Por ahora no llegamos a tu zona. Puedes recoger en ${nombreSede}.`;
+	return "No pudimos ver tu ubicación. Puedes elegir recoger o domicilio y lo confirmamos por WhatsApp.";
+}
 
 type Errores = ReturnType<typeof validarDatos>;
 
@@ -44,6 +47,7 @@ export function PasoEntrega({
 	onVolver: () => void;
 }) {
 	const sede = contenido.negocio.sedes.find((s) => s.atiende_pedidos);
+	const nombreSede = sede?.nombre ?? "la sede";
 	const cobertura = useCobertura(
 		sede?.ubicacion ?? { lat: 4.6347, lng: -74.0785 },
 		sede?.radio_domicilio_km ?? 5,
@@ -158,9 +162,7 @@ export function PasoEntrega({
 							<Icono nombre="paquete" />
 							<strong>Domicilio</strong>
 							<span>
-								{fuera
-									? "No disponible en tu zona"
-									: "Desde la sede U Nacional"}
+								{fuera ? "No disponible en tu zona" : `Desde ${nombreSede}`}
 							</span>
 						</label>
 						<label
@@ -175,8 +177,8 @@ export function PasoEntrega({
 								onChange={() => onEntrega("recoger")}
 							/>
 							<Icono nombre="ubicacion" />
-							<strong>Recoger en sede U Nacional</strong>
-							<span>Calle 45 # 28-10</span>
+							<strong>Recoger en {nombreSede}</strong>
+							{sede && <span>{sede.direccion}</span>}
 						</label>
 					</div>
 					{errores.entrega && (
@@ -220,12 +222,18 @@ export function PasoEntrega({
 					)}
 				</div>
 
-				{domicilio && (
+				{/* Si quedó fuera de la zona se sigue mostrando el resultado, aunque ya no esté en domicilio. */}
+				{(domicilio || fuera) && (
 					<div className="cobertura">
 						<button
 							type="button"
 							className="boton"
-							onClick={cobertura.comprobar}
+							onClick={() =>
+								cobertura.comprobar((resultado) => {
+									// «Domicilio» queda deshabilitado fuera de la zona: no puede seguir elegido.
+									if (resultado === "fuera" && domicilio) onEntrega("");
+								})
+							}
 							disabled={cobertura.estado === "buscando"}
 						>
 							<Icono nombre="ubicacion" />
@@ -246,7 +254,7 @@ export function PasoEntrega({
 									<Icono
 										nombre={cobertura.estado === "dentro" ? "ok" : "alerta"}
 									/>
-									<span>{MENSAJES_COBERTURA[cobertura.estado]}</span>
+									<span>{mensajeCobertura(cobertura.estado, nombreSede)}</span>
 								</p>
 							)}
 					</div>

@@ -4,6 +4,7 @@ import { unidadesCarrito } from "../compartido/carrito/unidades";
 import { useCarrito } from "../compartido/carrito/useCarrito";
 import { Icono } from "../compartido/componentes/Icono";
 import { useContenido } from "../compartido/contenido/useContenido";
+import { useDesplazamientoAlNavegar } from "../compartido/movimiento/useDesplazamientoAlNavegar";
 import { useDesplazamientoSuave } from "../compartido/movimiento/useDesplazamientoSuave";
 import { MarcaPorValidar } from "./MarcaPorValidar";
 
@@ -18,10 +19,12 @@ const SECCIONES = [
 
 /**
  * Estructura común de las páginas públicas: encabezado con navegación y carrito,
- * pie con contacto y redes. El desplazamiento suave se activa aquí para todo el sitio.
+ * pie con contacto y redes. El desplazamiento suave y la posición al cambiar de
+ * ruta se controlan aquí para todo el sitio.
  */
 export function MarcoDelSitio() {
 	useDesplazamientoSuave();
+	useDesplazamientoAlNavegar();
 	const [menuAbierto, setMenuAbierto] = useState(false);
 	const { lineas } = useCarrito();
 	const unidades = unidadesCarrito(lineas);
@@ -44,6 +47,7 @@ export function MarcoDelSitio() {
 						/>
 					</Link>
 					<nav
+						id="nav-principal"
 						className={menuAbierto ? "nav abierta" : "nav"}
 						aria-label="Principal"
 						data-lenis-prevent

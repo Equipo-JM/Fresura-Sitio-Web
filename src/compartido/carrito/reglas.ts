@@ -174,7 +174,7 @@ export function validarDatos(
 
 /**
  * Texto del mensaje de WhatsApp, con el formato de negrita de WhatsApp (*así*).
- * Los nombres de producto y las elecciones vienen del contenido, no de la persona.
+ * Los nombres de producto, las elecciones y la sede vienen del contenido, no de la persona.
  */
 export function mensajePedido({
 	lineas,
@@ -184,6 +184,7 @@ export function mensajePedido({
 	entrega,
 	total,
 	pendiente,
+	sede,
 }: {
 	lineas: LineaCarrito[];
 	productos: Producto[];
@@ -192,6 +193,8 @@ export function mensajePedido({
 	entrega: Entrega;
 	total: number;
 	pendiente: boolean;
+	/** Sede que atiende pedidos; se nombra cuando la persona recoge. */
+	sede?: { nombre: string; direccion: string };
 }): string {
 	const partes: string[] = [];
 	lineas.forEach((linea, indice) => {
@@ -224,7 +227,7 @@ export function mensajePedido({
 	partes.push(`*Correo:* ${datos.correo.trim()}`);
 	partes.push(`*Teléfono:* ${datos.telefono.trim()}`);
 	partes.push(
-		`*Entrega:* ${entrega === "domicilio" ? "Domicilio" : "Recoger en sede U Nacional"}`,
+		`*Entrega:* ${entrega === "domicilio" ? "Domicilio" : `Recoger en ${sede ? `${sede.nombre} (${sede.direccion})` : "la sede"}`}`,
 	);
 	if (entrega === "domicilio") {
 		if (datos.empresa.trim()) partes.push(`*Empresa:* ${datos.empresa.trim()}`);

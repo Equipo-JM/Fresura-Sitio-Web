@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import type { Contenido } from "../../../supabase/functions/_shared/esquemas/contenido";
-import { vaciarCarrito } from "../../compartido/carrito/almacenCarrito";
 import {
 	type DatosEntrega,
 	direccionCompleta,
@@ -15,22 +15,26 @@ import { MarcaPorValidar } from "../MarcaPorValidar";
 
 /**
  * Paso 3: revisión y envío. El mensaje se arma con lo que eligió la persona y
- * se abre en WhatsApp; el pago se acuerda allí.
+ * se abre en WhatsApp; el pago se acuerda allí. `onNuevoPedido` vacía el
+ * carrito y vuelve al paso 1 (lo resuelve la página, que guarda el paso).
  */
 export function PasoRevision({
 	contenido,
 	entrega,
 	datos,
 	onEditar,
+	onNuevoPedido,
 }: {
 	contenido: Contenido;
 	entrega: Entrega;
 	datos: DatosEntrega;
 	onEditar: () => void;
+	onNuevoPedido: () => void;
 }) {
 	const { lineas } = useCarrito();
 	const [enviado, setEnviado] = useState(false);
 	const { total, pendiente } = totalCarrito(lineas, contenido.productos);
+	const sede = contenido.negocio.sedes.find((s) => s.atiende_pedidos);
 	const texto = mensajePedido({
 		lineas,
 		productos: contenido.productos,
@@ -39,6 +43,7 @@ export function PasoRevision({
 		entrega,
 		total,
 		pendiente,
+		sede,
 	});
 	const numero = contenido.negocio.whatsapp;
 	const enlace = `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
@@ -56,13 +61,7 @@ export function PasoRevision({
 					Envía el mensaje y te confirmamos el total, el domicilio y el pago.{" "}
 					<MarcaPorValidar />
 				</p>
-				<button
-					type="button"
-					className="boton"
-					onClick={() => {
-						vaciarCarrito();
-					}}
-				>
+				<button type="button" className="boton" onClick={onNuevoPedido}>
 					Empezar otro pedido
 				</button>
 			</div>
@@ -95,7 +94,7 @@ export function PasoRevision({
 							</p>
 						</>
 					) : (
-						<p>Sede U Nacional, Calle 45 # 28-10</p>
+						<p>{sede ? `${sede.nombre}, ${sede.direccion}` : "En la sede"}</p>
 					)}
 					<button type="button" className="boton-texto" onClick={onEditar}>
 						Cambiar entrega
@@ -120,9 +119,9 @@ export function PasoRevision({
 			<p className="chico">
 				Tus datos van solo en el mensaje que envías por WhatsApp, para atender
 				tu pedido. Este sitio no los guarda.{" "}
-				<a className="enlace-texto" href="/privacidad">
+				<Link className="enlace-texto" to="/privacidad">
 					Política de datos
-				</a>
+				</Link>
 			</p>
 			<div className="acciones-fila">
 				<a

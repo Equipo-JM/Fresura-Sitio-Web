@@ -146,6 +146,24 @@ describe("entrega y datos", () => {
 		expect(texto).toContain("*Dirección:* Calle de ejemplo");
 		expect(texto).toContain("(sin productos por confirmar)");
 	});
+
+	it("al recoger, el mensaje nombra la sede del contenido", () => {
+		const sede = contenido.negocio.sedes.find((s) => s.atiende_pedidos);
+		const texto = mensajePedido({
+			lineas: [linea()],
+			productos: contenido.productos,
+			categorias: contenido.categorias,
+			datos,
+			entrega: "recoger",
+			total: 0,
+			pendiente: true,
+			sede,
+		});
+		expect(texto).toContain(
+			`*Entrega:* Recoger en ${sede?.nombre} (${sede?.direccion})`,
+		);
+		expect(texto).not.toContain("*Dirección:*");
+	});
 });
 
 describe("distancia a la sede", () => {

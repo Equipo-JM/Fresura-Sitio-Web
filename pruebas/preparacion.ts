@@ -30,3 +30,6 @@ if (!("ResizeObserver" in globalThis)) {
 		disconnect() {}
 	} as unknown as typeof ResizeObserver;
 }
+
+// jsdom no implementa el desplazamiento; el sitio sube al inicio al cambiar de ruta.
+window.scrollTo = () => {};

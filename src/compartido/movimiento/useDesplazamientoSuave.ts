@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 import Lenis from "lenis";
 import { useEffect } from "react";
+import { registrarLenis } from "./desplazar";
 
 /**
  * Desplazamiento suave con Lenis, sincronizado con el reloj de GSAP. Con
@@ -15,8 +16,10 @@ export function useDesplazamientoSuave() {
 		// Sin esto, GSAP compensa las pausas y Lenis salta al volver a la pestaña.
 		gsap.ticker.lagSmoothing(0);
 		gsap.ticker.add(avanzar);
+		registrarLenis(lenis);
 
 		return () => {
+			registrarLenis(null);
 			gsap.ticker.remove(avanzar);
 			gsap.ticker.lagSmoothing(500, 33);
 			lenis.destroy();

@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router";
+import { AvisoRespaldo } from "./AvisoRespaldo";
 import { ConContenido } from "./ConContenido";
 import { Antojos } from "./inicio/Antojos";
 import { Categorias } from "./inicio/Categorias";
@@ -14,20 +13,17 @@ import { MarcaPorValidar } from "./MarcaPorValidar";
 
 /** Inicio: portada, selector de antojos, menú por categorías, reciente, calificación, sedes y preguntas. */
 export function PaginaInicio() {
-	const { hash } = useLocation();
-
-	// Los enlaces del encabezado apuntan a secciones: al llegar, se baja hasta ella.
-	useEffect(() => {
-		if (!hash) return;
-		document.getElementById(hash.slice(1))?.scrollIntoView();
-	}, [hash]);
-
 	return (
 		<ConContenido>
-			{(contenido) => {
+			{(contenido, origen) => {
 				const { presentacion, sedes } = contenido.negocio;
 				return (
 					<>
+						{origen === "respaldo" && (
+							<div className="envoltura">
+								<AvisoRespaldo whatsapp={contenido.negocio.whatsapp} />
+							</div>
+						)}
 						<AvisoDomicilio
 							sede={sedes.find((s) => s.atiende_pedidos)?.nombre}
 						/>

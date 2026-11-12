@@ -54,9 +54,9 @@ export function Icono({
 			aria-hidden="true"
 			focusable="false"
 		>
-			{TRAZOS[nombre].split(" m").map((trazo, i) => (
-				<path key={trazo} d={i === 0 ? trazo : `M${trazo.replace(/^m/, "")}`} />
-			))}
+			{/* Un solo trazo: las «m» de los trazos son relativas a donde quedó el
+			    anterior (así están dibujadas las puntas de flecha y el check). */}
+			<path d={TRAZOS[nombre]} />
 		</svg>
 	);
 }

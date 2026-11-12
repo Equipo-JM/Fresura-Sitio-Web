@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import { agregarLinea } from "../compartido/carrito/almacenCarrito";
 import {
 	type LineaCarrito,
+	MAX_INDICACIONES,
 	MAX_UNIDADES,
 	type Producto,
 	pesos,
@@ -11,6 +12,7 @@ import {
 	type Seleccion,
 } from "../compartido/carrito/reglas";
 import { Icono } from "../compartido/componentes/Icono";
+import { AvisoRespaldo } from "./AvisoRespaldo";
 import { ConContenido } from "./ConContenido";
 import { MarcaPorValidar } from "./MarcaPorValidar";
 import { VasoIlustrado } from "./personalizar/VasoIlustrado";
@@ -20,7 +22,7 @@ export function PaginaPersonalizar() {
 	const { idProducto } = useParams();
 	return (
 		<ConContenido>
-			{(contenido) => {
+			{(contenido, origen) => {
 				const producto = contenido.productos.find((p) => p.id === idProducto);
 				if (!producto) {
 					return (
@@ -30,6 +32,19 @@ export function PaginaPersonalizar() {
 								<Link className="boton" to="/#menu">
 									Volver al menú
 								</Link>
+							</div>
+						</section>
+					);
+				}
+				if (origen === "respaldo") {
+					return (
+						<section className="pagina">
+							<div className="envoltura texto-largo">
+								<h1>{producto.nombre}</h1>
+								<AvisoRespaldo
+									whatsapp={contenido.negocio.whatsapp}
+									mensaje={`Hola, Fresura. Quiero pedir ${producto.nombre}.`}
+								/>
 							</div>
 						</section>
 					);
@@ -60,6 +75,19 @@ function Personalizador({ producto }: { producto: Producto }) {
 	};
 	const precio = precioLinea(producto, linea);
 
+	// El aviso «¡Ya está en tu carrito!» describe lo último agregado: si la
+	// persona cambia algo después, deja de ser cierto y se oculta.
+	function cambiar<T>(fijar: (valor: T) => void) {
+		return (valor: T) => {
+			fijar(valor);
+			setAgregado(false);
+			setAviso(null);
+		};
+	}
+	const elegirPresentacion = cambiar(setIdPresentacion);
+	const fijarCantidad = cambiar(setCantidad);
+	const fijarIndicaciones = cambiar(setIndicaciones);
+
 	function alternar(grupoId: string, idOpcion: string) {
 		const grupo = producto.grupos_opciones.find((g) => g.id === grupoId);
 		if (!grupo) return;
@@ -70,6 +98,7 @@ function Personalizador({ producto }: { producto: Producto }) {
 			: [...actuales, idOpcion];
 		setSeleccion({ ...seleccion, [grupoId]: nuevas });
 		setAgregado(false);
+		setAviso(null);
 	}
 
 	function agregar() {
@@ -134,7 +163,7 @@ function Personalizador({ producto }: { producto: Producto }) {
 											className="oculto"
 											value={p.id}
 											checked={idPresentacion === p.id}
-											onChange={() => setIdPresentacion(p.id)}
+											onChange={() => elegirPresentacion(p.id)}
 										/>
 										{p.nombre}
 									</label>
@@ -197,7 +226,7 @@ function Personalizador({ producto }: { producto: Producto }) {
 								className="redondo"
 								aria-label="Quitar una unidad"
 								disabled={cantidad <= 1}
-								onClick={() => setCantidad((c) => Math.max(1, c - 1))}
+								onClick={() => fijarCantidad(Math.max(1, cantidad - 1))}
 							>
 								<Icono nombre="menos" />
 							</button>
@@ -210,7 +239,7 @@ function Personalizador({ producto }: { producto: Producto }) {
 								aria-label="Agregar una unidad"
 								disabled={cantidad >= MAX_UNIDADES}
 								onClick={() =>
-									setCantidad((c) => Math.min(MAX_UNIDADES, c + 1))
+									fijarCantidad(Math.min(MAX_UNIDADES, cantidad + 1))
 								}
 							>
 								<Icono nombre="mas" />
@@ -222,13 +251,13 @@ function Personalizador({ producto }: { producto: Producto }) {
 							</label>
 							<textarea
 								id="indicaciones"
-								maxLength={120}
+								maxLength={MAX_INDICACIONES}
 								value={indicaciones}
-								onChange={(e) => setIndicaciones(e.target.value)}
+								onChange={(e) => fijarIndicaciones(e.target.value)}
 								aria-describedby="indicaciones-cuenta"
 							/>
 							<span className="contador-c" id="indicaciones-cuenta">
-								{indicaciones.length} de 120
+								{indicaciones.length} de {MAX_INDICACIONES}
 							</span>
 						</div>
 					</div>

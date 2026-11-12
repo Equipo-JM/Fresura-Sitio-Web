@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router";
 import type { Contenido } from "../../supabase/functions/_shared/esquemas/contenido";
+import { vaciarCarrito } from "../compartido/carrito/almacenCarrito";
 import {
 	claveLinea,
 	DATOS_VACIOS,
@@ -12,10 +12,12 @@ import {
 } from "../compartido/carrito/reglas";
 import { useCarrito } from "../compartido/carrito/useCarrito";
 import { Icono } from "../compartido/componentes/Icono";
+import { AvisoRespaldo } from "./AvisoRespaldo";
 import { ConContenido } from "./ConContenido";
 import { PasoEntrega } from "./carrito/PasoEntrega";
 import { PasoPedido } from "./carrito/PasoPedido";
 import { PasoRevision } from "./carrito/PasoRevision";
+import { useEnfocarPaso } from "./carrito/useEnfocarPaso";
 
 const NOMBRES_PASOS = [
 	"Tu pedido",
@@ -26,11 +28,23 @@ const NOMBRES_PASOS = [
 /**
  * Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje
  * de WhatsApp. El resumen se pliega en móvil y queda fijo al lado en escritorio.
+ * En modo respaldo el carrito se desactiva y se ofrece WhatsApp (DD-14).
  */
 export function PaginaCarrito() {
 	return (
 		<ConContenido>
-			{(contenido) => <Carrito contenido={contenido} />}
+			{(contenido, origen) =>
+				origen === "respaldo" ? (
+					<section className="pagina">
+						<div className="envoltura texto-largo">
+							<h1>Carrito</h1>
+							<AvisoRespaldo whatsapp={contenido.negocio.whatsapp} />
+						</div>
+					</section>
+				) : (
+					<Carrito contenido={contenido} />
+				)
+			}
 		</ConContenido>
 	);
 }
@@ -43,6 +57,19 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 	const [errores, setErrores] = useState<ReturnType<typeof validarDatos>>({});
 	const [resumenAbierto, setResumenAbierto] = useState(false);
 	const { total, pendiente } = totalCarrito(lineas, contenido.productos);
+
+	// Si el carrito se vacía (se quitó lo último), los pasos 2 y 3 no tienen
+	// sentido: se vuelve al paso 1, que muestra el carrito vacío.
+	if (lineas.length === 0 && paso !== 1) setPaso(1);
+	useEnfocarPaso(paso);
+
+	function nuevoPedido() {
+		vaciarCarrito();
+		setPaso(1);
+		setEntrega("");
+		setDatos(DATOS_VACIOS);
+		setErrores({});
+	}
 
 	function revisar() {
 		const nuevos = validarDatos(datos, entrega);
@@ -163,15 +190,11 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 									entrega={entrega}
 									datos={datos}
 									onEditar={() => setPaso(2)}
+									onNuevoPedido={nuevoPedido}
 								/>
 							)}
 						</div>
 					</div>
-				)}
-				{paso === 1 && lineas.length === 0 && (
-					<p className="chico">
-						<Link to="/#menu">Ver el menú</Link>
-					</p>
 				)}
 			</div>
 		</section>

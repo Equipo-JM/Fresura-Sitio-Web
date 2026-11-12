@@ -14,6 +14,20 @@
 	display: flex;
 }
 
+/* En el menú móvil cada enlace ocupa la fila completa: sin esto el min-height
+   de base.css no aplica (el enlace es inline) y el área táctil queda en 22 px. */
+@media (max-width: 1079.98px) {
+	.nav ul.raiz a {
+		display: flex;
+		align-items: center;
+		padding-inline: 12px;
+		border-bottom: 1px solid var(--color-dust-storm);
+	}
+	.nav ul.raiz li:last-child a {
+		border-bottom: 0;
+	}
+}
+
 .fondo-peep {
 	background: var(--color-we-peep);
 }

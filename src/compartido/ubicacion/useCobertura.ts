@@ -12,6 +12,8 @@ export type EstadoCobertura =
 /**
  * Comprueba si la persona está dentro del radio de la sede que atiende pedidos.
  * La ubicación se usa solo para esta comprobación: no se envía ni se guarda.
+ * `alTerminar` recibe el resultado, para que la pantalla reaccione (por ejemplo,
+ * quitar «Domicilio» si quedó fuera de la zona).
  */
 export function useCobertura(
 	sede: { lat: number; lng: number },
@@ -19,9 +21,13 @@ export function useCobertura(
 ) {
 	const [estado, setEstado] = useState<EstadoCobertura>("sin-comprobar");
 
-	function comprobar() {
+	function comprobar(alTerminar?: (resultado: EstadoCobertura) => void) {
+		const terminar = (resultado: EstadoCobertura) => {
+			setEstado(resultado);
+			alTerminar?.(resultado);
+		};
 		if (!navigator.geolocation) {
-			setEstado("sin-permiso");
+			terminar("sin-permiso");
 			return;
 		}
 		setEstado("buscando");
@@ -31,9 +37,9 @@ export function useCobertura(
 					lat: posicion.coords.latitude,
 					lng: posicion.coords.longitude,
 				};
-				setEstado(distanciaKm(sede, punto) <= radioKm ? "dentro" : "fuera");
+				terminar(distanciaKm(sede, punto) <= radioKm ? "dentro" : "fuera");
 			},
-			() => setEstado("sin-permiso"),
+			() => terminar("sin-permiso"),
 			{ enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 },
 		);
 	}

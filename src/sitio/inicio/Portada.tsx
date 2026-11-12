@@ -1,4 +1,4 @@
-import { type RefObject, useRef } from "react";
+import { Fragment, type RefObject, useRef } from "react";
 import { Link } from "react-router";
 import { FotoPendiente } from "../../compartido/componentes/FotoPendiente";
 import { Icono } from "../../compartido/componentes/Icono";
@@ -29,9 +29,12 @@ export function Portada({
 						<h1 id="titulo-portada" aria-label={titulo}>
 							{titulo.split(" ").map((palabra, i) => (
 								// biome-ignore lint/suspicious/noArrayIndexKey: las palabras del título son una lista fija que no se reordena
-								<span className="portada-palabra-caja" key={`${palabra}-${i}`}>
-									<span className="portada-palabra">{palabra}</span>{" "}
-								</span>
+								<Fragment key={`${palabra}-${i}`}>
+									{/* El espacio va fuera de la caja: dentro de un inline-block se pierde y las palabras se pegan. */}
+									<span className="portada-palabra-caja">
+										<span className="portada-palabra">{palabra}</span>
+									</span>{" "}
+								</Fragment>
 							))}
 						</h1>
 						<p className="portada-bajada portada-entrada">{texto}</p>

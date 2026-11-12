@@ -11,7 +11,7 @@ export function PaginaProducto() {
 	const { idProducto } = useParams();
 	return (
 		<ConContenido>
-			{(contenido) => {
+			{(contenido, origen) => {
 				const producto = contenido.productos.find((p) => p.id === idProducto);
 				if (!producto) return <SinProducto />;
 				const categoria = contenido.categorias.find(
@@ -82,8 +82,8 @@ export function PaginaProducto() {
 										</div>
 									)}
 									<div className="acciones">
-										{producto.grupos_opciones.length > 0 ||
-										producto.presentaciones.length > 0 ? (
+										{/* En respaldo el carrito está desactivado (DD-14): solo queda WhatsApp. */}
+										{origen === "principal" ? (
 											<Link
 												className="boton"
 												to={`/personalizar/${producto.id}`}
