@@ -29,8 +29,9 @@ describe("rutas del sitio", () => {
 	});
 
 	it("muestra en el inicio la presentación leída del contenido", async () => {
-		vi.spyOn(globalThis, "fetch").mockResolvedValue(
-			Response.json(structuredClone(ejemplo)),
+		// La versión publicada llega como la fila `{ json }` de Supabase.
+		vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
+			Response.json({ json: structuredClone(ejemplo) }),
 		);
 		mostrarRuta("/");
 		expect(

@@ -2,6 +2,7 @@ import {
 	type Contenido,
 	esquemaContenido,
 } from "../../../supabase/functions/_shared/esquemas/contenido";
+import { obtenerClientePublico } from "../supabase/clientePublico";
 
 /**
  * De dónde salió el contenido. En `respaldo` el sitio oculta precios y
@@ -19,12 +20,21 @@ export type ContenidoLeido = {
 export type LectorContenido = () => Promise<unknown>;
 
 /**
- * Fuente principal mientras no exista la API: el JSON de prueba de `public/`.
- * En la etapa 3 se reemplaza por la lectura de la versión publicada en
- * Supabase (DT-01, IF-01), sin cambiar el resto del flujo.
+ * Fuente principal: la versión publicada en Supabase (DT-01, sección 4).
+ * Las columnas se piden por nombre porque `anon` solo tiene permiso sobre las
+ * públicas; un `select('*')` sería rechazado.
  */
-export const leerContenidoPrincipal: LectorContenido = () =>
-	leerJson("/contenido-prueba.json");
+export const leerContenidoPrincipal: LectorContenido = async () => {
+	const { data, error } = await obtenerClientePublico()
+		.from("versiones_contenido")
+		.select("json")
+		.eq("estado", "publicada")
+		.single();
+	if (error) {
+		throw new Error(`No se pudo leer la versión publicada: ${error.message}`);
+	}
+	return data.json;
+};
 
 /** `contenido-respaldo.json` viene en los estáticos del sitio (DT-01, sección 22). */
 export const leerContenidoRespaldo: LectorContenido = () =>
