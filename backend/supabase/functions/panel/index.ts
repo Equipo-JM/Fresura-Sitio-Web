@@ -36,7 +36,7 @@ Deno.serve(
 			createClient(urlSupabase, clavePublicable, { auth: opcionesAuth }),
 			entorno.json("SUPABASE_JWKS") as ConjuntoClaves,
 		),
-		rutas: crearRutasPanel(clienteServicio),
+		rutas: crearRutasPanel(clienteServicio, registrarFallo),
 		mensajeSinPermiso: "Tu cuenta no tiene permiso para usar el panel.",
 		mensajeErrorInterno: "No se pudo publicar. El sitio sigue igual.",
 		registrarFallo,

@@ -1,6 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import { crearServidor } from "../supabase/functions/_shared/servidor";
+import {
+	decidirFotosParaBorrar,
+	extraerFotosEnUso,
+} from "../supabase/functions/panel/limpiarFotos";
 import { crearRutasPanel } from "../supabase/functions/panel/rutas";
 import casos from "./datos/contenido-1.0.1.casos.json";
 import ejemplo from "./datos/contenido-1.0.1.ejemplo.json";
@@ -22,6 +26,12 @@ function preparar(...pasos: Paso[]) {
 			fetch: async (url, opciones) => {
 				solicitudes.push(new Request(url, opciones));
 				const paso = pasos.shift();
+				if (paso === undefined && String(url).includes("select=json")) {
+					return Response.json([]);
+				}
+				if (paso === undefined && String(url).includes("/object/list/fotos")) {
+					return Response.json([]);
+				}
 				if (paso === undefined) throw new Error("Consulta no esperada");
 				if (paso instanceof Error) throw paso;
 				return new Response(JSON.stringify(paso.datos), {
@@ -39,7 +49,7 @@ function preparar(...pasos: Paso[]) {
 			aal: "aal2",
 			app_metadata: { rol: "admin" },
 		}),
-		rutas: crearRutasPanel(cliente),
+		rutas: crearRutasPanel(cliente, registrarFallo),
 		mensajeSinPermiso: "Sin permiso.",
 		mensajeErrorInterno: "No se pudo publicar. El sitio sigue igual.",
 		registrarFallo,
@@ -97,6 +107,8 @@ describe("POST /publicar", () => {
 				"GET",
 				"POST",
 				"GET",
+				"GET",
+				"POST",
 			]);
 			expect(await prueba.solicitudes[1].json()).toEqual({
 				revision_esperada: 3,
@@ -142,7 +154,7 @@ describe("POST /publicar", () => {
 			(await prueba.pedir("publicar", { ...entrada, contenido_real: true }))
 				.status,
 		).toBe(200);
-		expect(prueba.solicitudes).toHaveLength(3);
+		expect(prueba.solicitudes).toHaveLength(5);
 	});
 	it.each(
 		[
@@ -329,4 +341,169 @@ describe("fallos y privacidad", () => {
 			);
 		},
 	);
+});
+
+const nombreFoto = (letra: string) => `${letra.repeat(64)}.webp`;
+const rutaFoto = (letra: string) =>
+	`https://prueba.supabase.co/storage/v1/object/public/fotos/${nombreFoto(letra)}`;
+const objetoFoto = (letra: string, created_at = "2000-01-01T00:00:00Z") => ({
+	name: nombreFoto(letra),
+	id: letra,
+	created_at,
+	updated_at: created_at,
+	last_accessed_at: created_at,
+	metadata: {},
+});
+
+function publicarConLimpieza(...pasos: Paso[]) {
+	return preparar(
+		{ datos: borrador() },
+		{ datos: ID },
+		{ datos: { publicada_en: FECHA } },
+		...pasos,
+	);
+}
+
+describe("limpieza después de publicar", () => {
+	it("reconoce nombres JPEG y rutas con caracteres codificados sin contar rutas inválidas", () => {
+		const fotos = extraerFotosEnUso({
+			productos: [
+				{ imagen: { ruta: rutaFoto("a").replace("/aaa", "/%61aa") } },
+				{ imagen: { ruta: rutaFoto("b").replace(".webp", ".jpg") } },
+				{ imagen: { ruta: "https://[url-invalida" } },
+				{ imagen: { ruta: "/ejemplos/fresita.webp" } },
+			],
+		});
+		expect([...fotos]).toEqual([nombreFoto("a"), `${"b".repeat(64)}.jpg`]);
+	});
+	it("conserva imágenes de las tres versiones y recientes; borra solo viejas sin uso", async () => {
+		const prueba = publicarConLimpieza(
+			{
+				datos: [
+					{ json: { productos: [{ imagen: { ruta: rutaFoto("a") } }] } },
+					{ json: { productos: [{ imagen: { ruta: rutaFoto("b") } }] } },
+					{ json: { productos: [{ imagen: { ruta: rutaFoto("c") } }] } },
+				],
+			},
+			{
+				datos: [
+					objetoFoto("a"),
+					objetoFoto("b"),
+					objetoFoto("c"),
+					objetoFoto("d", new Date(Date.now() - 1000).toISOString()),
+					objetoFoto("e"),
+				],
+			},
+			{ datos: [] },
+		);
+		const respuesta = await prueba.pedir("publicar");
+		expect(respuesta.status).toBe(200);
+		const borrados = prueba.solicitudes.filter((p) => p.method === "DELETE");
+		expect(borrados).toHaveLength(1);
+		expect(await borrados[0].json()).toEqual({ prefixes: [nombreFoto("e")] });
+		expect(new URL(prueba.solicitudes[3].url).searchParams.get("estado")).toBe(
+			"in.(publicada,anterior,borrador)",
+		);
+		expect(prueba.registrarFallo).not.toHaveBeenCalled();
+	});
+
+	it("conserva todo nombre de foto citado en imagen.ruta, venga del dominio que venga", async () => {
+		const prueba = publicarConLimpieza(
+			{
+				datos: [
+					{
+						json: {
+							bloques: [
+								{ imagen: { ruta: `/ejemplos/${nombreFoto("a")}` } },
+								{ imagen: { ruta: rutaFoto("b").replace("prueba.", "otro.") } },
+								{
+									imagen: { ruta: rutaFoto("c").replace("/fotos/", "/otro/") },
+								},
+								{ ruta: rutaFoto("d") },
+								{ imagen: { ruta: `${rutaFoto("e")}?v=1` } },
+							],
+						},
+					},
+				],
+			},
+			{ datos: ["a", "b", "c", "d", "e"].map((letra) => objetoFoto(letra)) },
+			{ datos: [] },
+		);
+		expect((await prueba.pedir("publicar")).status).toBe(200);
+		const borrado = prueba.solicitudes.find((p) => p.method === "DELETE");
+		expect(borrado).toBeDefined();
+		// Solo `d` se borra: no está en un `imagen.ruta`. Las demás se conservan aunque
+		// su ruta apunte a otro dominio o carpeta: borrar una foto en uso no tiene arreglo.
+		expect(await borrado?.json()).toEqual({ prefixes: [nombreFoto("d")] });
+	});
+
+	it.each(["versiones", "listado", "borrado", "red"])(
+		"200 y registro sin datos sensibles si falla %s",
+		async (etapa) => {
+			const fallo = { datos: { message: CLAVE }, estado: 500 };
+			const pasos: Paso[] =
+				etapa === "versiones"
+					? [fallo]
+					: etapa === "red"
+						? [new Error(CLAVE)]
+						: [
+								{ datos: [] },
+								...(etapa === "listado"
+									? [fallo]
+									: [{ datos: [objetoFoto("a")] }, fallo]),
+							];
+			const prueba = publicarConLimpieza(...pasos);
+			const respuesta = await prueba.pedir("publicar");
+			expect(respuesta.status).toBe(200);
+			expect(await respuesta.json()).toEqual({ publicada_en: FECHA });
+			expect(prueba.registrarFallo.mock.calls).toEqual([["limpieza_fotos"]]);
+		},
+	);
+
+	it("restaurar no consulta versiones ni Storage para limpiar", async () => {
+		const prueba = preparar(
+			{ datos: null },
+			{ datos: { publicada_en: FECHA } },
+		);
+		expect((await prueba.pedir("restaurar", {})).status).toBe(200);
+		expect(prueba.solicitudes).toHaveLength(2);
+	});
+
+	it("lista todas las páginas antes de borrar para no saltar objetos", async () => {
+		const pagina = Array.from({ length: 100 }, (_, i) => ({
+			...objetoFoto("a"),
+			name: `${i.toString(16).padStart(64, "0")}.jpg`,
+		}));
+		const prueba = publicarConLimpieza(
+			{ datos: [] },
+			{ datos: pagina },
+			{ datos: [objetoFoto("b")] },
+			{ datos: [] },
+			{ datos: [] },
+		);
+		expect((await prueba.pedir("publicar")).status).toBe(200);
+		expect(await prueba.solicitudes[5].json()).toMatchObject({ offset: 100 });
+		expect(prueba.solicitudes[6].method).toBe("DELETE");
+		expect((await prueba.solicitudes[6].json()).prefixes).toHaveLength(100);
+		expect(await prueba.solicitudes[7].json()).toEqual({
+			prefixes: [nombreFoto("b")],
+		});
+	});
+
+	it("conserva fotos con 24 horas exactas, fechas inválidas o nombres ajenos al contrato", () => {
+		const ahora = Date.parse("2026-11-16T12:00:00Z");
+		expect(
+			decidirFotosParaBorrar(
+				[
+					objetoFoto("a", "2026-11-15T12:00:00Z"),
+					objetoFoto("b", "2026-11-15T11:59:59.999Z"),
+					objetoFoto("c", "fecha inválida"),
+					{ name: nombreFoto("d"), created_at: null },
+					{ name: "carpeta", created_at: "2000-01-01T00:00:00Z" },
+				],
+				new Set(),
+				ahora,
+			),
+		).toEqual([nombreFoto("b")]);
+	});
 });

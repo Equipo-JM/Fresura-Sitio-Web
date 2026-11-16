@@ -11,14 +11,16 @@ import {
 	responderJson,
 } from "../_shared/http.ts";
 import type { ContextoRuta, ManejadorRuta } from "../_shared/servidor.ts";
+import { limpiarFotos } from "./limpiarFotos.ts";
 
 /** Conecta las operaciones del panel con el cliente de permisos elevados. */
 export function crearRutasPanel(
 	cliente: SupabaseClient,
+	registrarFallo: (tipo: string) => void,
 ): Record<string, ManejadorRuta> {
 	return {
 		publicar: protegerRuta("publicacion", (contexto) =>
-			publicar(cliente, contexto),
+			publicar(cliente, contexto, registrarFallo),
 		),
 		restaurar: protegerRuta("restauracion", (contexto) =>
 			restaurar(cliente, contexto),
@@ -40,6 +42,7 @@ function protegerRuta(tipo: string, ruta: ManejadorRuta): ManejadorRuta {
 async function publicar(
 	cliente: SupabaseClient,
 	{ peticion, usuario, cors }: ContextoRuta,
+	registrarFallo: (tipo: string) => void,
 ): Promise<Response> {
 	const cuerpo = await leerCuerpoJson(peticion);
 	if (!cuerpo.valido) return responderCuerpoInvalido(cuerpo.motivo, cors);
@@ -130,6 +133,12 @@ async function publicar(
 		.single();
 	if (errorLectura || typeof publicada?.publicada_en !== "string")
 		throw new Error("lectura_publicada");
+	try {
+		await limpiarFotos(cliente);
+	} catch {
+		// Storage queda fuera de la transacción; se reintenta al volver a publicar.
+		registrarFallo("limpieza_fotos");
+	}
 	return responderJson(200, { publicada_en: publicada.publicada_en }, cors);
 }
 
