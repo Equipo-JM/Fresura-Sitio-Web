@@ -2,7 +2,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
-import prueba from "../public/contenido-prueba.json";
 import { claveProducto } from "../src/compartido/fotos/almacenFotosDemo";
 import { aplicarFotosDemo } from "../src/compartido/fotos/aplicarFotosDemo";
 import {
@@ -12,6 +11,7 @@ import {
 } from "../src/compartido/fotos/prepararFoto";
 import { RutasDelSitio } from "../src/RutasDelSitio";
 import { esquemaContenido } from "../supabase/functions/_shared/esquemas/contenido";
+import prueba from "./datos/contenido-prueba.json";
 
 const contenido = esquemaContenido.parse(prueba);
 

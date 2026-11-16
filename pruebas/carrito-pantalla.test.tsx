@@ -2,13 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import prueba from "../public/contenido-prueba.json";
 import respaldo from "../public/contenido-respaldo.json";
 import {
 	agregarLinea,
 	vaciarCarrito,
 } from "../src/compartido/carrito/almacenCarrito";
 import { RutasDelSitio } from "../src/RutasDelSitio";
+import prueba from "./datos/contenido-prueba.json";
 
 /** Simula la red: la fuente principal (JSON de prueba o Supabase) responde o falla; el respaldo siempre responde. */
 function simularContenido(principalDisponible: boolean) {
