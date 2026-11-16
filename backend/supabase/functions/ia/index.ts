@@ -9,7 +9,6 @@ import {
 	responderCuerpoInvalido,
 	responderError,
 	responderJson,
-	responderNoImplementado,
 } from "../_shared/http.ts";
 import { type ContextoRuta, crearServidor } from "../_shared/servidor.ts";
 import { crearLlamadaGemini } from "./gemini.ts";
@@ -19,10 +18,9 @@ import {
 	datosDelProducto,
 	fechaColombia,
 } from "./instrucciones.ts";
+import { crearRutaPromptVideo } from "./prompt-video.ts";
 
-// Función `ia` (DT-01, secciones 5 y 25). `POST /guion` (IF-09) está construida;
-// `POST /prompt-video` (IF-10) ya tiene su ruta y su control de acceso, y
-// responde 501 hasta que se implemente.
+// Ambas rutas usan el JWT del administrador para que las lecturas y escrituras apliquen RLS.
 
 const entorno = crearLectorEntorno((nombre) => Deno.env.get(nombre));
 const urlSupabase = entorno.obligatoria("SUPABASE_URL");
@@ -121,8 +119,16 @@ Deno.serve(
 		),
 		rutas: {
 			guion: generarGuionDesdePeticion,
-			// IF-10, DT-01 sección 25.4: pendiente de implementar.
-			"prompt-video": async ({ cors }) => responderNoImplementado(cors),
+			"prompt-video": crearRutaPromptVideo({
+				crearCliente: (jwt) =>
+					createClient(urlSupabase, clavePublicable, {
+						auth: opcionesAuth,
+						global: { headers: { Authorization: `Bearer ${jwt}` } },
+					}),
+				llamar: llamarGemini,
+				modeloPrincipal,
+				modeloRespaldo,
+			}),
 		},
 		mensajeSinPermiso: "Tu cuenta no tiene permiso para usar el agente.",
 		mensajeErrorInterno:

@@ -88,6 +88,24 @@ export type OpcionesGeneracion = {
 export async function generarGuion(
 	opciones: OpcionesGeneracion,
 ): Promise<{ guion: Guion; modelo: string }> {
+	const { salida, modelo } = await generarSalida({
+		...opciones,
+		esquemaJson: esquemaJsonGuion(),
+		validar: (datos) => crearEsquemaGuion(opciones.duracion).safeParse(datos),
+	});
+	return { guion: salida, modelo };
+}
+
+/** Opciones comunes a las dos salidas estructuradas, con validación inyectada. */
+export type OpcionesSalida<T> = Omit<OpcionesGeneracion, "duracion"> & {
+	esquemaJson: Record<string, unknown>;
+	validar: (datos: unknown) => { success: true; data: T } | { success: false };
+};
+
+/** Ejecuta la cadena de modelos y el único reintento por estructura de la sección 25.2. */
+export async function generarSalida<T>(
+	opciones: OpcionesSalida<T>,
+): Promise<{ salida: T; modelo: string }> {
 	const { modeloPrincipal, modeloRespaldo } = opciones;
 	try {
 		return await intentar(opciones, modeloPrincipal);
@@ -116,16 +134,22 @@ function esErrorIa(error: unknown, codigo: CodigoErrorIa): boolean {
 	return error instanceof ErrorIa && error.codigo === codigo;
 }
 
-async function intentar(
-	{ llamar, prompt, duracion, esperaMs = 30_000 }: OpcionesGeneracion,
+async function intentar<T>(
+	{
+		llamar,
+		prompt,
+		esquemaJson,
+		validar,
+		esperaMs = 30_000,
+	}: OpcionesSalida<T>,
 	modelo: string,
-): Promise<{ guion: Guion; modelo: string }> {
+): Promise<{ salida: T; modelo: string }> {
 	let respuesta: RespuestaModelo;
 	try {
 		respuesta = await llamar({
 			modelo,
 			prompt,
-			esquemaJson: esquemaJsonGuion(),
+			esquemaJson,
 			senal: AbortSignal.timeout(esperaMs),
 		});
 	} catch (error) {
@@ -134,11 +158,9 @@ async function intentar(
 
 	if (respuesta.bloqueado) throw new ErrorIa("ia_bloqueado");
 
-	const resultado = crearEsquemaGuion(duracion).safeParse(
-		leerJson(respuesta.texto),
-	);
+	const resultado = validar(leerJson(respuesta.texto));
 	if (!resultado.success) throw new ErrorIa("ia_estructura");
-	return { guion: resultado.data, modelo };
+	return { salida: resultado.data, modelo };
 }
 
 /**
