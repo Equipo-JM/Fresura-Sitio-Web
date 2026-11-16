@@ -7,12 +7,15 @@
 		"node": ">=24"
 	},
 	"scripts": {
-		"dev": "vite",
-		"build": "tsc -b && vite build",
-		"preview": "vite preview",
+		"dev": "vite frontend",
+		"build": "tsc -b && vite build frontend",
+		"preview": "vite preview frontend",
 		"test": "vitest run",
 		"check": "biome check",
-		"deploy": "npm run build && wrangler deploy"
+		"deploy": "npm run build && wrangler deploy",
+		"supabase": "supabase --workdir backend",
+		"db:push": "supabase --workdir backend db push",
+		"functions:deploy": "supabase --workdir backend functions deploy"
 	},
 	"dependencies": {
 		"@fontsource/plus-jakarta-sans": "5.3.0",
