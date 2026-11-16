@@ -32,6 +32,15 @@ export const esquemaInstruccionGuion = z.strictObject({
 /** Instrucción del administrador ya validada. */
 export type InstruccionGuion = z.infer<typeof esquemaInstruccionGuion>;
 
+/**
+ * Caracteres hablados que caben en un video: 20 por segundo, con margen sobre
+ * los 15 de una voz en español (DT-01, 25.4). Lo usan el guion, que lo pide al
+ * modelo, y el prompt de avatar, que lo valida.
+ */
+export function maximoCaracteresVoz(duracion: DuracionVideo): number {
+	return duracion * 20;
+}
+
 const texto = (maximo: number) => z.string().min(1).max(maximo);
 
 const escena = z.strictObject({
