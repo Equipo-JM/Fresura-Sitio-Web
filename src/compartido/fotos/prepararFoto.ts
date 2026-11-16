@@ -65,7 +65,8 @@ export async function prepararFoto(archivo: File): Promise<Blob> {
 
 	for (const calidad of [0.82, 0.72, 0.6, 0.5]) {
 		let foto = await aBlob(lienzo, "image/webp", calidad);
-		if (!foto || foto.type !== "image/webp") {
+		// Sin blob, o si el navegador no codifica WebP (Safari), se usa JPEG (DD-18).
+		if (foto?.type !== "image/webp") {
 			foto = await aBlob(lienzo, "image/jpeg", calidad);
 		}
 		if (foto && foto.size <= MAX_BYTES_FOTO) return foto;

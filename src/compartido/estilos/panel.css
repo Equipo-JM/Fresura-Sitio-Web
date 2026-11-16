@@ -207,6 +207,8 @@
 	height: 200px;
 	padding: 8px;
 	border-radius: var(--radio-chico);
+	/* Única excepción a la paleta: el código QR necesita fondo blanco para que la
+	   cámara lo lea sin fallos. Es un elemento funcional, no de marca. */
 	background: #fff;
 }
 .panel-secreto code {
