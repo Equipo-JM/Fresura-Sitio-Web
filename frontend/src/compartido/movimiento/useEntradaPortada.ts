@@ -45,7 +45,12 @@ export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 						ease: "back.out(1.7)",
 					},
 					0.75,
-				);
+				)
+				.from(".portada-arco img", { scale: 1.18, duration: 1.6 }, 0.05)
+				.from(".portada-trazo", { opacity: 0, x: -40, duration: 1.4 }, 0.1)
+				.add(() => {
+					gsap.set(".portada-palabra", { clearProps: "filter" });
+				});
 		}, raiz);
 
 		return () => contexto.revert();

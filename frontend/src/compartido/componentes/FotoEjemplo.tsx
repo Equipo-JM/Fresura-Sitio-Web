@@ -3,7 +3,7 @@ const ANCHO_VARIANTE = 400;
 
 /**
  * Foto de referencia del kit de marca, puesta solo para el prototipo. Lleva la
- * etiqueta «Foto de ejemplo» porque no consta que Fresura tenga sus derechos
+ * etiqueta «Por validar» porque no consta que Fresura tenga sus derechos
  * (kit de diseño, «Fotografía»): se reemplaza antes de publicar.
  *
  * Si la foto mide más de 400 px de ancho, junto a ella existe una variante
@@ -17,6 +17,7 @@ export function FotoEjemplo({
 	alto,
 	tamanos = "(min-width: 900px) 33vw, 90vw",
 	prioridad = false,
+	marcada = true,
 }: {
 	src: string;
 	alt: string;
@@ -26,6 +27,8 @@ export function FotoEjemplo({
 	tamanos?: string;
 	/** La de la portada se pide de inmediato; el resto, al acercarse. */
 	prioridad?: boolean;
+	/** Permite que el marco exterior coloque una única etiqueta sobre el arco. */
+	marcada?: boolean;
 }) {
 	const conVariante = ancho > ANCHO_VARIANTE;
 	return (
@@ -45,7 +48,9 @@ export function FotoEjemplo({
 				fetchPriority={prioridad ? "high" : undefined}
 				decoding="async"
 			/>
-			<span className="por-validar foto-ejemplo-marca">Foto de ejemplo</span>
+			{marcada && (
+				<span className="pv pv-foto foto-ejemplo-marca">Por validar</span>
+			)}
 		</>
 	);
 }

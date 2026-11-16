@@ -3,11 +3,99 @@
 
 #raiz {
 	min-height: 100dvh;
+}
+
+/* Como en el prototipo: la barra de compra es pegajosa, no fija, así que no hace falta
+   reservarle espacio y la página no termina con un hueco vacío en escritorio. */
+#raiz:has(.compra-barra) {
 	display: flex;
 	flex-direction: column;
 }
-#contenido {
-	flex: 1;
+#raiz:has(.compra-barra) > main {
+	flex: 1 0 auto;
+}
+.compra-barra {
+	position: sticky;
+	bottom: 0;
+	z-index: 20;
+	padding-bottom: env(safe-area-inset-bottom);
+}
+dialog {
+	overscroll-behavior: contain;
+}
+.foto-pendiente.fondo-peep {
+	background: var(--color-we-peep);
+}
+.foto-pendiente.fondo-dust {
+	background: var(--color-dust-storm);
+}
+.foto-pendiente > img {
+	position: static;
+}
+.grupo-cabeza {
+	justify-content: space-between;
+}
+.ficha-bloque-titulo {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+.ficha-titulo h1 {
+	font-size: clamp(2.5rem, 2rem + 2vw, 3.75rem);
+}
+.cupon h3 {
+	font-size: clamp(1.75rem, 1.5rem + 1vw, 2.5rem);
+}
+.contacto-sedes {
+	margin-top: 28px;
+	padding: clamp(20px, 3vw, 32px);
+}
+.sedes-pagina {
+	margin-top: 28px;
+}
+.pagina-sedes h1 {
+	font-size: clamp(2.5rem, 2rem + 2vw, 3.75rem);
+	margin-bottom: 8px;
+}
+.contacto-sedes h2 {
+	font-size: 1.875rem;
+}
+.contacto-sedes .chips {
+	margin-top: 6px;
+}
+.contacto-sedes .chips li {
+	background: none;
+	padding: 0;
+}
+.sede-cuerpo h2,
+.sede-cuerpo h3 {
+	font-size: 1.875rem;
+}
+.cara-contenido {
+	position: absolute;
+	inset: 0;
+}
+.cara-contenido > img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.nosotros-trazo {
+	width: 380px;
+	right: -170px;
+	top: -90px;
+}
+.miniatura > img,
+.miniatura .cara {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.foto-pendiente > img {
+	width: 72px;
+	height: 102px;
+	object-fit: contain;
 }
 
 .sitio-h .nav-lista {
@@ -17,6 +105,9 @@
 /* En el menú móvil cada enlace ocupa la fila completa: sin esto el min-height
    de base.css no aplica (el enlace es inline) y el área táctil queda en 22 px. */
 @media (max-width: 1079.98px) {
+	.nav .abrir-menu {
+		display: none;
+	}
 	.nav ul.raiz a {
 		display: flex;
 		align-items: center;
@@ -48,6 +139,9 @@
 }
 
 .por-validar {
+	font-family: var(--fuente-texto);
+	font-style: normal;
+	letter-spacing: 0;
 	display: inline-flex;
 	align-items: center;
 	min-height: 24px;
@@ -78,7 +172,6 @@
 
 /* Fotos: llenan su marco; el espacio «Foto por validar» ocupa el marco entero */
 .tarjeta-foto,
-.ficha-foto,
 .polaroid-foto,
 .portada-arco,
 .arco {
@@ -99,19 +192,12 @@
 	position: absolute;
 	inset: 0;
 }
-/* Espacio de foto pendiente: textura fotográfica teñida con un color de la
-   paleta, marco punteado e icono de imagen, para que se lea como «aquí va una
-   foto» y no como un bloque de texto. */
+/* Las fotos pendientes conservan el fondo plano del prototipo. */
 .foto-pendiente {
-	gap: 8px;
+	gap: 12px;
 	color: var(--texto);
 	background-color: var(--color-we-peep);
-	background-image:
-		linear-gradient(var(--tinte-foto), var(--tinte-foto)),
-		url(/ejemplos/textura-crema.webp);
-	background-size: cover;
-	background-position: center;
-	--tinte-foto: rgba(250, 218, 215, 0.6);
+	background-image: none;
 }
 .foto-pendiente.tinte-verde {
 	background-color: var(--color-court-bouillon);
@@ -173,18 +259,13 @@
 .foto-ejemplo-marca {
 	position: absolute;
 	left: 50%;
-	bottom: 14px;
+	top: 10px;
+	bottom: auto;
 	transform: translateX(-50%);
-	z-index: 1;
+	z-index: 2;
 }
 .portada-foto .arco img {
-	object-position: 50% 45%;
-}
-
-.ficha-foto {
-	aspect-ratio: 4 / 5;
-	overflow: hidden;
-	border-radius: 999px 999px var(--radio) var(--radio);
+	object-position: 45% 72%;
 }
 
 /* Carruseles de producto: con más de tres, se desplazan en horizontal */
@@ -321,7 +402,7 @@
 /* Formularios: etiqueta visible encima de cada campo */
 .form {
 	display: grid;
-	gap: 24px;
+	gap: 28px;
 }
 .form-pago .bloque-form {
 	gap: 14px;
@@ -384,7 +465,7 @@
 	accent-color: var(--color-peat-brown);
 }
 .contador-c {
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	justify-self: end;
 }
 .error {
@@ -438,7 +519,7 @@
 	display: grid;
 	gap: 12px;
 	justify-items: start;
-	background: var(--color-dust-storm);
+	background: var(--color-we-peep);
 	padding: 18px;
 	border-radius: var(--radio);
 }
@@ -750,7 +831,7 @@ button.paso-num {
 	padding-left: 0;
 }
 .chat {
-	border-radius: 22px;
+	border-radius: var(--radio);
 	overflow: hidden;
 	box-shadow: inset 0 0 0 1.5px var(--texto);
 }
@@ -842,7 +923,7 @@ button.paso-num {
 }
 .visual .pv-foto {
 	position: absolute;
-	top: 14px;
+	top: 10px;
 	left: 50%;
 	transform: translateX(-50%);
 }
@@ -921,7 +1002,7 @@ button.paso-num {
 }
 .grupo {
 	display: grid;
-	gap: 12px;
+	gap: 14px;
 	padding: 20px;
 	border-radius: 22px;
 	border: 0;
@@ -1063,7 +1144,7 @@ button.paso-num {
 .precio-barra {
 	font-family: var(--fuente-titulos);
 	font-weight: 400;
-	font-size: 1.75rem;
+	font-size: 1.875rem;
 	line-height: 1.1;
 	font-variant-numeric: tabular-nums;
 }
@@ -1114,7 +1195,7 @@ button.paso-num {
 	}
 	.columna-resumen {
 		position: sticky;
-		top: 90px;
+		top: 24px;
 		order: 2;
 	}
 	.resumen-boton {
@@ -1162,4 +1243,13 @@ button.paso-num {
 		/* biome-ignore lint/complexity/noImportantStyles: movimiento reducido o desplazamiento de Lenis deben ganar a cualquier transición */
 		transition: none !important;
 	}
+}
+
+.miniatura .pv,
+.miniatura .foto-ejemplo-marca,
+.miniatura .foto-pendiente span {
+	display: none;
+}
+.hoja .sello-hoja {
+	background: var(--color-we-peep);
 }

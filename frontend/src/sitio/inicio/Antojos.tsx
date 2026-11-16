@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router";
 import { desplazarA } from "../../compartido/movimiento/desplazar";
 import { ANTOJOS } from "./copy";
 
@@ -23,7 +22,13 @@ export function Antojos() {
 			aria-labelledby="titulo-antojos"
 		>
 			<div className="envoltura antojos">
-				<p className="antetitulo">¿No sabes qué pedir?</p>
+				<img
+					className="antojos-sticker"
+					src="/marca/sticker-simbolo.svg"
+					alt=""
+					width="132"
+					height="115"
+				/>
 				<h2 id="titulo-antojos" className="frase-antojo" tabIndex={-1}>
 					Hoy se me antoja{" "}
 					<span className="hueco" aria-live="polite">
@@ -47,9 +52,8 @@ export function Antojos() {
 						</li>
 					))}
 				</ul>
-				<p className="chico">
-					Toca un antojo y te llevamos a esa parte del menú.{" "}
-					<Link to="/#menu">Ver todo el menú</Link>
+				<p className="antojos-nota">
+					Toca un antojo y te llevamos a esa parte del menú.
 				</p>
 			</div>
 		</section>

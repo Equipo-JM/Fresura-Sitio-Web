@@ -9,6 +9,7 @@ export type NombreIcono =
 	| "derecha"
 	| "alerta"
 	| "ok"
+	| "visto"
 	| "ubicacion"
 	| "estrella"
 	| "menos"
@@ -27,6 +28,7 @@ const TRAZOS: Record<NombreIcono, string> = {
 	derecha: "M5 12h14 m-6-6 6 6-6 6",
 	alerta: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z M12 7.5v5.5 M12 16.4v.1",
 	ok: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z m-4 9.5 2.7 2.7L16 9.5",
+	visto: "m5 12.5 4.5 4.5L19 7.5",
 	ubicacion:
 		"M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z M12 12.1a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8Z",
 	estrella:

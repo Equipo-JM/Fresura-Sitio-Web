@@ -5,6 +5,7 @@ import {
 	type LineaCarrito,
 	MAX_INDICACIONES,
 	MAX_UNIDADES,
+	nombreProducto,
 	type Producto,
 	pesos,
 	precioLinea,
@@ -12,9 +13,13 @@ import {
 	type Seleccion,
 } from "../compartido/carrito/reglas";
 import { Icono } from "../compartido/componentes/Icono";
-import { AvisoRespaldo } from "./AvisoRespaldo";
+import { CompraDesactivada } from "./CompraDesactivada";
 import { ConContenido } from "./ConContenido";
+import { FotoProducto } from "./FotoProducto";
+import { PERSONALIZACION } from "./inicio/copy";
 import { MarcaPorValidar } from "./MarcaPorValidar";
+import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
+import { useDialogoAgregado } from "./personalizar/useDialogoAgregado";
 import { VasoIlustrado } from "./personalizar/VasoIlustrado";
 
 /** Pantalla «Ponle tu toque»: tamaño, opciones por grupo, cantidad y agregar al carrito. */
@@ -25,38 +30,35 @@ export function PaginaPersonalizar() {
 			{(contenido, origen) => {
 				const producto = contenido.productos.find((p) => p.id === idProducto);
 				if (!producto) {
-					return (
-						<section className="pagina">
-							<div className="envoltura texto-largo">
-								<h1>No encontramos este producto</h1>
-								<Link className="boton" to="/#menu">
-									Volver al menú
-								</Link>
-							</div>
-						</section>
-					);
+					return <PaginaNoEncontrada />;
 				}
 				if (origen === "respaldo") {
-					return (
-						<section className="pagina">
-							<div className="envoltura texto-largo">
-								<h1>{producto.nombre}</h1>
-								<AvisoRespaldo
-									whatsapp={contenido.negocio.whatsapp}
-									mensaje={`Hola, Fresura. Quiero pedir ${producto.nombre}.`}
-								/>
-							</div>
-						</section>
-					);
+					return <CompraDesactivada whatsapp={contenido.negocio.whatsapp} />;
 				}
-				return <Personalizador key={producto.id} producto={producto} />;
+				return (
+					<Personalizador
+						key={producto.id}
+						producto={producto}
+						nombre={
+							producto.nombre.startsWith("Arma tu")
+								? producto.nombre
+								: nombreProducto(producto, contenido.categorias)
+						}
+					/>
+				);
 			}}
 		</ConContenido>
 	);
 }
 
 /** Estado de la personalización de un producto. Se reinicia al cambiar de producto. */
-function Personalizador({ producto }: { producto: Producto }) {
+function Personalizador({
+	producto,
+	nombre,
+}: {
+	producto: Producto;
+	nombre: string;
+}) {
 	const [idPresentacion, setIdPresentacion] = useState(
 		producto.presentaciones[0].id,
 	);
@@ -65,6 +67,13 @@ function Personalizador({ producto }: { producto: Producto }) {
 	const [indicaciones, setIndicaciones] = useState("");
 	const [aviso, setAviso] = useState<string | null>(null);
 	const [agregado, setAgregado] = useState(false);
+	const dialogo = useDialogoAgregado(agregado);
+	const presentacion =
+		producto.presentaciones.find((p) => p.id === idPresentacion) ??
+		producto.presentaciones[0];
+	const incluye = producto.caracteristicas
+		.find((c) => c.startsWith("Incluye "))
+		?.replace(/^Incluye /, "");
 
 	const linea: LineaCarrito = {
 		idProducto: producto.id,
@@ -115,7 +124,7 @@ function Personalizador({ producto }: { producto: Producto }) {
 	);
 
 	return (
-		<section className="pagina">
+		<section>
 			<div className="envoltura pz">
 				<div className="columna-visual">
 					<div className="visual">
@@ -123,17 +132,33 @@ function Personalizador({ producto }: { producto: Producto }) {
 						{producto.grupos_opciones.length > 0 ? (
 							<VasoIlustrado producto={producto} seleccion={seleccion} />
 						) : (
-							<div className="visual-foto">
-								<p className="visual-simple">{producto.nombre}</p>
+							<div className="visual-foto tarjeta-foto">
+								<FotoProducto producto={producto} marcada={false} />
 							</div>
 						)}
-						<ul className="stickers-lista" aria-label="Lo que llevas">
-							{elegidos.map((e) => (
-								<li className="sticker-op" key={`${e.grupo}-${e.nombre}`}>
-									<span className="sticker-grupo">{e.grupo}</span> {e.nombre}
-								</li>
-							))}
-						</ul>
+						{elegidos.length > 0 && (
+							<ul className="stickers-lista" aria-label="Lo que llevas">
+								{elegidos.map((e) => (
+									<li className="sticker-op" key={`${e.grupo}-${e.nombre}`}>
+										<span className="sticker-grupo">{e.grupo}</span> {e.nombre}
+									</li>
+								))}
+							</ul>
+						)}
+						{producto.grupos_opciones.length > 0 && (
+							<p className="visual-pie">
+								{elegidos.length === 0
+									? PERSONALIZACION.inicio
+									: elegidos.length < 4
+										? PERSONALIZACION.frases[0]
+										: elegidos.length < 7
+											? PERSONALIZACION.frases[1]
+											: PERSONALIZACION.frases[2]}
+							</p>
+						)}
+						{producto.grupos_opciones.length === 0 && (
+							<p className="visual-pie">{producto.nombre}</p>
+						)}
 					</div>
 				</div>
 
@@ -145,9 +170,12 @@ function Personalizador({ producto }: { producto: Producto }) {
 					}}
 				>
 					<div className="pz-encabezado">
-						<h1>{producto.nombre}</h1>
+						<h1>{nombre}</h1>
 						<p>
-							Ponle tu toque único. <MarcaPorValidar />
+							{incluye
+								? `Ponle tu toque único: ${presentacion.nombre} con ${incluye}.`
+								: `${presentacion.nombre}. Elige la cantidad y déjanos tus indicaciones.`}{" "}
+							<MarcaPorValidar />
 						</p>
 					</div>
 
@@ -172,51 +200,71 @@ function Personalizador({ producto }: { producto: Producto }) {
 						</fieldset>
 					)}
 
-					{producto.grupos_opciones.map((grupo) => {
-						const elegidas = seleccion[grupo.id] ?? [];
-						const lleno = elegidas.length >= grupo.maximo;
-						return (
-							<fieldset className="grupo fondo-dust" key={grupo.id}>
-								<legend>
-									{grupo.nombre} <span className="opc">(opcional)</span>
-								</legend>
-								<div className="grupo-cabeza">
-									<span className="cuenta">
-										{lleno ? "Listo · " : ""}
-										{elegidas.length} de {grupo.maximo}
-									</span>
-								</div>
-								<p className="ayuda">
-									Elige hasta {grupo.maximo}.
-									{lleno ? " Para cambiar uno, quita otro primero." : ""}
-								</p>
-								<div className="opciones-chips">
-									{grupo.opciones.map((opcion) => {
-										const marcada = elegidas.includes(opcion.id);
-										const bloqueada = !puedeElegir(grupo, seleccion, opcion.id);
-										return (
-											<button
-												type="button"
-												key={opcion.id}
-												className="op"
-												aria-pressed={marcada}
-												aria-disabled={bloqueada}
-												onClick={() => alternar(grupo.id, opcion.id)}
-											>
-												{marcada && <Icono nombre="ok" />}
-												{opcion.nombre}
-												{opcion.adicional > 0 && (
-													<span className="costo">
-														+{pesos(opcion.adicional)}
-													</span>
-												)}
-											</button>
-										);
-									})}
-								</div>
-							</fieldset>
-						);
-					})}
+					<div className="grupos">
+						{producto.grupos_opciones.map((grupo, indice) => {
+							const elegidas = seleccion[grupo.id] ?? [];
+							const lleno = elegidas.length >= grupo.maximo;
+							const adicional = grupo.id === "adicionales";
+							const precios = [
+								...new Set(grupo.opciones.map((o) => o.adicional)),
+							];
+							return (
+								<section
+									className={`grupo fondo-${indice % 2 === 0 ? "peep" : "dust"}`}
+									key={grupo.id}
+									aria-labelledby={`grupo-${grupo.id}`}
+								>
+									<div className="grupo-cabeza">
+										<h2 id={`grupo-${grupo.id}`}>{grupo.nombre}</h2>
+										<span className="cuenta">
+											{adicional
+												? `${elegidas.length} ${elegidas.length === 1 ? "elegido" : "elegidos"}`
+												: `${lleno ? "Listo · " : ""}${elegidas.length} de ${grupo.maximo}`}
+										</span>
+									</div>
+									<p className="ayuda">
+										{adicional
+											? precios.length === 1
+												? `Opcional. ${pesos(precios[0])} cada uno.`
+												: "Opcional. El precio aparece en cada opción."
+											: `Elige hasta ${grupo.maximo} (opcional).`}
+										{grupo.id === "base" ? ` ${PERSONALIZACION.base}` : ""}
+										{lleno && !adicional
+											? " Para cambiar uno, quita otro primero."
+											: ""}
+									</p>
+									<div className="opciones-chips">
+										{grupo.opciones.map((opcion) => {
+											const marcada = elegidas.includes(opcion.id);
+											const bloqueada = !puedeElegir(
+												grupo,
+												seleccion,
+												opcion.id,
+											);
+											return (
+												<button
+													type="button"
+													key={opcion.id}
+													className="op"
+													aria-pressed={marcada}
+													aria-disabled={bloqueada}
+													onClick={() => alternar(grupo.id, opcion.id)}
+												>
+													{marcada && <Icono nombre="ok" />}
+													{opcion.nombre}
+													{opcion.adicional > 0 && (
+														<span className="costo">
+															+{pesos(opcion.adicional)}
+														</span>
+													)}
+												</button>
+											);
+										})}
+									</div>
+								</section>
+							);
+						})}
+					</div>
 
 					<div className="extra">
 						<h2>Cantidad e indicaciones</h2>
@@ -269,34 +317,58 @@ function Personalizador({ producto }: { producto: Producto }) {
 						</p>
 					)}
 
-					<div className="barra-pedido">
-						<div className="barra-texto">
-							<span className="chico">Precio estimado</span>
-							<strong className="precio-barra">
-								{precio === null ? "Consulta por WhatsApp" : pesos(precio)}
-							</strong>
+					<div className="compra-barra oscuro">
+						<div className="envoltura">
+							<div className="barra-texto">
+								<span className="chico">
+									{producto.nombre} × {cantidad}
+								</span>
+								<strong className="precio-barra">
+									{precio === null ? "Precio por confirmar" : pesos(precio)}
+								</strong>
+							</div>
+							<button className="boton" type="submit">
+								<Icono nombre="carrito" />
+								Agregar al carrito
+							</button>
 						</div>
-						<button className="boton" type="submit">
-							<Icono nombre="carrito" />
-							Agregar al carrito
-						</button>
 					</div>
 
 					{agregado && (
-						<div className="agregado" role="status">
-							<p>
-								<strong>¡Ya está en tu carrito!</strong> {producto.nombre} ×{" "}
-								{cantidad}
-							</p>
-							<div className="acciones">
-								<Link className="boton secundario" to="/#menu">
-									Seguir comprando
-								</Link>
-								<Link className="boton" to="/carrito">
-									Ver carrito
-								</Link>
+						<dialog
+							id="dlg-agregado"
+							aria-labelledby="dlg-agregado-t"
+							ref={dialogo}
+							onClose={() => setAgregado(false)}
+							data-lenis-prevent
+						>
+							<div className="dlg-cuerpo hoja">
+								<div className="sello-hoja" aria-hidden="true">
+									¡A tu carrito!
+								</div>
+								<h2 id="dlg-agregado-t">
+									Ya está <em>en tu carrito</em>
+								</h2>
+								<p>
+									{nombre}, {presentacion.nombre} × {cantidad}
+								</p>
+								<div className="hoja-acciones">
+									<Link className="boton secundario" to="/#menu">
+										Seguir comprando
+									</Link>
+									<Link className="boton" to="/carrito">
+										Ver carrito
+									</Link>
+								</div>
+								<button
+									type="button"
+									className="boton-texto"
+									onClick={() => setAgregado(false)}
+								>
+									Seguir personalizando
+								</button>
 							</div>
-						</div>
+						</dialog>
 					)}
 				</form>
 			</div>
