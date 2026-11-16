@@ -5,12 +5,17 @@ import {
 } from "../../_shared/esquemas/guion.ts";
 import type { HerramientaVideo } from "../../_shared/esquemas/prompt-video.ts";
 import type { PromptGuion } from "../proveedor/generar.ts";
+import { PERFIL_MARCA } from "./marca.ts";
 
 // Plantillas base de 25.4: este es el lugar para ajustar el tono de ambas herramientas.
-const SISTEMA_VIDEO = `Eres guionista de videos verticales de Fresura, una marca colombiana de postres a base de fresa. Adaptas un guion aprobado a una herramienta de video.
-Tono cercano, cálido y auténtico. En Instagram y Facebook, inspirador; en TikTok, fresco, enérgico y dinámico. Conserva el tono del guion aprobado.
+const SISTEMA_VIDEO = `Eres guionista de videos verticales de Fresura. Adaptas un guion aprobado a una herramienta de video.
+
+${PERFIL_MARCA}
+
+Conserva el tono del guion aprobado.
+
 Reglas:
-- Responde en español de Colombia y sin frases cliché.
+- Responde en español de Colombia.
 - Un solo personaje en pantalla durante todo el video.
 - No añadas productos, ingredientes, precios, promociones ni datos del negocio que no estén en el guion. Si no hay precios o promociones, no los menciones.
 - No nombres canciones ni artistas; describe solo el estilo y ritmo de la música.
