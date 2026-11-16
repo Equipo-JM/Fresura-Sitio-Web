@@ -18,6 +18,7 @@ import {
 } from "../_shared/http.ts";
 import type { ManejadorRuta } from "../_shared/servidor.ts";
 import {
+	datosRegistroFallo,
 	ErrorIa,
 	generarSalida,
 	type LlamarModelo,
@@ -102,8 +103,11 @@ export function crearRutaPromptVideo(
 			return responderJson(200, { prompt, modelo }, cors);
 		} catch (error) {
 			// DD-20: ningún mensaje del proveedor o de Postgres llega al registro.
-			const tipo = error instanceof ErrorIa ? error.codigo : tipoFallo;
-			console.error(JSON.stringify({ fecha: new Date().toISOString(), tipo }));
+			const datos =
+				error instanceof ErrorIa
+					? datosRegistroFallo(error.codigo, error.estadoProveedor)
+					: datosRegistroFallo(tipoFallo);
+			console.error(JSON.stringify(datos));
 			if (error instanceof ErrorIa) {
 				const { estado, mensaje } = RESPUESTAS_ERROR_IA[error.codigo];
 				return responderError(

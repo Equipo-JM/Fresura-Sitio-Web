@@ -12,7 +12,12 @@ import {
 } from "../_shared/http.ts";
 import { type ContextoRuta, crearServidor } from "../_shared/servidor.ts";
 import { crearLlamadaGemini } from "./gemini.ts";
-import { ErrorIa, generarGuion, RESPUESTAS_ERROR_IA } from "./generar.ts";
+import {
+	datosRegistroFallo,
+	ErrorIa,
+	generarGuion,
+	RESPUESTAS_ERROR_IA,
+} from "./generar.ts";
 import {
 	armarPromptGuion,
 	datosDelProducto,
@@ -31,9 +36,10 @@ const llamarGemini = crearLlamadaGemini(entorno.obligatoria("GEMINI_API_KEY"));
 
 const opcionesAuth = { persistSession: false, autoRefreshToken: false };
 
-// DD-20: el registro lleva fecha y tipo de error, nunca la clave ni el formulario.
-function registrarFallo(tipo: string) {
-	console.error(JSON.stringify({ fecha: new Date().toISOString(), tipo }));
+// DD-20: el registro lleva fecha, tipo de error y, si lo hay, el código HTTP del
+// proveedor; nunca su mensaje, la clave ni el formulario.
+function registrarFallo(tipo: string, estadoProveedor?: number) {
+	console.error(JSON.stringify(datosRegistroFallo(tipo, estadoProveedor)));
 }
 
 async function generarGuionDesdePeticion({
@@ -102,7 +108,7 @@ async function generarGuionDesdePeticion({
 		return responderJson(200, resultado, cors);
 	} catch (error) {
 		if (!(error instanceof ErrorIa)) throw error;
-		registrarFallo(error.codigo);
+		registrarFallo(error.codigo, error.estadoProveedor);
 		const { estado, mensaje } = RESPUESTAS_ERROR_IA[error.codigo];
 		return responderError(estado, error.codigo, mensaje, cors);
 	}

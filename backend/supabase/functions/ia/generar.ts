@@ -9,9 +9,10 @@ import type { PromptGuion } from "./instrucciones.ts";
 /**
  * Cadena de generación del guion con sus fallos (DT-01, secciones 25 y 25.2).
  * Si la respuesta no cumple el esquema, reintenta una vez con el mismo modelo;
- * si el cupo diario del principal está agotado, en la primera llamada o en ese
- * reintento, pasa una vez al modelo de respaldo. Como mucho hay dos esperas de
- * 30 s: la llamada que choca con el cupo responde 429 al instante.
+ * si el cupo diario del principal está agotado o el principal está saturado
+ * (503), en la primera llamada o en ese reintento, pasa una vez al modelo de
+ * respaldo. Como mucho hay dos esperas de 30 s: la llamada que choca con el
+ * cupo o con la saturación responde al instante.
  */
 
 /** Códigos de error del agente (DT-01, sección 23). */
@@ -50,12 +51,39 @@ export const RESPUESTAS_ERROR_IA: Record<
 	},
 };
 
-/** Fallo del agente ya clasificado. */
+/**
+ * Fallo del agente ya clasificado. `estadoProveedor` es el código HTTP que
+ * devolvió Gemini, si lo hubo; sirve para el registro (NT-06, punto 2).
+ */
 export class ErrorIa extends Error {
-	constructor(readonly codigo: CodigoErrorIa) {
+	constructor(
+		readonly codigo: CodigoErrorIa,
+		readonly estadoProveedor?: number,
+	) {
 		super(codigo);
 		this.name = "ErrorIa";
 	}
+}
+
+/** Código HTTP con el que Gemini indica que el modelo está saturado. */
+const ESTADO_SATURADO = 503;
+
+/**
+ * Datos del registro de un fallo (DD-20): fecha, tipo y, si lo hay, el código
+ * HTTP del proveedor. Nunca el mensaje del proveedor, la clave ni el formulario.
+ */
+export function datosRegistroFallo(
+	tipo: string,
+	estadoProveedor?: number,
+	fecha: Date = new Date(),
+): { fecha: string; tipo: string; estado_proveedor?: number } {
+	return {
+		fecha: fecha.toISOString(),
+		tipo,
+		...(estadoProveedor === undefined
+			? {}
+			: { estado_proveedor: estadoProveedor }),
+	};
 }
 
 /** Lo que devuelve el proveedor: el texto JSON y si bloqueó el contenido. */
@@ -111,19 +139,19 @@ export async function generarSalida<T>(
 		return await intentar(opciones, modeloPrincipal);
 	} catch (error) {
 		if (!esErrorIa(error, "ia_estructura")) {
-			if (esErrorIa(error, "ia_cupo")) {
+			if (pasaAlRespaldo(error)) {
 				return intentar(opciones, modeloRespaldo);
 			}
 			throw error;
 		}
 	}
 
-	// Reintento por estructura. Si en él se agota el cupo del principal, la
-	// sección 25.2 pide pasar al respaldo igual que en la primera llamada.
+	// Reintento por estructura. Si en él se agota el cupo del principal o este
+	// se satura, la sección 25.2 pide pasar al respaldo igual que en la primera llamada.
 	try {
 		return await intentar(opciones, modeloPrincipal);
 	} catch (error) {
-		if (esErrorIa(error, "ia_cupo")) {
+		if (pasaAlRespaldo(error)) {
 			return intentar(opciones, modeloRespaldo);
 		}
 		throw error;
@@ -132,6 +160,15 @@ export async function generarSalida<T>(
 
 function esErrorIa(error: unknown, codigo: CodigoErrorIa): boolean {
 	return error instanceof ErrorIa && error.codigo === codigo;
+}
+
+// Solo el cupo diario y la saturación tienen sentido con otro modelo: el límite
+// por minuto es del proyecto y un 400 o 404 se repetiría igual (NT-06, punto 2).
+function pasaAlRespaldo(error: unknown): boolean {
+	return (
+		esErrorIa(error, "ia_cupo") ||
+		(error instanceof ErrorIa && error.estadoProveedor === ESTADO_SATURADO)
+	);
 }
 
 async function intentar<T>(
@@ -153,7 +190,10 @@ async function intentar<T>(
 			senal: AbortSignal.timeout(esperaMs),
 		});
 	} catch (error) {
-		throw new ErrorIa(clasificarErrorProveedor(error));
+		throw new ErrorIa(
+			clasificarErrorProveedor(error),
+			estadoDelProveedor(error),
+		);
 	}
 
 	if (respuesta.bloqueado) throw new ErrorIa("ia_bloqueado");
@@ -169,16 +209,23 @@ async function intentar<T>(
  * errores de red o del servidor) cuenta como «no responde o da error».
  */
 export function clasificarErrorProveedor(error: unknown): CodigoErrorIa {
-	const estado =
-		typeof error === "object" && error !== null && "status" in error
-			? error.status
-			: undefined;
-	if (estado !== 429) return "ia_tiempo";
+	if (estadoDelProveedor(error) !== 429) return "ia_tiempo";
 
 	const mensaje = error instanceof Error ? error.message : String(error);
 	// Gemini identifica la cuota en el mensaje, por ejemplo
 	// "GenerateRequestsPerDayPerProjectPerModel-FreeTier".
 	return /per\s?day/i.test(mensaje) ? "ia_cupo" : "ia_limite_minuto";
+}
+
+/**
+ * Código HTTP de un error del proveedor (`status` de `ApiError` en
+ * @google/genai), o `undefined` si no lo trae: tiempo agotado o fallo de red.
+ */
+export function estadoDelProveedor(error: unknown): number | undefined {
+	if (typeof error !== "object" || error === null || !("status" in error)) {
+		return undefined;
+	}
+	return typeof error.status === "number" ? error.status : undefined;
 }
 
 function leerJson(texto: string | undefined): unknown {

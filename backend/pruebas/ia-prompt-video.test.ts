@@ -320,20 +320,22 @@ describe("POST /prompt-video (IF-10, PU-16)", () => {
 		},
 	);
 	it.each([
-		[new Error("contenido secreto"), 504, "ia_tiempo"],
+		[new Error("contenido secreto"), 504, "ia_tiempo", undefined],
 		[
 			Object.assign(new Error("RequestsPerMinute secreto"), { status: 429 }),
 			429,
 			"ia_limite_minuto",
+			429,
 		],
 		[
 			Object.assign(new Error("RequestsPerDay secreto"), { status: 429 }),
 			429,
 			"ia_cupo",
+			429,
 		],
 	])(
 		"clasifica fallos sin registrar datos del proveedor",
-		async (error, estado, codigo) => {
+		async (error, estado, codigo, estadoProveedor) => {
 			const p = preparar();
 			const registro = vi.spyOn(console, "error").mockImplementation(() => {});
 			p.llamar.mockRejectedValue(error);
@@ -344,10 +346,40 @@ describe("POST /prompt-video (IF-10, PU-16)", () => {
 			expect(JSON.parse(registro.mock.calls[0][0])).toEqual({
 				fecha: expect.stringMatching(/^\d{4}-\d\d-\d\dT/),
 				tipo: codigo,
+				...(estadoProveedor === undefined
+					? {}
+					: { estado_proveedor: estadoProveedor }),
 			});
+			expect(registro.mock.calls[0][0]).not.toContain("secreto");
 			expect(p.guardados.size).toBe(0);
 		},
 	);
+	it("NT-06: pasa al respaldo si el principal está saturado, sin registrar fallo", async () => {
+		const p = preparar();
+		const registro = vi.spyOn(console, "error").mockImplementation(() => {});
+		p.llamar.mockRejectedValueOnce(
+			Object.assign(new Error("UNAVAILABLE secreto"), { status: 503 }),
+		);
+		const respuesta = await p.pedir();
+		expect((await respuesta.json()).modelo).toBe("respaldo");
+		expect(registro).not.toHaveBeenCalled();
+	});
+	it("NT-06: registra el código de estado del proveedor sin su mensaje", async () => {
+		const p = preparar();
+		const registro = vi.spyOn(console, "error").mockImplementation(() => {});
+		p.llamar.mockRejectedValue(
+			Object.assign(new Error("UNAVAILABLE secreto"), { status: 503 }),
+		);
+		const respuesta = await p.pedir();
+		expect(respuesta.status).toBe(504);
+		expect(registro).toHaveBeenCalledTimes(1);
+		expect(registro.mock.calls[0][0]).not.toContain("secreto");
+		expect(JSON.parse(registro.mock.calls[0][0])).toEqual({
+			fecha: expect.any(String),
+			tipo: "ia_tiempo",
+			estado_proveedor: 503,
+		});
+	});
 	it("no reintenta un bloqueo", async () => {
 		const p = preparar();
 		vi.spyOn(console, "error").mockImplementation(() => {});
