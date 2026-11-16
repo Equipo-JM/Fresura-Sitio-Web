@@ -2,28 +2,28 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
 	crearEsquemaGuion,
 	esquemaInstruccionGuion,
-} from "../_shared/esquemas/guion.ts";
+} from "../../_shared/esquemas/guion.ts";
 import {
 	crearEsquemaPromptVideo,
 	esquemaJsonPromptVideo,
 	esquemaPeticionPromptVideo,
 	type HerramientaVideo,
 	type SalidaPromptVideo,
-} from "../_shared/esquemas/prompt-video.ts";
+} from "../../_shared/esquemas/prompt-video.ts";
 import {
 	leerCuerpoJson,
 	responderCuerpoInvalido,
 	responderError,
 	responderJson,
-} from "../_shared/http.ts";
-import type { ManejadorRuta } from "../_shared/servidor.ts";
+} from "../../_shared/http.ts";
+import type { ManejadorRuta } from "../../_shared/servidor.ts";
 import {
 	datosRegistroFallo,
 	ErrorIa,
 	generarSalida,
 	type LlamarModelo,
 	RESPUESTAS_ERROR_IA,
-} from "./generar.ts";
+} from "../proveedor/generar.ts";
 import { armarPromptVideo } from "./instrucciones-video.ts";
 
 /** Dependencias de generación y acceso a datos con el JWT del administrador. */

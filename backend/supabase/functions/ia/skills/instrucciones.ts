@@ -1,5 +1,6 @@
-import type { Contenido } from "../_shared/esquemas/contenido.ts";
-import type { InstruccionGuion } from "../_shared/esquemas/guion.ts";
+import type { Contenido } from "../../_shared/esquemas/contenido.ts";
+import type { InstruccionGuion } from "../../_shared/esquemas/guion.ts";
+import type { PromptGuion } from "../proveedor/generar.ts";
 
 /**
  * Arma lo que se envía al modelo para generar un guion (DT-01, sección 25):
@@ -23,9 +24,6 @@ export type DatosProducto = {
 		condiciones: string;
 	}[];
 };
-
-/** Mensajes para el modelo. */
-export type PromptGuion = { sistema: string; usuario: string };
 
 const OBJETIVOS: Record<InstruccionGuion["objetivo"], string> = {
 	dar_a_conocer: "dar a conocer el producto",

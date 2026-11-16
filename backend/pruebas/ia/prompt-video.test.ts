@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { LlamarModelo } from "../supabase/functions/ia/generar";
-import { crearRutaPromptVideo } from "../supabase/functions/ia/prompt-video";
-import { guionDePrueba } from "./datos/guion";
+import type { LlamarModelo } from "../../supabase/functions/ia/proveedor/generar";
+import { crearRutaPromptVideo } from "../../supabase/functions/ia/skills/prompt-video";
+import { guionDePrueba } from "../datos/guion";
 
 const id = "12345678-1234-4234-8234-123456789abc";
 const avatar = {
