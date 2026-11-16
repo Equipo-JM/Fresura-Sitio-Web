@@ -53,6 +53,7 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `frontend/src/sitio/`                          | Páginas públicas                                                                                         |
 | `frontend/src/panel/`                          | Panel `/admin`                                                                                           |
+| `frontend/src/panel/guiones/`                  | Formulario, editor, estados y prompts de video; servicio y hook con cliente del panel inyectado          |
 | `frontend/src/compartido/`                     | Lo que usan el sitio y el panel                                                                          |
 | `frontend/public/`                             | Lo que se publica tal cual: contenido de respaldo, marca, fotos de ejemplo, `_headers` y `robots.txt`    |
 | `frontend/pruebas/`                            | Pruebas de pantallas, carrito y lectura del contenido; `datos/` tiene el contenido de prueba             |
@@ -84,6 +85,8 @@ Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos
 | `/admin/vista-previa` | Sitio con el borrador del administrador, franja de aviso y regreso al panel; sus enlaces conservan esta base        |
 
 El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `frontend/src/compartido/carrito/reglas.ts` y tienen pruebas en `frontend/pruebas/carrito.test.ts`.
+
+La sección «Guiones» del panel real permite generar con los productos publicados, editar, copiar y guardar como borrador; también aprobar, descartar, recuperar y eliminar. Editar un aprobado pide confirmación y lo devuelve a borrador; la base borra su prompt. Solo un aprobado permite solicitar el prompt para avatar o escenas. El cliente usa los contratos de `ia/guion` e `ia/prompt-video`; este último sigue respondiendo 501 en esta rama del backend. Ninguna acción de «Guiones» publica contenido. Sus pruebas con cliente simulado están en `frontend/pruebas/guiones-panel.test.tsx`.
 
 ## Movimiento
 

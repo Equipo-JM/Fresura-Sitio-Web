@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import type { Database } from "../tipos/database.types";
 import { ContenidoPanel } from "./contenido/ContenidoPanel";
+import { GuionesPanel } from "./guiones/GuionesPanel";
 import { VersionesPanel } from "./versiones/VersionesPanel";
 
 /** Menú del administrador: vuelve a leer la revisión guardada al abrir cada sección. */
@@ -11,7 +12,7 @@ export function SeccionesPanel({
 }: {
 	cliente: SupabaseClient<Database>;
 }) {
-	const [seccion, setSeccion] = useState<"versiones" | "contenido">(
+	const [seccion, setSeccion] = useState<"versiones" | "contenido" | "guiones">(
 		"versiones",
 	);
 	const [pendiente, setPendiente] = useState(false);
@@ -27,6 +28,12 @@ export function SeccionesPanel({
 		setPendiente(false);
 		setSeccion(siguiente);
 	}
+	// Guiones trae su encabezado y su propio botón de volver, que pregunta antes de
+	// perder un guion sin guardar; por eso aquí no se dibuja un segundo menú.
+	if (seccion === "guiones")
+		return (
+			<GuionesPanel cliente={cliente} irVersiones={() => abrir("versiones")} />
+		);
 	return (
 		<div className="panel">
 			<a
@@ -91,6 +98,14 @@ export function SeccionesPanel({
 					onClick={() => abrir("versiones")}
 				>
 					Versiones
+				</button>
+				<button
+					type="button"
+					className="boton secundario compacto"
+					aria-pressed={false}
+					onClick={() => abrir("guiones")}
+				>
+					Guiones
 				</button>
 			</nav>
 			{seccion === "versiones" ? (
