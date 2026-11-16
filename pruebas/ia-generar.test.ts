@@ -123,9 +123,26 @@ describe("generarGuion", () => {
 		expect(llamar).toHaveBeenCalledTimes(1);
 	});
 
-	it("nunca hace más de dos llamadas", async () => {
-		const llamar = proveedor(incompleto, cupoDiario);
+	it("PI-05: si el cupo se agota en el reintento por estructura, usa el respaldo", async () => {
+		const llamar = proveedor(incompleto, cupoDiario, valido);
+		const resultado = await generar(llamar);
+		expect(resultado.modelo).toBe("respaldo");
+		expect(llamar.mock.calls.map(([p]) => p.modelo)).toEqual([
+			"principal",
+			"principal",
+			"respaldo",
+		]);
+	});
+
+	it("nunca hace más de tres llamadas, y la tercera solo es al respaldo", async () => {
+		const llamar = proveedor(incompleto, cupoDiario, cupoDiario);
 		expect(await codigoDeError(generar(llamar))).toBe("ia_cupo");
+		expect(llamar).toHaveBeenCalledTimes(3);
+	});
+
+	it("no pasa al respaldo si el reintento falla por otra causa", async () => {
+		const llamar = proveedor(incompleto, limiteMinuto);
+		expect(await codigoDeError(generar(llamar))).toBe("ia_limite_minuto");
 		expect(llamar).toHaveBeenCalledTimes(2);
 	});
 });

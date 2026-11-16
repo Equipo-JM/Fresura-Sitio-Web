@@ -1,0 +1,13 @@
+# Finales de línea LF en el repositorio y en la copia de trabajo, también en Windows:
+# Biome formatea con LF y, con `core.autocrlf=true`, `biome check` fallaba solo por CRLF.
+* text=auto eol=lf
+
+# Binarios: git no los convierte ni los compara como texto.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

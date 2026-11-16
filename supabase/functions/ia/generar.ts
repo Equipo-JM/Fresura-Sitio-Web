@@ -8,9 +8,10 @@ import type { PromptGuion } from "./instrucciones.ts";
 
 /**
  * Cadena de generación del guion con sus fallos (DT-01, secciones 25 y 25.2).
- * Hace como máximo dos llamadas de 30 s, para que el administrador no espere
- * más de un minuto: si se agota el cupo diario, una con el modelo de respaldo;
- * si la respuesta no cumple el esquema, otra con el mismo modelo.
+ * Si la respuesta no cumple el esquema, reintenta una vez con el mismo modelo;
+ * si el cupo diario del principal está agotado, en la primera llamada o en ese
+ * reintento, pasa una vez al modelo de respaldo. Como mucho hay dos esperas de
+ * 30 s: la llamada que choca con el cupo responde 429 al instante.
  */
 
 /** Códigos de error del agente (DT-01, sección 23). */
@@ -91,15 +92,28 @@ export async function generarGuion(
 	try {
 		return await intentar(opciones, modeloPrincipal);
 	} catch (error) {
-		if (!(error instanceof ErrorIa)) throw error;
-		if (error.codigo === "ia_estructura") {
-			return intentar(opciones, modeloPrincipal);
+		if (!esErrorIa(error, "ia_estructura")) {
+			if (esErrorIa(error, "ia_cupo")) {
+				return intentar(opciones, modeloRespaldo);
+			}
+			throw error;
 		}
-		if (error.codigo === "ia_cupo") {
+	}
+
+	// Reintento por estructura. Si en él se agota el cupo del principal, la
+	// sección 25.2 pide pasar al respaldo igual que en la primera llamada.
+	try {
+		return await intentar(opciones, modeloPrincipal);
+	} catch (error) {
+		if (esErrorIa(error, "ia_cupo")) {
 			return intentar(opciones, modeloRespaldo);
 		}
 		throw error;
 	}
+}
+
+function esErrorIa(error: unknown, codigo: CodigoErrorIa): boolean {
+	return error instanceof ErrorIa && error.codigo === codigo;
 }
 
 async function intentar(

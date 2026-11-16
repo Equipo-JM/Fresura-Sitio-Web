@@ -89,7 +89,7 @@ describe("archivos de public/", () => {
 		const { esquemaContenido } = await import(
 			"../supabase/functions/_shared/esquemas/contenido"
 		);
-		const prueba = await import("../public/contenido-prueba.json");
+		const prueba = await import("./datos/contenido-prueba.json");
 		const respaldo = await import("../public/contenido-respaldo.json");
 		expect(esquemaContenido.safeParse(prueba.default).success).toBe(true);
 		expect(esquemaContenido.safeParse(respaldo.default).success).toBe(true);

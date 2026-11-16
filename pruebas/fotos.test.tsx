@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
-import prueba from "../public/contenido-prueba.json";
 import { tieneFoto } from "../src/compartido/contenido/fotos";
 import { TarjetaProducto } from "../src/sitio/inicio/Categorias";
 import { esquemaContenido } from "../supabase/functions/_shared/esquemas/contenido";
+import prueba from "./datos/contenido-prueba.json";
 
 const producto = esquemaContenido.parse(prueba).productos[0];
 
