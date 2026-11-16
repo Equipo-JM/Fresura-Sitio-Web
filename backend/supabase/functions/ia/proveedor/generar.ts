@@ -61,6 +61,8 @@ export class ErrorIa extends Error {
 	constructor(
 		readonly codigo: CodigoErrorIa,
 		readonly estadoProveedor?: number,
+		/** Reglas que no cumplió una respuesta con `ia_estructura`, para el reintento. */
+		readonly problemas: string[] = [],
 	) {
 		super(codigo);
 		this.name = "ErrorIa";
@@ -129,35 +131,68 @@ export async function generarGuion(
 /** Opciones comunes a las dos salidas estructuradas, con validación inyectada. */
 export type OpcionesSalida<T> = Omit<OpcionesGeneracion, "duracion"> & {
 	esquemaJson: Record<string, unknown>;
-	validar: (datos: unknown) => { success: true; data: T } | { success: false };
+	/** Compatible con `safeParse` de Zod: los `issues` alimentan el aviso del reintento. */
+	validar: (datos: unknown) =>
+		| { success: true; data: T }
+		| {
+				success: false;
+				error?: { issues: { path: PropertyKey[]; message: string }[] };
+		  };
 };
+
+/** Máximo de reglas que se citan en el aviso del reintento. */
+const MAXIMO_PROBLEMAS_AVISO = 5;
 
 /** Ejecuta la cadena de modelos y el único reintento por estructura de la sección 25.2. */
 export async function generarSalida<T>(
 	opciones: OpcionesSalida<T>,
 ): Promise<{ salida: T; modelo: string }> {
 	const { modeloPrincipal, modeloRespaldo } = opciones;
+	let reintento: OpcionesSalida<T>;
 	try {
 		return await intentar(opciones, modeloPrincipal);
 	} catch (error) {
-		if (!esErrorIa(error, "ia_estructura")) {
+		if (!(error instanceof ErrorIa && error.codigo === "ia_estructura")) {
 			if (pasaAlRespaldo(error)) {
 				return intentar(opciones, modeloRespaldo);
 			}
 			throw error;
 		}
+		// Repetir la misma petición suele dar el mismo fallo (por ejemplo, el modelo
+		// cuenta mal los caracteres): el reintento le dice qué regla no cumplió.
+		reintento = {
+			...opciones,
+			prompt: conAviso(opciones.prompt, error.problemas),
+		};
 	}
 
 	// Reintento por estructura. Si en él se agota el cupo del principal o este
 	// se satura, la sección 25.2 pide pasar al respaldo igual que en la primera llamada.
 	try {
-		return await intentar(opciones, modeloPrincipal);
+		return await intentar(reintento, modeloPrincipal);
 	} catch (error) {
 		if (pasaAlRespaldo(error)) {
-			return intentar(opciones, modeloRespaldo);
+			return intentar(reintento, modeloRespaldo);
 		}
 		throw error;
 	}
+}
+
+// Los mensajes vienen de los esquemas propios (números y reglas), no del texto
+// generado, así que no abren una vía para que el modelo se dé órdenes a sí mismo.
+function conAviso(prompt: PromptGuion, problemas: string[]): PromptGuion {
+	const lista = (
+		problemas.length > 0
+			? problemas
+			: ["La respuesta no tenía la estructura pedida"]
+	)
+		.slice(0, MAXIMO_PROBLEMAS_AVISO)
+		.map((problema) => `- ${problema}`)
+		.join("\n");
+	return {
+		sistema: prompt.sistema,
+		usuario: `${prompt.usuario}\n\nTu respuesta anterior no cumplió estas reglas. Corrígelas y devuelve de nuevo el JSON completo:\n${lista}`,
+	};
 }
 
 function esErrorIa(error: unknown, codigo: CodigoErrorIa): boolean {
@@ -200,8 +235,24 @@ async function intentar<T>(
 
 	if (respuesta.bloqueado) throw new ErrorIa("ia_bloqueado");
 
-	const resultado = validar(leerJson(respuesta.texto));
-	if (!resultado.success) throw new ErrorIa("ia_estructura");
+	const datos = leerJson(respuesta.texto);
+	if (datos === undefined) {
+		throw new ErrorIa("ia_estructura", undefined, [
+			"La respuesta no era un JSON válido con la estructura pedida",
+		]);
+	}
+	const resultado = validar(datos);
+	if (!resultado.success) {
+		throw new ErrorIa(
+			"ia_estructura",
+			undefined,
+			(resultado.error?.issues ?? []).map((problema) =>
+				problema.path.length > 0
+					? `${problema.path.map(String).join(".")}: ${problema.message}`
+					: problema.message,
+			),
+		);
+	}
 	return { salida: resultado.data, modelo };
 }
 
