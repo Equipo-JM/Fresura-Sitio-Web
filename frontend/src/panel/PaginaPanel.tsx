@@ -21,7 +21,7 @@ import { PantallaCodigo, Salir } from "./acceso/PantallaCodigo";
 import { PantallaEntrar } from "./acceso/PantallaEntrar";
 import { useSesionPanel } from "./acceso/useSesionPanel";
 import { CambiarFoto } from "./CambiarFoto";
-import { VersionesPanel } from "./versiones/VersionesPanel";
+import { SeccionesPanel } from "./SeccionesPanel";
 import { VistaPrevia } from "./versiones/VistaPrevia";
 
 /** Clave de la sesión simulada: dura lo que la pestaña. */
@@ -92,7 +92,7 @@ function PanelReal({ vistaPrevia }: { vistaPrevia?: ReactNode }) {
 			return vistaPrevia ? (
 				<VistaPrevia cliente={cliente}>{vistaPrevia}</VistaPrevia>
 			) : (
-				<VersionesPanel cliente={cliente} />
+				<SeccionesPanel cliente={cliente} />
 			);
 	}
 }

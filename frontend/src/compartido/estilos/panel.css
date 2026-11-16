@@ -275,3 +275,50 @@
 .panel-confirmacion {
 	overflow-wrap: anywhere;
 }
+
+/* Formularios: reutilizan las superficies, controles y foco del panel. */
+.panel-editor {
+	max-width: 760px;
+}
+.panel-editor-campos {
+	border: 0;
+	padding: 0;
+	min-width: 0;
+}
+.panel-bloque {
+	display: grid;
+	gap: 16px;
+	min-width: 0;
+	margin-block: 16px;
+	padding: 16px;
+	border: 1px solid var(--texto);
+	border-radius: var(--radio-chico);
+}
+.panel-editor .campo input,
+.panel-editor .campo textarea,
+.panel-editor .campo select {
+	width: 100%;
+	min-width: 0;
+}
+.panel-editor .campo select {
+	padding: 12px;
+	border: 1px solid var(--texto);
+	border-radius: var(--radio-chico);
+	color: var(--texto);
+	background: var(--fondo);
+	font: inherit;
+	min-height: var(--objetivo-tactil);
+}
+.panel-editor-foto {
+	width: 100%;
+	max-width: 360px;
+	height: auto;
+	object-fit: contain;
+}
+.panel-editor [hidden] {
+	display: none;
+}
+.panel-editor [data-campo],
+.panel-editor [id^="error-"] {
+	scroll-margin-top: calc(var(--objetivo-tactil) * 3);
+}
