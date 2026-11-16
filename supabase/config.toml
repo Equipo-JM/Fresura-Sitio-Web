@@ -401,6 +401,10 @@ deno_version = 2
 [functions.ia]
 verify_jwt = false
 
+# Igual que `ia`: valida el JWT y exige admin con aal2 en su código (DT-01, DD-04).
+[functions.panel]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

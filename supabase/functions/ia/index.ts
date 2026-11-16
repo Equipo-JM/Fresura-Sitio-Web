@@ -1,16 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
-import {
-	comprobarAdministrador,
-	crearVerificadorJwt,
-} from "../_shared/acceso.ts";
+import { type ConjuntoClaves, crearVerificadorJwt } from "../_shared/acceso.ts";
+import { crearLectorEntorno } from "../_shared/entorno.ts";
 import { esquemaContenido } from "../_shared/esquemas/contenido.ts";
 import { esquemaInstruccionGuion } from "../_shared/esquemas/guion.ts";
 import {
-	cabecerasCors,
+	leerCuerpoJson,
 	leerOrigenesPermitidos,
+	responderCuerpoInvalido,
 	responderError,
 	responderJson,
+	responderNoImplementado,
 } from "../_shared/http.ts";
+import { type ContextoRuta, crearServidor } from "../_shared/servidor.ts";
 import { crearLlamadaGemini } from "./gemini.ts";
 import { ErrorIa, generarGuion, RESPUESTAS_ERROR_IA } from "./generar.ts";
 import {
@@ -19,95 +20,33 @@ import {
 	fechaColombia,
 } from "./instrucciones.ts";
 
-// Función `ia` (DT-01, secciones 5 y 25; IF-09). Por ahora atiende `POST /guion`;
-// `POST /prompt-video` (IF-10) se agrega en el siguiente paso.
+// Función `ia` (DT-01, secciones 5 y 25). `POST /guion` (IF-09) está construida;
+// `POST /prompt-video` (IF-10) ya tiene su ruta y su control de acceso, y
+// responde 501 hasta que se implemente.
 
-function variable(nombre: string): string {
-	const valor = Deno.env.get(nombre);
-	if (!valor) throw new Error(`Falta la variable ${nombre}`);
-	return valor;
-}
-
-const urlSupabase = variable("SUPABASE_URL");
-const clavePublicable: string = JSON.parse(
-	variable("SUPABASE_PUBLISHABLE_KEYS"),
-).default;
-const origenesPermitidos = leerOrigenesPermitidos(
-	Deno.env.get("ORIGENES_PERMITIDOS"),
-);
-const modeloPrincipal = variable("IA_MODELO");
-const modeloRespaldo = variable("IA_MODELO_RESPALDO");
-const llamarGemini = crearLlamadaGemini(variable("GEMINI_API_KEY"));
+const entorno = crearLectorEntorno((nombre) => Deno.env.get(nombre));
+const urlSupabase = entorno.obligatoria("SUPABASE_URL");
+const clavePublicable = entorno.clavePorDefecto("SUPABASE_PUBLISHABLE_KEYS");
+const modeloPrincipal = entorno.obligatoria("IA_MODELO");
+const modeloRespaldo = entorno.obligatoria("IA_MODELO_RESPALDO");
+const llamarGemini = crearLlamadaGemini(entorno.obligatoria("GEMINI_API_KEY"));
 
 const opcionesAuth = { persistSession: false, autoRefreshToken: false };
-const verificarJwt = crearVerificadorJwt(
-	createClient(urlSupabase, clavePublicable, { auth: opcionesAuth }),
-	JSON.parse(variable("SUPABASE_JWKS")),
-);
 
 // DD-20: el registro lleva fecha y tipo de error, nunca la clave ni el formulario.
 function registrarFallo(tipo: string) {
 	console.error(JSON.stringify({ fecha: new Date().toISOString(), tipo }));
 }
 
-Deno.serve(async (peticion) => {
-	const cors = cabecerasCors(
-		peticion.headers.get("Origin"),
-		origenesPermitidos,
-	);
-	if (cors === null) {
-		return responderError(403, "origen_no_permitido", "Origen no permitido.");
-	}
-	if (peticion.method === "OPTIONS") {
-		return new Response(null, { status: 204, headers: cors });
-	}
+async function generarGuionDesdePeticion({
+	peticion,
+	jwt,
+	cors,
+}: ContextoRuta): Promise<Response> {
+	const cuerpo = await leerCuerpoJson(peticion);
+	if (!cuerpo.valido) return responderCuerpoInvalido(cuerpo.motivo, cors);
 
-	const ruta = new URL(peticion.url).pathname;
-	if (peticion.method !== "POST" || !ruta.endsWith("/guion")) {
-		return responderError(404, "no_encontrado", "Ruta no encontrada.", cors);
-	}
-
-	const acceso = await comprobarAdministrador(
-		peticion.headers.get("Authorization"),
-		verificarJwt,
-	);
-	if (!acceso.permitido) {
-		return acceso.estado === 401
-			? responderError(
-					401,
-					"sin_sesion",
-					"Tu sesión terminó. Vuelve a iniciar sesión.",
-					cors,
-				)
-			: responderError(
-					403,
-					"sin_permiso",
-					"Tu cuenta no tiene permiso para usar el agente.",
-					cors,
-				);
-	}
-
-	try {
-		return await generarGuionDesdePeticion(peticion, acceso.jwt, cors);
-	} catch (error) {
-		// Los errores propios llevan su tipo en el mensaje (p. ej. "lectura_contenido").
-		registrarFallo(error instanceof Error ? error.message : "desconocido");
-		return responderError(
-			500,
-			"error_interno",
-			"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.",
-			cors,
-		);
-	}
-});
-
-async function generarGuionDesdePeticion(
-	peticion: Request,
-	jwt: string,
-	cors: Record<string, string>,
-): Promise<Response> {
-	const cuerpo: unknown = await peticion.json().catch(() => undefined);
-	const instruccion = esquemaInstruccionGuion.safeParse(cuerpo);
+	const instruccion = esquemaInstruccionGuion.safeParse(cuerpo.datos);
 	if (!instruccion.success) {
 		return responderError(
 			400,
@@ -170,3 +109,24 @@ async function generarGuionDesdePeticion(
 		return responderError(estado, error.codigo, mensaje, cors);
 	}
 }
+
+Deno.serve(
+	crearServidor({
+		origenesPermitidos: leerOrigenesPermitidos(
+			entorno.opcional("ORIGENES_PERMITIDOS"),
+		),
+		verificarJwt: crearVerificadorJwt(
+			createClient(urlSupabase, clavePublicable, { auth: opcionesAuth }),
+			entorno.json("SUPABASE_JWKS") as ConjuntoClaves,
+		),
+		rutas: {
+			guion: generarGuionDesdePeticion,
+			// IF-10, DT-01 sección 25.4: pendiente de implementar.
+			"prompt-video": async ({ cors }) => responderNoImplementado(cors),
+		},
+		mensajeSinPermiso: "Tu cuenta no tiene permiso para usar el agente.",
+		mensajeErrorInterno:
+			"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.",
+		registrarFallo,
+	}),
+);
