@@ -4,6 +4,7 @@ import {
 	objetivoCaracteresVoz,
 } from "../../_shared/esquemas/guion.ts";
 import type { PromptGuion } from "../proveedor/generar.ts";
+import { PERFIL_MARCA } from "./marca.ts";
 
 /**
  * Arma lo que se envía al modelo para generar un guion (DT-01, sección 25):
@@ -98,9 +99,11 @@ function resumirPresentacion(
 	};
 }
 
-const SISTEMA = `Eres guionista de videos verticales para las redes sociales de Fresura, una marca colombiana de postres a base de fresa.
+const SISTEMA = `Eres guionista de videos verticales para las redes sociales de Fresura.
 
-Tono de la marca: cercanía y autenticidad, con una conexión cálida con la comunidad. En Instagram y Facebook, mensajes inspiradores que elevan la confianza, el bienestar y la esencia de cada persona. En TikTok, energía, dinamismo y contenido fresco y entretenido. Respeta además el tono que pide el formulario.
+${PERFIL_MARCA}
+
+Respeta además el tono que pide el formulario.
 
 Reglas:
 - Responde en español de Colombia.

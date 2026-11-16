@@ -165,3 +165,38 @@ describe("límite de la voz (DT-01, 25.4)", () => {
 		expect(usuario).not.toContain("caracteres");
 	});
 });
+
+describe("perfil de marca (04-branding)", () => {
+	const producto = datosDelProducto(
+		contenidoDePrueba(),
+		"arma-tu-fresota",
+		"2026-11-12",
+	);
+	if (!producto) throw new Error("El ejemplo debe tener el producto");
+	const guion = armarPromptGuion(instruccion, producto).sistema;
+	const video = armarPromptVideo("avatar", guionDePrueba(), {
+		red: "tiktok",
+		duracion_s: 15,
+	}).sistema;
+
+	it.each([
+		["guion", guion],
+		["prompt de video", video],
+	])(
+		"las instrucciones del %s llevan personalidad, valores y tono por red",
+		(_nombre, sistema) => {
+			expect(sistema).toContain("Dulce, pero con estilo");
+			expect(sistema).toMatch(/divertida/i);
+			expect(sistema).toMatch(/calidad.*estética.*cercanía/s);
+			expect(sistema).toContain("TikTok: energía");
+			expect(sistema).toContain("Instagram y Facebook: cercano e inspirador");
+			expect(sistema).toMatch(/clichés/);
+		},
+	);
+
+	it("conserva las reglas de seguridad y de no inventar datos", () => {
+		expect(guion).toContain("No inventes datos del negocio");
+		expect(guion).toContain("<datos>");
+		expect(video).toContain("No añadas productos");
+	});
+});
