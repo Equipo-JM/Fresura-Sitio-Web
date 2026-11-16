@@ -21,8 +21,9 @@ import {
 	totalCarrito,
 	validarDatos,
 } from "../src/compartido/carrito/reglas";
+import prueba from "./datos/contenido-prueba.json";
 
-const contenido = esquemaContenido.parse(respaldo);
+const contenido = esquemaContenido.parse(prueba);
 const armada = contenido.productos.find(
 	(p) => p.id === "fresitas-arma-tu-fresita",
 ) as Producto;
@@ -53,8 +54,11 @@ describe("precios", () => {
 	});
 
 	it("un precio ausente deja la línea por confirmar (DD-14, respaldo)", () => {
-		expect(precioLinea(armada, linea())).toBeNull();
-		expect(totalCarrito([linea()], contenido.productos)).toEqual({
+		const sinPrecios = esquemaContenido.parse(respaldo);
+		const producto = sinPrecios.productos.find((p) => p.id === armada.id);
+		if (!producto) throw new Error("Falta Arma tu Fresita en el respaldo");
+		expect(precioLinea(producto, linea())).toBeNull();
+		expect(totalCarrito([linea()], sinPrecios.productos)).toEqual({
 			total: 0,
 			pendiente: true,
 		});
@@ -159,10 +163,22 @@ describe("entrega y datos", () => {
 			pendiente: true,
 			sede,
 		});
-		expect(texto).toContain(
-			`*Entrega:* Recoger en ${sede?.nombre} (${sede?.direccion})`,
-		);
+		expect(texto).toContain("*Entrega:* Recoger en sede U Nacional");
+		expect(texto).not.toContain("Calle 45 # 28-10");
 		expect(texto).not.toContain("*Dirección:*");
+	});
+	it("el mensaje siempre indica Toppings: ninguno si no se eligieron", () => {
+		const texto = mensajePedido({
+			lineas: [linea({ seleccion: {} })],
+			productos: contenido.productos,
+			categorias: contenido.categorias,
+			datos,
+			entrega: "recoger",
+			total: 14900,
+			pendiente: false,
+		});
+		expect(texto).toContain("Toppings: ninguno");
+		expect(texto).not.toContain("Base:");
 	});
 });
 

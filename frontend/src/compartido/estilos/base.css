@@ -344,7 +344,20 @@ h2:focus {
 	gap: 4px;
 }
 .nav a,
-.nav .nav a:hover,
+.nav .abrir-menu {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-height: 44px;
+	padding: 8px 12px;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	text-decoration: none;
+	font-size: 0.9375rem;
+	white-space: nowrap;
+}
+.nav a:hover,
 .nav .abrir-menu:hover {
 	text-decoration: underline;
 	text-underline-offset: 5px;
@@ -612,8 +625,8 @@ h2:focus {
 	.tarjeta:focus-visible .cara.b {
 		opacity: 1;
 	}
-	.tarjeta:hover .cara.a,
-	.tarjeta:focus-visible .cara.a {
+	.tarjeta:has(.cara.b):hover .cara.a,
+	.tarjeta:has(.cara.b):focus-visible .cara.a {
 		opacity: 0;
 	}
 }
@@ -1741,11 +1754,18 @@ body {
 }
 
 /* Enlaces del menú: subrayado que se dibuja */
-.nav a,
-.nav .nav a:hover,
+.nav a:hover,
 .nav .abrir-menu:hover {
 	text-decoration: none;
 	background-size: calc(100% - 24px) 1.5px;
+}
+.nav a,
+.nav .abrir-menu {
+	background-image: linear-gradient(currentColor, currentColor);
+	background-position: 12px calc(100% - 9px);
+	background-size: 0 1.5px;
+	background-repeat: no-repeat;
+	transition: background-size 220ms var(--curva-salida);
 }
 
 /* Anuncio */

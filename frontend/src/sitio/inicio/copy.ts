@@ -14,6 +14,41 @@ export const FRASES_CATEGORIAS: Record<string, string> = {
 	compartir: "Para el plan con tu gente",
 };
 
+/** Tamaños e inclusiones del menú provisional que acompañan a las categorías. */
+export const DATOS_CATEGORIAS: Record<string, string> = {
+	fresitas: "9 oz · Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping",
+	fresotas: "13 oz · Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings",
+	fresuras:
+		"16 oz · Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado",
+	chocolate: "9, 12 y 16 oz",
+	miti: "Fresitas, Fresotas y Fresuras",
+	compartir: "Ensalada de frutas, Merengón y Fresubowl",
+};
+
+/** Relato y valores propuestos por el rediseño, sin campos en el contrato. */
+export const NOSOTROS = {
+	texto:
+		"Fresura nace de «fresa» y «dulzura». No solo hacemos postres: transformamos un antojo en una experiencia que se queda en la memoria, porque los pequeños detalles hacen grandes diferencias.",
+	valores: [
+		{
+			titulo: "Calidad",
+			texto: "Ingredientes seleccionados y presentación impecable.",
+		},
+		{ titulo: "Estética", texto: "Armonía, diseño y experiencia sensorial." },
+		{
+			titulo: "Cercanía",
+			texto: "Atención cálida, comunicación honesta y empatía.",
+		},
+	],
+};
+
+/** Ayudas de personalización que no son contenido administrable. */
+export const PERSONALIZACION = {
+	inicio: "Empieza por la base",
+	base: "Las mermeladas como base están por confirmar con Fresura.",
+	frases: ["Va tomando forma", "Se ve delicioso", "Tu Fresura ideal"],
+};
+
 /** Opciones del selector «Hoy se me antoja…», cada una lleva a una categoría. */
 export const ANTOJOS = [
 	{ texto: "algo chiquito", detalle: "Fresitas · 9 oz", categoria: "fresitas" },

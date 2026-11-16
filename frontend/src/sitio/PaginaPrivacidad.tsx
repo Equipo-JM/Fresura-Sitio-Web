@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { Link } from "react-router";
+import { Icono } from "../compartido/componentes/Icono";
 
 /**
  * Página `/privacidad`. Mientras la política no tenga revisión jurídica ni los
@@ -7,36 +7,37 @@ import { Link } from "react-router";
  * (SRS 11.6). Los textos son los «Avisos del sitio» de esa sección.
  */
 export function PaginaPrivacidad() {
-	useEffect(() => {
-		document.title = "Política de datos · Fresura";
-	}, []);
-
 	return (
-		<section className="seccion">
-			<div className="envoltura texto-largo">
-				<h1>Política de tratamiento de datos</h1>
-				<p>
-					<strong>La política completa está en revisión.</strong> La
-					publicaremos aquí cuando esté lista.
-				</p>
+		<section className="pagina">
+			<div className="envoltura">
+				<div className="prosa">
+					<h1>
+						Política <em>de datos</em>
+					</h1>
+					<p className="alerta">
+						<Icono nombre="alerta" />
+						<span>
+							Esta política está en revisión. Mientras tanto, te contamos lo
+							esencial.
+						</span>
+					</p>
 
-				<h2>Tus datos en el pedido</h2>
-				<p>
-					Tus datos van solo en el mensaje que envías por WhatsApp, para atender
-					tu pedido. Este sitio no los guarda.
-				</p>
+					<p>
+						Tus datos van solo en el mensaje que envías por WhatsApp, para
+						atender tu pedido. Este sitio no los guarda.
+					</p>
 
-				<h2>Tu ubicación</h2>
-				<p>
-					Usamos tu ubicación solo para ver si llegamos a tu zona. No se envía
-					ni se guarda.
-				</p>
-
-				<p>
-					<Link className="enlace-texto" to="/">
-						Volver al inicio
-					</Link>
-				</p>
+					<p>
+						Usamos tu ubicación solo aquí, para ver si llegamos a tu zona. No se
+						envía ni se guarda.
+					</p>
+					<p>No creamos cuentas de clientes ni pedimos datos sensibles.</p>
+					<p>
+						<Link className="boton secundario" to="/">
+							Volver al inicio
+						</Link>
+					</p>
+				</div>
 			</div>
 		</section>
 	);

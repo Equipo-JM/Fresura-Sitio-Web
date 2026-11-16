@@ -1,15 +1,11 @@
-import { useState } from "react";
 import { Link } from "react-router";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import {
 	type DatosEntrega,
 	direccionCompleta,
 	type Entrega,
-	mensajePedido,
 	nombreCompleto,
-	totalCarrito,
 } from "../../compartido/carrito/reglas";
-import { useCarrito } from "../../compartido/carrito/useCarrito";
 import { Icono } from "../../compartido/componentes/Icono";
 import { MarcaPorValidar } from "../MarcaPorValidar";
 
@@ -24,29 +20,22 @@ export function PasoRevision({
 	datos,
 	onEditar,
 	onNuevoPedido,
+	texto,
+	enlace,
+	enviado,
+	onEnviar,
 }: {
 	contenido: Contenido;
 	entrega: Entrega;
 	datos: DatosEntrega;
 	onEditar: () => void;
 	onNuevoPedido: () => void;
+	texto: string;
+	enlace: string;
+	enviado: boolean;
+	onEnviar: () => void;
 }) {
-	const { lineas } = useCarrito();
-	const [enviado, setEnviado] = useState(false);
-	const { total, pendiente } = totalCarrito(lineas, contenido.productos);
 	const sede = contenido.negocio.sedes.find((s) => s.atiende_pedidos);
-	const texto = mensajePedido({
-		lineas,
-		productos: contenido.productos,
-		categorias: contenido.categorias,
-		datos,
-		entrega,
-		total,
-		pendiente,
-		sede,
-	});
-	const numero = contenido.negocio.whatsapp;
-	const enlace = `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
 
 	if (enviado) {
 		return (
@@ -113,7 +102,16 @@ export function PasoRevision({
 					</div>
 				</div>
 				<div className="chat-cuerpo">
-					<div className="burbuja">{texto}</div>
+					<div className="burbuja">
+						{texto.split(/(\*[^*\n]+\*)/).map((parte, indice) =>
+							parte.startsWith("*") && parte.endsWith("*") ? (
+								// biome-ignore lint/suspicious/noArrayIndexKey: los fragmentos del mensaje no tienen estado y pueden repetir el mismo texto.
+								<strong key={`${indice}-${parte}`}>{parte.slice(1, -1)}</strong>
+							) : (
+								parte
+							),
+						)}
+					</div>
 				</div>
 			</section>
 			<p className="chico">
@@ -129,7 +127,7 @@ export function PasoRevision({
 					href={enlace}
 					target="_blank"
 					rel="noopener noreferrer"
-					onClick={() => setEnviado(true)}
+					onClick={onEnviar}
 				>
 					<Icono nombre="chat" />
 					Enviar pedido por WhatsApp

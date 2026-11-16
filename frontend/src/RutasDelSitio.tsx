@@ -7,6 +7,7 @@ import { PaginaNoEncontrada } from "./sitio/PaginaNoEncontrada";
 import { PaginaPersonalizar } from "./sitio/PaginaPersonalizar";
 import { PaginaPrivacidad } from "./sitio/PaginaPrivacidad";
 import { PaginaProducto } from "./sitio/PaginaProducto";
+import { PaginaSedes } from "./sitio/PaginaSedes";
 
 /**
  * Rutas de la aplicación en modo declarativo (ADR-001, D1). Las páginas
@@ -40,6 +41,7 @@ function RutasPublicas() {
 				/>
 				<Route path="/carrito" element={<PaginaCarrito />} />
 				<Route path="/privacidad" element={<PaginaPrivacidad />} />
+				<Route path="/sedes" element={<PaginaSedes />} />
 				<Route path="*" element={<PaginaNoEncontrada />} />
 			</Route>
 		</Routes>

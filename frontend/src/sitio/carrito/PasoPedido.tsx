@@ -9,9 +9,8 @@ import {
 	precioLinea,
 } from "../../compartido/carrito/reglas";
 import { useCarrito } from "../../compartido/carrito/useCarrito";
-import { FotoPendiente } from "../../compartido/componentes/FotoPendiente";
 import { Icono } from "../../compartido/componentes/Icono";
-import { tieneFoto } from "../../compartido/contenido/fotos";
+import { MiniaturaProducto } from "./MiniaturaProducto";
 
 /** Paso 1: lo que lleva la persona, con cantidades y quitar. */
 export function PasoPedido({
@@ -25,7 +24,8 @@ export function PasoPedido({
 
 	if (lineas.length === 0) {
 		return (
-			<div className="vacio-caja">
+			<div className="vacio vacio-caja">
+				<img src="/marca/fresa-flamingo.svg" alt="" width="80" height="113" />
 				<h1>
 					Tu carrito está <em>vacío</em>
 				</h1>
@@ -54,33 +54,31 @@ export function PasoPedido({
 					const precio = precioLinea(producto, linea);
 					const nombre = nombreProducto(producto, contenido.categorias);
 					return (
-						<li className="linea-c" key={claveLinea(linea)}>
-							<div className="miniatura">
-								{tieneFoto(producto.imagen) ? (
-									<img
-										className="mini-foto"
-										src={producto.imagen.ruta}
-										alt=""
-									/>
-								) : (
-									<FotoPendiente texto="" />
-								)}
-							</div>
+						<li
+							className={`linea-c${indice % 2 ? " b" : ""}`}
+							key={claveLinea(linea)}
+						>
+							<MiniaturaProducto producto={producto} />
 							<div className="linea-datos">
 								<p className="linea-titulo">{nombre}</p>
 								{presentacion && <p className="chico">{presentacion.nombre}</p>}
 								{producto.grupos_opciones.map((grupo) => {
 									const elegidas = linea.seleccion[grupo.id] ?? [];
-									if (elegidas.length === 0) return null;
+									if (elegidas.length === 0 && grupo.id !== "toppings")
+										return null;
 									const nombres = grupo.opciones
 										.filter((o) => elegidas.includes(o.id))
 										.map((o) => o.nombre);
 									return (
 										<p className="chico" key={grupo.id}>
-											{grupo.nombre}: {nombres.join(", ")}
+											{grupo.nombre}:{" "}
+											{nombres.length ? nombres.join(", ") : "ninguno"}
 										</p>
 									);
 								})}
+								{!producto.grupos_opciones.some((g) => g.id === "toppings") && (
+									<p className="chico">Toppings: ninguno</p>
+								)}
 								{linea.indicaciones && (
 									<p className="chico">Indicaciones: {linea.indicaciones}</p>
 								)}

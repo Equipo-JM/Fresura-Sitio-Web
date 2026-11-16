@@ -54,6 +54,7 @@ export function PasoEntrega({
 	);
 	const domicilio = entrega === "domicilio";
 	const fuera = cobertura.estado === "fuera";
+	const numeroErrores = Object.values(errores).filter(Boolean).length;
 
 	function campo(
 		id: keyof DatosEntrega,
@@ -70,15 +71,24 @@ export function PasoEntrega({
 		const ayudaId = `${id}-ayuda`;
 		const errorId = `${id}-error`;
 		return (
-			<div className={`campo${opciones.ancho ? " ancho" : ""}`}>
+			<div
+				className={`cf${opciones.ancho ? " ancho" : ""}${error ? " invalido" : ""}`}
+			>
 				<label htmlFor={`c-${id}`}>
 					{etiqueta}{" "}
-					<span className="opc">
-						{opciones.opcional ? "(opcional)" : "(obligatorio)"}
-					</span>
+					{opciones.opcional && <span className="opc">(opcional)</span>}
 				</label>
 				<input
 					id={`c-${id}`}
+					name={id}
+					inputMode={
+						opciones.tipo === "tel"
+							? "tel"
+							: opciones.tipo === "email"
+								? "email"
+								: undefined
+					}
+					spellCheck={opciones.tipo === "email" ? false : undefined}
 					type={opciones.tipo ?? "text"}
 					value={datos[id]}
 					autoComplete={opciones.autoComplete}
@@ -108,6 +118,7 @@ export function PasoEntrega({
 
 	return (
 		<form
+			id="form-carrito"
 			className="form form-pago"
 			noValidate
 			onSubmit={(e) => {
@@ -118,10 +129,14 @@ export function PasoEntrega({
 			<h1 id="titulo-paso" tabIndex={-1}>
 				Entrega y <em>datos</em>
 			</h1>
-			{Object.keys(errores).length > 0 && (
+			{numeroErrores > 0 && (
 				<p className="alerta" role="alert">
 					<Icono nombre="alerta" />
-					<span>Revisa los campos marcados.</span>
+					<span>
+						{numeroErrores === 1
+							? "Hay 1 dato por completar o corregir. Revisa el campo marcado."
+							: `Hay ${numeroErrores} datos por completar o corregir. Revisa los campos marcados.`}
+					</span>
 				</p>
 			)}
 
@@ -132,12 +147,6 @@ export function PasoEntrega({
 						tipo: "email",
 						autoComplete: "email",
 						ancho: true,
-					})}
-					{campo("telefono", "Teléfono", {
-						tipo: "tel",
-						autoComplete: "tel-national",
-						ancho: true,
-						ayuda: "Por si necesitamos contactarte sobre tu pedido.",
 					})}
 				</div>
 			</section>
@@ -154,6 +163,7 @@ export function PasoEntrega({
 								type="radio"
 								className="oculto"
 								name="entrega"
+								id="entrega-domicilio"
 								value="domicilio"
 								checked={domicilio}
 								disabled={fuera}
@@ -161,9 +171,7 @@ export function PasoEntrega({
 							/>
 							<Icono nombre="paquete" />
 							<strong>Domicilio</strong>
-							<span>
-								{fuera ? "No disponible en tu zona" : `Desde ${nombreSede}`}
-							</span>
+							{fuera && <span>No disponible en tu zona</span>}
 						</label>
 						<label
 							className={`segmento${entrega === "recoger" ? " elegido" : ""}`}
@@ -177,8 +185,14 @@ export function PasoEntrega({
 								onChange={() => onEntrega("recoger")}
 							/>
 							<Icono nombre="ubicacion" />
-							<strong>Recoger en {nombreSede}</strong>
-							{sede && <span>{sede.direccion}</span>}
+							<strong>
+								Recoger en {nombreSede.replace(/^Sede /, "sede ")}
+							</strong>
+							{sede && (
+								<span>
+									{sede.horarios[0]?.horas.split(" Cierre por almuerzo:")[0]}
+								</span>
+							)}
 						</label>
 					</div>
 					{errores.entrega && (
@@ -190,11 +204,18 @@ export function PasoEntrega({
 				</fieldset>
 
 				<div className="rejilla">
-					<div className="campo">
+					<div className="cf">
 						<label htmlFor="c-pais">País / Región</label>
-						<select id="c-pais" value="CO" onChange={() => undefined}>
+						<select
+							id="c-pais"
+							name="pais"
+							autoComplete="country"
+							value="CO"
+							onChange={() => undefined}
+						>
 							<option value="CO">Colombia</option>
 						</select>
+						<Icono nombre="abajo" />
 					</div>
 					{campo("nombre", "Nombre", { autoComplete: "given-name" })}
 					{campo("apellidos", "Apellidos", { autoComplete: "family-name" })}
@@ -220,54 +241,85 @@ export function PasoEntrega({
 							</div>
 						</>
 					)}
+					{campo("telefono", "Teléfono", {
+						tipo: "tel",
+						autoComplete: "tel-national",
+						ancho: true,
+						ayuda:
+							"Por si necesitamos contactarte sobre tu pedido: te escribimos por WhatsApp.",
+					})}
 				</div>
-
-				{/* Si quedó fuera de la zona se sigue mostrando el resultado, aunque ya no esté en domicilio. */}
-				{(domicilio || fuera) && (
-					<div className="cobertura">
-						<button
-							type="button"
-							className="boton"
-							onClick={() =>
-								cobertura.comprobar((resultado) => {
-									// «Domicilio» queda deshabilitado fuera de la zona: no puede seguir elegido.
-									if (resultado === "fuera" && domicilio) onEntrega("");
-								})
-							}
-							disabled={cobertura.estado === "buscando"}
-						>
-							<Icono nombre="ubicacion" />
-							{cobertura.estado === "buscando"
-								? "Comprobando…"
-								: "Comprobar cobertura"}
-						</button>
-						<p className="chico">
-							Usamos tu ubicación solo aquí, para ver si llegamos a tu zona. No
-							se envía ni se guarda.
-						</p>
-						{cobertura.estado !== "sin-comprobar" &&
-							cobertura.estado !== "buscando" && (
-								<p
-									className={`resultado${cobertura.estado === "dentro" ? " ok" : ""}`}
-									role="status"
-								>
-									<Icono
-										nombre={cobertura.estado === "dentro" ? "ok" : "alerta"}
-									/>
-									<span>{mensajeCobertura(cobertura.estado, nombreSede)}</span>
-								</p>
-							)}
-					</div>
-				)}
 
 				<label className="casilla">
 					<input type="checkbox" disabled />
 					<span>
-						Guardar mi información y consultar más rápidamente la próxima vez{" "}
-						<MarcaPorValidar />
+						Guardar mi información y consultar más rápidamente la próxima vez
 					</span>
 				</label>
 			</section>
+
+			{entrega && (
+				<section className="bloque-form" aria-labelledby="t-metodo">
+					<h2 id="t-metodo">
+						{domicilio ? "Métodos de envío" : "Punto de recogida"}
+					</h2>
+					<div className="metodo">
+						<Icono nombre="ok" />
+						<div>
+							<strong>
+								{domicilio
+									? `Domicilio desde ${nombreSede.replace(/^Sede /, "sede ")}`
+									: nombreSede}
+							</strong>
+							<span>
+								{domicilio
+									? `Hasta ${sede?.radio_domicilio_km ?? 5} km en línea recta.`
+									: `${sede?.direccion}, Bogotá · ${sede?.horarios[0].horas.split(" Cierre por almuerzo:")[0]}`}
+							</span>
+						</div>
+						<span className="metodo-precio">
+							{domicilio ? "Por confirmar" : "Sin costo"}
+						</span>
+					</div>
+				</section>
+			)}
+			{/* El resultado sigue visible al salir de domicilio para poder elegir recogida. */}
+			{(domicilio || fuera) && (
+				<div className="cobertura">
+					<button
+						type="button"
+						className="boton"
+						onClick={() =>
+							cobertura.comprobar((resultado) => {
+								// «Domicilio» queda deshabilitado fuera de la zona: no puede seguir elegido.
+								if (resultado === "fuera" && domicilio) onEntrega("");
+							})
+						}
+						disabled={cobertura.estado === "buscando"}
+					>
+						<Icono nombre="ubicacion" />
+						{cobertura.estado === "buscando"
+							? "Comprobando…"
+							: "Comprobar cobertura"}
+					</button>
+					<p className="chico">
+						Usamos tu ubicación solo aquí, para ver si llegamos a tu zona. No se
+						envía ni se guarda.
+					</p>
+					{cobertura.estado !== "sin-comprobar" &&
+						cobertura.estado !== "buscando" && (
+							<p
+								className={`resultado${cobertura.estado === "dentro" ? " ok" : ""}`}
+								role="status"
+							>
+								<Icono
+									nombre={cobertura.estado === "dentro" ? "ok" : "alerta"}
+								/>
+								<span>{mensajeCobertura(cobertura.estado, nombreSede)}</span>
+							</p>
+						)}
+				</div>
+			)}
 
 			<section className="bloque-form" aria-labelledby="t-pago">
 				<h2 id="t-pago">Pago</h2>

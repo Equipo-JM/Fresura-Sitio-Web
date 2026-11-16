@@ -209,12 +209,16 @@ export function mensajePedido({
 		);
 		for (const grupo of producto.grupos_opciones) {
 			const elegidas = linea.seleccion[grupo.id] ?? [];
-			if (elegidas.length === 0) continue;
+			if (elegidas.length === 0 && grupo.id !== "toppings") continue;
 			const nombres = grupo.opciones
 				.filter((o) => elegidas.includes(o.id))
 				.map((o) => o.nombre);
-			partes.push(`   ${grupo.nombre}: ${nombres.join(", ")}`);
+			partes.push(
+				`   ${grupo.nombre}: ${nombres.length ? nombres.join(", ") : "ninguno"}`,
+			);
 		}
+		if (!producto.grupos_opciones.some((grupo) => grupo.id === "toppings"))
+			partes.push("   Toppings: ninguno");
 		if (linea.indicaciones.trim()) {
 			partes.push(`   Indicaciones: ${linea.indicaciones.trim()}`);
 		}
@@ -227,7 +231,7 @@ export function mensajePedido({
 	partes.push(`*Correo:* ${datos.correo.trim()}`);
 	partes.push(`*Teléfono:* ${datos.telefono.trim()}`);
 	partes.push(
-		`*Entrega:* ${entrega === "domicilio" ? "Domicilio" : `Recoger en ${sede ? `${sede.nombre} (${sede.direccion})` : "la sede"}`}`,
+		`*Entrega:* ${entrega === "domicilio" ? "Domicilio" : `Recoger en ${sede ? sede.nombre.replace(/^Sede /, "sede ") : "la sede"}`}`,
 	);
 	if (entrega === "domicilio") {
 		if (datos.empresa.trim()) partes.push(`*Empresa:* ${datos.empresa.trim()}`);

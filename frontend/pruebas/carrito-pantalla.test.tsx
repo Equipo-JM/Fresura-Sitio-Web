@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import respaldo from "../public/contenido-respaldo.json";
@@ -76,17 +76,24 @@ describe("pantalla del carrito", () => {
 		fireEvent.click(screen.getByRole("radio", { name: /recoger en/i }));
 		escribir(/^nombre/i, "Ana");
 		escribir(/apellidos/i, "Ruiz");
-		fireEvent.click(screen.getByRole("button", { name: "Revisar pedido" }));
+		fireEvent.click(
+			screen.getAllByRole("button", { name: "Revisar pedido" })[0],
+		);
 
 		const enviar = screen.getByRole("link", {
 			name: /enviar pedido por whatsapp/i,
 		});
 		// Al recoger, el mensaje nombra la sede del contenido, no un texto fijo.
 		expect(decodeURIComponent(enviar.getAttribute("href") ?? "")).toContain(
-			"Recoger en Sede U Nacional",
+			"Recoger en sede U Nacional",
 		);
 		enviar.addEventListener("click", (e) => e.preventDefault());
 		fireEvent.click(enviar);
+		expect(
+			within(screen.getByRole("navigation", { name: "Pasos del pedido" }))
+				.getAllByRole("listitem")
+				.every((paso) => paso.classList.contains("hecho")),
+		).toBe(true);
 		fireEvent.click(
 			screen.getByRole("button", { name: "Empezar otro pedido" }),
 		);
@@ -105,14 +112,16 @@ describe("pantalla del carrito", () => {
 
 		// El cliente de Supabase reintenta ante un 503 antes de rendirse.
 		expect(
-			await screen.findByText(
+			await screen.findAllByText(
 				/consulta precios por whatsapp/i,
 				{},
 				{ timeout: 8000 },
 			),
-		).toBeInTheDocument();
+		).not.toHaveLength(0);
 		expect(
-			screen.getByRole("link", { name: /pedir por whatsapp/i }),
+			within(screen.getByRole("main")).getByRole("link", {
+				name: "Escríbenos",
+			}),
 		).toHaveAttribute("href", expect.stringContaining("https://wa.me/"));
 		expect(
 			screen.queryByRole("button", { name: "Continuar a la entrega" }),

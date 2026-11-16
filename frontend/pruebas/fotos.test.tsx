@@ -22,6 +22,24 @@ function mostrarTarjeta(ruta: string) {
 }
 
 describe("fotos de producto", () => {
+	it("un precio pendiente de la fuente principal se anuncia por confirmar", () => {
+		render(
+			<MemoryRouter>
+				<TarjetaProducto
+					producto={{
+						...producto,
+						presentaciones: producto.presentaciones.map((p) => ({
+							...p,
+							precio: null,
+						})),
+					}}
+				/>
+			</MemoryRouter>,
+		);
+		expect(
+			screen.getByRole("link", { name: /Precio por confirmar/ }),
+		).toBeInTheDocument();
+	});
 	it("las rutas de ejemplo (.invalid) no cuentan como foto", () => {
 		expect(
 			tieneFoto({ ...producto.imagen, ruta: "https://ejemplo.invalid/a.webp" }),
@@ -31,9 +49,12 @@ describe("fotos de producto", () => {
 		);
 	});
 
-	it("sin foto real muestra el espacio «Foto del producto»", () => {
+	it("sin foto real Arma tu usa la textura de referencia de DD-43", () => {
 		mostrarTarjeta("https://ejemplo.invalid/fresas.webp");
-		expect(screen.getByText("Foto del producto")).toBeInTheDocument();
+		expect(
+			screen.getByRole("img", { name: "Textura de crema, foto de referencia" }),
+		).toHaveAttribute("src", "/ejemplos/textura-crema.webp");
+		expect(screen.getAllByText("Por validar").length).toBeGreaterThan(0);
 		expect(screen.queryByRole("img", { name: "Vaso de fresas" })).toBeNull();
 	});
 

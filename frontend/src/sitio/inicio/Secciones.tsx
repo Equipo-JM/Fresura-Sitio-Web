@@ -48,17 +48,60 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 								aria-hidden="true"
 							/>
 							<div className="polaroid-foto">
-								<FotoEjemplo
-									src={foto.src}
-									alt={foto.alt}
-									ancho={600}
-									alto={600}
-								/>
+								{i === 1 ? (
+									<div className="foto-pendiente fondo-dust">
+										<img
+											src="/marca/fresa-flamingo.svg"
+											alt=""
+											width="72"
+											height="102"
+										/>
+										<span className="pv">Publicación por validar</span>
+									</div>
+								) : (
+									<>
+										<span className="pv pv-foto">Por validar</span>
+										<FotoEjemplo
+											src={
+												i === 2 ? "/ejemplos/reciente-interior.webp" : foto.src
+											}
+											alt={
+												i === 2
+													? "Interior de Fresura con dos sillones rosados, foto de referencia"
+													: foto.alt
+											}
+											ancho={600}
+											alto={600}
+											marcada={false}
+										/>
+									</>
+								)}
 							</div>
 							<p className="polaroid-pie">{usuario}</p>
 						</li>
 					))}
 				</ul>
+				<p className="reciente-otras">
+					También estamos en{" "}
+					<a
+						className="enlace-texto"
+						href={contenido.negocio.redes.tiktok ?? undefined}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						TikTok
+					</a>{" "}
+					y{" "}
+					<a
+						className="enlace-texto"
+						href={contenido.negocio.redes.facebook ?? undefined}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Facebook
+					</a>
+					.
+				</p>
 			</div>
 		</section>
 	);
@@ -86,7 +129,7 @@ export function Calificacion({
 		>
 			<div className="envoltura google">
 				<div className="google-espacio" aria-hidden="true">
-					Logo de Google
+					Espacio para el logo de Google
 				</div>
 				<div className="google-texto">
 					<h2 id="titulo-google">
@@ -122,45 +165,77 @@ export function Calificacion({
 }
 
 /** Sedes con su dirección, horario y enlace para llegar. */
-export function Sedes({ contenido }: { contenido: Contenido }) {
+export function Sedes({
+	contenido,
+	pagina = false,
+}: {
+	contenido: Contenido;
+	pagina?: boolean;
+}) {
+	const TituloSede = pagina ? "h2" : "h3";
 	return (
 		<section
-			className="seccion con-toldo"
+			className={pagina ? "sedes-pagina" : "seccion con-toldo"}
 			id="sedes"
-			aria-labelledby="titulo-sedes"
+			aria-labelledby={pagina ? undefined : "titulo-sedes"}
+			aria-label={pagina ? "Sedes" : undefined}
 		>
 			<div className="envoltura">
-				<div className="capa-encabezado">
-					<h2 id="titulo-sedes" tabIndex={-1}>
-						Sedes
-					</h2>
-					<p className="capa-frase">¿Cuál te queda cerca?</p>
-					<p className="capa-dato">Mismos productos y precios en ambas.</p>
-				</div>
+				{!pagina && (
+					<div className="capa-encabezado">
+						<h2 id="titulo-sedes" tabIndex={-1}>
+							Sedes
+						</h2>
+						<p className="capa-frase">¿Cuál te queda cerca?</p>
+						<p className="capa-dato">Mismos productos y precios en ambas.</p>
+					</div>
+				)}
 				<div className="sedes-grid">
 					{contenido.negocio.sedes.map((sede) => (
 						<article className="sede" key={sede.id}>
+							<div className="sede-mapa">
+								<strong>Ubicación en Google Maps</strong>
+								<span>Toca «Cómo llegar» para abrirla</span>
+							</div>
 							<div className="sede-cuerpo">
-								<h3>{sede.nombre}</h3>
+								<TituloSede>{sede.nombre}</TituloSede>
 								<p className="etiqueta-sede">
-									{sede.atiende_pedidos
-										? "Recogida y domicilio hasta 5 km en línea recta"
-										: "Punto de venta"}
+									{sede.atiende_pedidos ? (
+										<>
+											Recogida y domicilios hasta {sede.radio_domicilio_km} km
+											en línea recta <MarcaPorValidar />
+										</>
+									) : (
+										"Punto de venta"
+									)}
 								</p>
 								<p>{sede.direccion}, Bogotá</p>
 								<table className="horario">
-									<caption className="oculto">Horario de {sede.nombre}</caption>
+									<caption className="oculto">Horario</caption>
 									<tbody>
-										{sede.horarios.map((h) => (
-											<tr key={h.dias}>
-												<th scope="row">{h.dias}</th>
-												<td>{h.horas}</td>
-											</tr>
-										))}
+										{sede.horarios
+											.flatMap((h) => {
+												const [horas, almuerzo] = h.horas.split(
+													" Cierre por almuerzo: ",
+												);
+												return almuerzo
+													? [
+															{ dias: h.dias, horas },
+															{ dias: "Cierre por almuerzo", horas: almuerzo },
+														]
+													: [h];
+											})
+											.map((h) => (
+												<tr key={h.dias}>
+													<th scope="row">{h.dias}</th>
+													<td>{h.horas}</td>
+												</tr>
+											))}
 									</tbody>
 								</table>
 								<a
 									className="enlace"
+									aria-label={`Cómo llegar a la sede ${sede.nombre.replace(/^Sede /, "")}, se abre en otra pestaña`}
 									href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${sede.direccion}, Bogotá, Colombia`)}`}
 									target="_blank"
 									rel="noopener noreferrer"
@@ -168,7 +243,8 @@ export function Sedes({ contenido }: { contenido: Contenido }) {
 									Cómo llegar
 									<span className="oculto">
 										{" "}
-										a {sede.nombre}, se abre en otra pestaña
+										a la sede {sede.nombre.replace(/^Sede /, "")}, se abre en
+										otra pestaña
 									</span>
 								</a>
 							</div>

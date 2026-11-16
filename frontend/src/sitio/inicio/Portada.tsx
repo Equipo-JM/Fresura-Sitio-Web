@@ -19,7 +19,7 @@ export function Portada({
 }: {
 	titulo: string;
 	texto: string;
-	sedes: number;
+	sedes: string[];
 }) {
 	const raiz = useRef<HTMLElement>(null);
 	useEntradaPortada(raiz);
@@ -28,6 +28,11 @@ export function Portada({
 	return (
 		<>
 			<section className="portada" aria-labelledby="titulo-portada" ref={raiz}>
+				<img
+					className="deco portada-trazo"
+					src="/marca/trazo-1-we-peep.svg"
+					alt=""
+				/>
 				<div className="envoltura portada-grid">
 					<div className="portada-texto">
 						<h1 id="titulo-portada" aria-label={titulo}>
@@ -35,9 +40,22 @@ export function Portada({
 								// biome-ignore lint/suspicious/noArrayIndexKey: las palabras del título son una lista fija que no se reordena
 								<Fragment key={`${palabra}-${i}`}>
 									{/* El espacio va fuera de la caja: dentro de un inline-block se pierde y las palabras se pegan. */}
-									<span className="portada-palabra-caja">
-										<span className="portada-palabra">{palabra}</span>
-									</span>{" "}
+									{titulo.endsWith("como tú") &&
+									i === titulo.split(" ").length - 2 ? (
+										<em>
+											<span className="portada-palabra-caja">
+												<span className="portada-palabra">como</span>
+											</span>{" "}
+											<span className="portada-palabra-caja">
+												<span className="portada-palabra">tú</span>
+											</span>
+										</em>
+									) : titulo.endsWith("como tú") &&
+										i === titulo.split(" ").length - 1 ? null : (
+										<span className="portada-palabra-caja">
+											<span className="portada-palabra">{palabra}</span>
+										</span>
+									)}{" "}
 								</Fragment>
 							))}
 						</h1>
@@ -54,12 +72,15 @@ export function Portada({
 							<Icono nombre="ubicacion" />
 							<span>
 								<strong>
-									{sedes === 2 ? "Dos sedes" : `${sedes} sedes`} en Bogotá
-								</strong>
+									{sedes.length === 2 ? "Dos sedes" : `${sedes.length} sedes`}{" "}
+									en Bogotá:
+								</strong>{" "}
+								{sedes.map((s) => s.replace(/^Sede /, " ").trim()).join(" y ")}
 							</span>
 						</p>
 					</div>
 					<div className="portada-foto">
+						{!fotoCambiada && <span className="pv pv-foto">Por validar</span>}
 						<div className="arco portada-arco">
 							{fotoCambiada ? (
 								<img
@@ -73,6 +94,7 @@ export function Portada({
 									{...FOTO_PORTADA}
 									tamanos="(min-width: 900px) 40vw, 90vw"
 									prioridad
+									marcada={false}
 								/>
 							)}
 						</div>

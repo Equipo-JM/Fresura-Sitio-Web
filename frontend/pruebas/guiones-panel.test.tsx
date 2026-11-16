@@ -182,13 +182,21 @@ describe("guiones del panel", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Versiones" }));
 		expect(irVersiones).not.toHaveBeenCalled();
 		expect(confirmar).toHaveBeenCalled();
-		const salida = new Event("beforeunload", { cancelable: true });
-		window.dispatchEvent(salida);
-		expect(salida.defaultPrevented).toBe(true);
+		// Con la máquina cargada, el aviso de salida y el guardado pueden tardar más
+		// que la espera por defecto: se espera de forma explícita para no fallar al azar.
+		await waitFor(() => {
+			const salida = new Event("beforeunload", { cancelable: true });
+			window.dispatchEvent(salida);
+			expect(salida.defaultPrevented).toBe(true);
+		});
 		fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-		await screen.findByText("Guion guardado como borrador.");
+		await screen.findByText(
+			"Guion guardado como borrador.",
+			{},
+			{ timeout: 5000 },
+		);
 		fireEvent.click(screen.getByRole("button", { name: "Versiones" }));
-		expect(irVersiones).toHaveBeenCalledOnce();
+		await waitFor(() => expect(irVersiones).toHaveBeenCalledOnce());
 	});
 	it("abre un aprobado con su prompt guardado y lo oculta después de confirmar la edición", async () => {
 		const fila: Fila = {

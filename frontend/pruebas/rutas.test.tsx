@@ -22,7 +22,7 @@ describe("rutas del sitio", () => {
 	it("muestra el aviso breve en /privacidad y dice que la política está en revisión", () => {
 		mostrarRuta("/privacidad");
 		expect(
-			screen.getByRole("heading", { level: 1, name: /tratamiento de datos/i }),
+			screen.getByRole("heading", { level: 1, name: /política de datos/i }),
 		).toBeInTheDocument();
 		expect(screen.getByText(/está en revisión/i)).toBeInTheDocument();
 		expect(screen.getByText(/este sitio no los guarda/i)).toBeInTheDocument();

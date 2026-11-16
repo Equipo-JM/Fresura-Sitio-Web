@@ -3,8 +3,8 @@
 	"estado": "ejemplo",
 	"negocio": {
 		"presentacion": {
-			"titulo": "Ven, date un gusto bonito",
-			"texto": "Fresas con crema hechas a tu manera: elige el tamaño, tus toppings y pídelas por WhatsApp."
+			"titulo": "Ven, date un gusto bonito… como tú",
+			"texto": "Fresas con crema a tu manera: eliges el tamaño, le pones tu toque y terminamos el pedido por WhatsApp."
 		},
 		"whatsapp": "573000000000",
 		"sedes": [
@@ -64,7 +64,7 @@
 			"id": "fresitas-arma-tu-fresita",
 			"categoria": "fresitas",
 			"nombre": "Arma tu Fresita",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Arma tu Fresita, foto por validar",
@@ -83,7 +83,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -312,7 +313,7 @@
 			"id": "fresitas-caribena",
 			"categoria": "fresitas",
 			"nombre": "Caribeña",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Caribeña, foto por validar",
@@ -331,7 +332,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -560,7 +562,7 @@
 			"id": "fresitas-oscura",
 			"categoria": "fresitas",
 			"nombre": "Oscura",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Oscura, foto por validar",
@@ -579,7 +581,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -808,7 +811,7 @@
 			"id": "fresitas-chocolatosa",
 			"categoria": "fresitas",
 			"nombre": "Chocolatosa",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Chocolatosa, foto por validar",
@@ -827,7 +830,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -1056,7 +1060,7 @@
 			"id": "fresitas-frutos-secos",
 			"categoria": "fresitas",
 			"nombre": "Frutos Secos",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Frutos Secos, foto por validar",
@@ -1075,7 +1079,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping"
+				"Incluye 1 base, 1 espolvoreado, 1 salsa y 1 topping",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -1304,7 +1309,7 @@
 			"id": "fresotas-arma-tu-fresota",
 			"categoria": "fresotas",
 			"nombre": "Arma tu Fresota",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Arma tu Fresota, foto por validar",
@@ -1323,7 +1328,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -1552,7 +1558,7 @@
 			"id": "fresotas-chocolatosa",
 			"categoria": "fresotas",
 			"nombre": "Chocolatosa",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Chocolatosa, foto por validar",
@@ -1571,7 +1577,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -1800,7 +1807,7 @@
 			"id": "fresotas-acida",
 			"categoria": "fresotas",
 			"nombre": "Ácida",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Ácida, foto por validar",
@@ -1819,7 +1826,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -2048,7 +2056,7 @@
 			"id": "fresotas-sorpresa",
 			"categoria": "fresotas",
 			"nombre": "Sorpresa",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Sorpresa, foto por validar",
@@ -2067,7 +2075,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -2296,7 +2305,7 @@
 			"id": "fresotas-explosiva",
 			"categoria": "fresotas",
 			"nombre": "Explosiva",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Explosiva, foto por validar",
@@ -2315,7 +2324,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas y 2 toppings",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -2544,7 +2554,7 @@
 			"id": "fresuras-arma-tu-fresura",
 			"categoria": "fresuras",
 			"nombre": "Arma tu Fresura",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Arma tu Fresura, foto por validar",
@@ -2563,7 +2573,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -2792,7 +2803,7 @@
 			"id": "fresuras-acida",
 			"categoria": "fresuras",
 			"nombre": "Ácida",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Ácida, foto por validar",
@@ -2811,7 +2822,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -3040,7 +3052,7 @@
 			"id": "fresuras-top",
 			"categoria": "fresuras",
 			"nombre": "Top",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Top, foto por validar",
@@ -3059,7 +3071,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -3288,7 +3301,7 @@
 			"id": "fresuras-dulce",
 			"categoria": "fresuras",
 			"nombre": "Dulce",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Dulce, foto por validar",
@@ -3307,7 +3320,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -3536,7 +3550,7 @@
 			"id": "fresuras-fit",
 			"categoria": "fresuras",
 			"nombre": "Fit",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fit, foto por validar",
@@ -3555,7 +3569,8 @@
 				}
 			],
 			"caracteristicas": [
-				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado"
+				"Incluye 1 base, 2 espolvoreados, 2 salsas, 2 toppings y helado",
+				"Disponible en las sedes U Nacional y U Javeriana"
 			],
 			"grupos_opciones": [
 				{
@@ -3784,7 +3799,7 @@
 			"id": "chocolate-fresitas",
 			"categoria": "chocolate",
 			"nombre": "Fresitas",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresitas, foto por validar",
@@ -3802,14 +3817,14 @@
 					"precio": 14500
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "chocolate-fresotas",
 			"categoria": "chocolate",
 			"nombre": "Fresotas",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresotas, foto por validar",
@@ -3827,14 +3842,14 @@
 					"precio": 20500
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "chocolate-fresuras",
 			"categoria": "chocolate",
 			"nombre": "Fresuras",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresuras, foto por validar",
@@ -3852,14 +3867,14 @@
 					"precio": 24100
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "miti-fresitas",
 			"categoria": "miti",
 			"nombre": "Fresitas",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresitas, foto por validar",
@@ -3877,14 +3892,14 @@
 					"precio": 15700
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "miti-fresotas",
 			"categoria": "miti",
 			"nombre": "Fresotas",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresotas, foto por validar",
@@ -3902,14 +3917,14 @@
 					"precio": 21700
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "miti-fresuras",
 			"categoria": "miti",
 			"nombre": "Fresuras",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresuras, foto por validar",
@@ -3927,14 +3942,14 @@
 					"precio": 26100
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "compartir-ensalada-de-frutas",
 			"categoria": "compartir",
 			"nombre": "Ensalada de frutas",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Ensalada de frutas, foto por validar",
@@ -3952,14 +3967,14 @@
 					"precio": 25900
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "compartir-merengon",
 			"categoria": "compartir",
 			"nombre": "Merengón",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Merengón, foto por validar",
@@ -3977,14 +3992,14 @@
 					"precio": 21500
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		},
 		{
 			"id": "compartir-fresubowl",
 			"categoria": "compartir",
 			"nombre": "Fresubowl",
-			"descripcion": "Descripción por validar.",
+			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresubowl, foto por validar",
@@ -4002,7 +4017,7 @@
 					"precio": 21000
 				}
 			],
-			"caracteristicas": [],
+			"caracteristicas": ["Disponible en las sedes U Nacional y U Javeriana"],
 			"grupos_opciones": []
 		}
 	],

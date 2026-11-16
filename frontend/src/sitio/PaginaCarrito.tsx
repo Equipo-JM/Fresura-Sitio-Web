@@ -6,14 +6,18 @@ import {
 	DATOS_VACIOS,
 	type DatosEntrega,
 	type Entrega,
+	mensajePedido,
+	nombreProducto,
 	pesos,
+	precioLinea,
 	totalCarrito,
 	validarDatos,
 } from "../compartido/carrito/reglas";
 import { useCarrito } from "../compartido/carrito/useCarrito";
 import { Icono } from "../compartido/componentes/Icono";
-import { AvisoRespaldo } from "./AvisoRespaldo";
+import { CompraDesactivada } from "./CompraDesactivada";
 import { ConContenido } from "./ConContenido";
+import { MiniaturaProducto } from "./carrito/MiniaturaProducto";
 import { PasoEntrega } from "./carrito/PasoEntrega";
 import { PasoPedido } from "./carrito/PasoPedido";
 import { PasoRevision } from "./carrito/PasoRevision";
@@ -35,12 +39,7 @@ export function PaginaCarrito() {
 		<ConContenido>
 			{(contenido, origen) =>
 				origen === "respaldo" ? (
-					<section className="pagina">
-						<div className="envoltura texto-largo">
-							<h1>Carrito</h1>
-							<AvisoRespaldo whatsapp={contenido.negocio.whatsapp} />
-						</div>
-					</section>
+					<CompraDesactivada whatsapp={contenido.negocio.whatsapp} />
 				) : (
 					<Carrito contenido={contenido} />
 				)
@@ -56,7 +55,19 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 	const [datos, setDatos] = useState<DatosEntrega>(DATOS_VACIOS);
 	const [errores, setErrores] = useState<ReturnType<typeof validarDatos>>({});
 	const [resumenAbierto, setResumenAbierto] = useState(false);
+	const [enviado, setEnviado] = useState(false);
 	const { total, pendiente } = totalCarrito(lineas, contenido.productos);
+	const texto = mensajePedido({
+		lineas,
+		productos: contenido.productos,
+		categorias: contenido.categorias,
+		datos,
+		entrega,
+		total,
+		pendiente,
+		sede: contenido.negocio.sedes.find((s) => s.atiende_pedidos),
+	});
+	const enlace = `https://wa.me/${contenido.negocio.whatsapp}?text=${encodeURIComponent(texto)}`;
 
 	// Si el carrito se vacía (se quitó lo último), los pasos 2 y 3 no tienen
 	// sentido: se vuelve al paso 1, que muestra el carrito vacío.
@@ -69,49 +80,72 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 		setEntrega("");
 		setDatos(DATOS_VACIOS);
 		setErrores({});
+		setEnviado(false);
 	}
 
 	function revisar() {
 		const nuevos = validarDatos(datos, entrega);
 		setErrores(nuevos);
 		if (Object.keys(nuevos).length === 0) setPaso(3);
+		else {
+			const orden = [
+				"correo",
+				"entrega",
+				"nombre",
+				"apellidos",
+				"direccion",
+				"barrio",
+				"ciudad",
+				"telefono",
+			] as const;
+			const primero = orden.find((campo) => nuevos[campo]);
+			document
+				.getElementById(
+					primero === "entrega" ? "entrega-domicilio" : `c-${primero}`,
+				)
+				?.focus();
+		}
 	}
 
 	return (
-		<section className="pagina">
+		<section className={lineas.length === 0 ? "pagina" : undefined}>
 			<div className="envoltura">
-				<nav className="pasos-nav" aria-label="Pasos del pedido">
-					<ol className="pasos">
-						{NOMBRES_PASOS.map((nombre, i) => {
-							const numero = (i + 1) as 1 | 2 | 3;
-							const actual = paso === numero;
-							const hecho = paso > numero;
-							return (
-								<li
-									className={`paso${actual ? " actual" : hecho ? " hecho" : ""}`}
-									key={nombre}
-									aria-current={actual ? "step" : undefined}
-								>
-									{hecho ? (
-										<button
-											type="button"
-											className="paso-num"
-											onClick={() => setPaso(numero)}
-											aria-label={`Volver a ${nombre}`}
+				{lineas.length > 0 && (
+					<nav className="pasos-nav" aria-label="Pasos del pedido">
+						{lineas.length > 0 && (
+							<ol className="pasos">
+								{NOMBRES_PASOS.map((nombre, i) => {
+									const numero = (i + 1) as 1 | 2 | 3;
+									const actual = paso === numero && !enviado;
+									const hecho = paso > numero || enviado;
+									return (
+										<li
+											className={`paso${actual ? " actual" : hecho ? " hecho" : ""}`}
+											key={nombre}
+											aria-current={actual ? "step" : undefined}
 										>
-											<Icono nombre="ok" />
-										</button>
-									) : (
-										<span className="paso-num" aria-hidden="true">
-											{numero}
-										</span>
-									)}
-									<span className="paso-texto">{nombre}</span>
-								</li>
-							);
-						})}
-					</ol>
-				</nav>
+											{hecho && !enviado ? (
+												<button
+													type="button"
+													className="paso-num"
+													onClick={() => setPaso(numero)}
+													aria-label={`Volver a ${nombre}`}
+												>
+													<Icono nombre="visto" />
+												</button>
+											) : (
+												<span className="paso-num" aria-hidden="true">
+													{enviado ? <Icono nombre="visto" /> : numero}
+												</span>
+											)}
+											<span className="paso-texto">{nombre}</span>
+										</li>
+									);
+								})}
+							</ol>
+						)}
+					</nav>
+				)}
 
 				{lineas.length === 0 && paso === 1 ? (
 					<PasoPedido contenido={contenido} onContinuar={() => setPaso(2)} />
@@ -137,11 +171,27 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 										const producto = contenido.productos.find(
 											(p) => p.id === linea.idProducto,
 										);
+										if (!producto) return null;
+										const presentacion = producto.presentaciones.find(
+											(p) => p.id === linea.idPresentacion,
+										);
+										const precio = precioLinea(producto, linea);
 										return (
 											<div className="item" key={claveLinea(linea)}>
+												<MiniaturaProducto
+													producto={producto}
+													cantidad={linea.cantidad}
+												/>
 												<span>
-													{producto?.nombre ?? "Producto"} × {linea.cantidad}
+													{nombreProducto(producto, contenido.categorias)}
+													<br />
+													<span className="chico">{presentacion?.nombre}</span>
 												</span>
+												<strong>
+													{precio === null
+														? "Precio por confirmar"
+														: pesos(precio)}
+												</strong>
 											</div>
 										);
 									})}
@@ -156,8 +206,8 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 										</p>
 									)}
 									<p className="chico">
-										El total no incluye domicilio. El total, el domicilio y el
-										pago se confirman por WhatsApp.
+										El total estimado no incluye promociones ni domicilio. El
+										total, el domicilio y el pago se confirman por WhatsApp.
 									</p>
 								</div>
 							</div>
@@ -191,12 +241,49 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 									datos={datos}
 									onEditar={() => setPaso(2)}
 									onNuevoPedido={nuevoPedido}
+									texto={texto}
+									enlace={enlace}
+									enviado={enviado}
+									onEnviar={() => setEnviado(true)}
 								/>
 							)}
 						</div>
 					</div>
 				)}
 			</div>
+			{lineas.length > 0 && !enviado && (
+				<div className="compra-barra oscuro carrito-barra">
+					<div className="envoltura">
+						<div className="barra-texto">
+							<span className="chico">Total estimado</span>
+							<strong className="precio-barra">{pesos(total)}</strong>
+						</div>
+						{paso === 1 ? (
+							<button
+								type="button"
+								className="boton"
+								onClick={() => setPaso(2)}
+							>
+								Continuar
+							</button>
+						) : paso === 2 ? (
+							<button type="submit" className="boton" form="form-carrito">
+								Revisar pedido
+							</button>
+						) : (
+							<a
+								className="boton"
+								href={enlace}
+								target="_blank"
+								rel="noopener noreferrer"
+								onClick={() => setEnviado(true)}
+							>
+								Enviar por WhatsApp
+							</a>
+						)}
+					</div>
+				</div>
+			)}
 		</section>
 	);
 }
