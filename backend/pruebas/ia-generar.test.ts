@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
 	clasificarErrorProveedor,
+	datosRegistroFallo,
 	ErrorIa,
+	estadoDelProveedor,
 	generarGuion,
 	type LlamarModelo,
 	type RespuestaModelo,
@@ -30,6 +32,8 @@ const limiteMinuto = errorApi(
 	429,
 	"Quota exceeded. quotaId: GenerateRequestsPerMinutePerProjectPerModel-FreeTier",
 );
+
+const saturado = errorApi(503, "The model is overloaded. UNAVAILABLE");
 
 /** Simula el proveedor con una respuesta (o un error) por llamada. */
 function proveedor(...pasos: (RespuestaModelo | Error)[]) {
@@ -144,6 +148,96 @@ describe("generarGuion", () => {
 		const llamar = proveedor(incompleto, limiteMinuto);
 		expect(await codigoDeError(generar(llamar))).toBe("ia_limite_minuto");
 		expect(llamar).toHaveBeenCalledTimes(2);
+	});
+
+	it("NT-06: si el principal está saturado (503) usa una vez el respaldo", async () => {
+		const llamar = proveedor(saturado, valido);
+		await expect(generar(llamar)).resolves.toMatchObject({
+			modelo: "respaldo",
+		});
+		expect(llamar.mock.calls.map(([p]) => p.modelo)).toEqual([
+			"principal",
+			"respaldo",
+		]);
+	});
+
+	it("NT-06: da ia_tiempo con el estado 503 si el respaldo también está saturado", async () => {
+		const llamar = proveedor(saturado, saturado);
+		const error = await generar(llamar).catch((e: unknown) => e);
+		expect(error).toBeInstanceOf(ErrorIa);
+		expect(error).toMatchObject({ codigo: "ia_tiempo", estadoProveedor: 503 });
+		expect(llamar).toHaveBeenCalledTimes(2);
+	});
+
+	it("NT-06: si el principal se satura en el reintento por estructura, usa el respaldo", async () => {
+		const llamar = proveedor(incompleto, saturado, valido);
+		await expect(generar(llamar)).resolves.toMatchObject({
+			modelo: "respaldo",
+		});
+		expect(llamar).toHaveBeenCalledTimes(3);
+	});
+
+	it.each([
+		[500, "Internal"],
+		[400, "Bad request"],
+		[404, "Not found"],
+	])(
+		"no pasa al respaldo con un error %i y conserva el estado",
+		async (estado, mensaje) => {
+			const llamar = proveedor(errorApi(estado, mensaje));
+			const error = await generar(llamar).catch((e: unknown) => e);
+			expect(error).toMatchObject({
+				codigo: "ia_tiempo",
+				estadoProveedor: estado,
+			});
+			expect(llamar).toHaveBeenCalledTimes(1);
+		},
+	);
+
+	it("un tiempo agotado no lleva estado del proveedor", async () => {
+		const llamar = vi.fn<LlamarModelo>(
+			({ senal }) =>
+				new Promise((_resolver, rechazar) => {
+					senal.addEventListener("abort", () => rechazar(senal.reason));
+				}),
+		);
+		const error = await generar(llamar, 20).catch((e: unknown) => e);
+		expect(error).toMatchObject({ codigo: "ia_tiempo" });
+		expect((error as ErrorIa).estadoProveedor).toBeUndefined();
+	});
+});
+
+describe("estadoDelProveedor", () => {
+	it.each([
+		[saturado, 503],
+		[errorApi(400, "x"), 400],
+		[new TypeError("fetch failed"), undefined],
+		[{ status: "503" }, undefined],
+		[undefined, undefined],
+	])("%s → %s", (error, estado) => {
+		expect(estadoDelProveedor(error)).toBe(estado);
+	});
+});
+
+describe("datosRegistroFallo", () => {
+	it("DD-20: lleva fecha, tipo y estado del proveedor, sin el mensaje", () => {
+		const datos = datosRegistroFallo(
+			"ia_tiempo",
+			503,
+			new Date("2026-11-16T15:00:00Z"),
+		);
+		expect(datos).toEqual({
+			fecha: "2026-11-16T15:00:00.000Z",
+			tipo: "ia_tiempo",
+			estado_proveedor: 503,
+		});
+	});
+
+	it("omite el estado cuando no lo hay", () => {
+		expect(datosRegistroFallo("ia_tiempo", undefined, new Date(0))).toEqual({
+			fecha: "1970-01-01T00:00:00.000Z",
+			tipo: "ia_tiempo",
+		});
 	});
 });
 
