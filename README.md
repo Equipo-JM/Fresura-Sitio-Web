@@ -58,7 +58,7 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 | `frontend/pruebas/`                            | Pruebas de pantallas, carrito y lectura del contenido; `datos/` tiene el contenido de prueba             |
 | `backend/supabase/functions/_shared/esquemas/` | Esquemas Zod, únicos para el sitio, el panel y las funciones (contrato de contenido y guion)             |
 | `backend/supabase/functions/_shared/`          | Código común de las funciones: esqueleto de la petición, acceso de administrador, variables y respuestas |
-| `backend/supabase/functions/panel/`            | Función `panel`: `POST /publicar` y `POST /restaurar` (base lista; responden 501 hasta implementarse)    |
+| `backend/supabase/functions/panel/`            | Función `panel`: publica el borrador validado con control de revisión y restaura la versión anterior     |
 | `backend/supabase/functions/ia/`               | Función `ia`: genera guiones con Gemini (`POST /guion`); `POST /prompt-video` responde 501 por ahora     |
 | `backend/supabase/migrations/`                 | Tablas, permisos (RLS), bucket de fotos y semilla del contenido                                          |
 | `backend/pruebas/`                             | Pruebas de las funciones y de los esquemas; `datos/` tiene el ejemplo y los casos del contrato           |
@@ -120,7 +120,9 @@ Las dos validan el JWT en su código (`verify_jwt = false` en `backend/supabase/
 npm run supabase -- secrets set GEMINI_API_KEY=<clave> IA_MODELO=gemini-3.5-flash-lite IA_MODELO_RESPALDO=gemini-3.5-flash-lite ORIGENES_PERMITIDOS=http://localhost:5173
 ```
 
-En desarrollo, los dos modelos son Flash-Lite para no gastar el cupo de 3.8 Flash; por eso el paso al modelo de respaldo no se ejercita hasta la entrega, cuando `IA_MODELO=gemini-3.8-flash`. `ORIGENES_PERMITIDOS` lleva también la dirección del sitio desplegado, separada por comas. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEYS`, `SUPABASE_SECRET_KEYS` y `SUPABASE_JWKS` los pone Supabase; `panel` usará `SUPABASE_SECRET_KEYS` para publicar y restaurar.
+En desarrollo, los dos modelos son Flash-Lite para no gastar el cupo de 3.8 Flash; por eso el paso al modelo de respaldo no se ejercita hasta la entrega, cuando `IA_MODELO=gemini-3.8-flash`. `ORIGENES_PERMITIDOS` lleva también la dirección del sitio desplegado, separada por comas. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEYS`, `SUPABASE_SECRET_KEYS` y `SUPABASE_JWKS` los pone Supabase; `panel` usa la clave `default` de `SUPABASE_SECRET_KEYS` para publicar y restaurar.
+
+`panel/index.ts` conecta el acceso y el cliente; `panel/rutas.ts` recibe el cliente para probar las operaciones sin una base real. `POST /publicar` exige `{revision, contenido_real}`; `POST /restaurar`, `{}`. Ambas devuelven `{publicada_en}`. La publicación valida el contrato completo antes de llamar a `publicar_borrador`; si cambia la aprobación a `real`, guarda con control de revisión antes de publicar. Con `contenido_real: false` conserva el estado del borrador (hipótesis pendiente de confirmación por Miguel, DD-26).
 
 ```bash
 npm run functions:deploy -- ia
