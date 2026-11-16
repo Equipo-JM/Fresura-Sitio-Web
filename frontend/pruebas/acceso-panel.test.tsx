@@ -18,6 +18,7 @@ const verify = vi.fn();
 const signIn = vi.fn();
 
 const clienteFalso = {
+	from: vi.fn(() => ({ select: async () => ({ data: [], error: null }) })),
 	auth: {
 		getSession: async () => ({
 			data: {
@@ -65,14 +66,17 @@ vi.mock("../src/compartido/supabase/clientePanel", () => ({
 	panelConfigurado: () => true,
 }));
 
-function mostrarPanel() {
+function mostrarPanel(vistaPrevia = false) {
 	const cliente = new QueryClient({
 		defaultOptions: { queries: { retry: false } },
 	});
 	render(
 		<QueryClientProvider client={cliente}>
-			<MemoryRouter initialEntries={["/admin"]}>
-				<RutasDelSitio />
+			<MemoryRouter
+				initialEntries={[vistaPrevia ? "/admin/vista-previa" : "/admin"]}
+				basename={vistaPrevia ? "/admin/vista-previa" : undefined}
+			>
+				<RutasDelSitio vistaPrevia={vistaPrevia} />
 			</MemoryRouter>
 		</QueryClientProvider>,
 	);
@@ -105,7 +109,22 @@ describe("ruta /admin con acceso real", () => {
 	beforeEach(() => {
 		verify.mockReset();
 		signIn.mockReset();
+		clienteFalso.from.mockClear();
 	});
+
+	it.each([false, true])(
+		"la vista previa no consulta datos sin completar el acceso: sesión %s",
+		async (haySesion) => {
+			sesion = { haySesion, nivel: "aal1", factores: 1, rol: "admin" };
+			mostrarPanel(true);
+			if (haySesion) await screen.findByLabelText("Código de 6 dígitos");
+			else await screen.findByLabelText("Correo");
+			expect(clienteFalso.from).not.toHaveBeenCalled();
+			expect(
+				screen.queryByRole("complementary", { name: "Vista previa" }),
+			).not.toBeInTheDocument();
+		},
+	);
 
 	it("sin sesión muestra el formulario y no envía sin el token de Turnstile", async () => {
 		sesion = { haySesion: false, nivel: "aal1", factores: 0 };
@@ -149,11 +168,11 @@ describe("ruta /admin con acceso real", () => {
 		});
 	});
 
-	it("con el código y rol admin muestra la sección de fotos", async () => {
+	it("con el código y rol admin muestra versiones", async () => {
 		sesion = { haySesion: true, nivel: "aal2", factores: 1, rol: "admin" };
 		mostrarPanel();
 		expect(
-			await screen.findByRole("heading", { level: 1, name: "Fotos" }),
+			await screen.findByRole("heading", { level: 1, name: "Versiones" }),
 		).toBeInTheDocument();
 		expect(screen.getByText("Sesión verificada")).toBeInTheDocument();
 	});

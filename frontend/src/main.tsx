@@ -19,12 +19,16 @@ if (!raiz) {
 }
 
 const clienteConsultas = new QueryClient();
+// La base conserva los enlaces del sitio dentro del borrador, incluso al recargar.
+const vistaPrevia = /^\/admin\/vista-previa(?:\/|$)/.test(
+	window.location.pathname,
+);
 
 createRoot(raiz).render(
 	<StrictMode>
 		<QueryClientProvider client={clienteConsultas}>
-			<BrowserRouter>
-				<RutasDelSitio />
+			<BrowserRouter basename={vistaPrevia ? "/admin/vista-previa" : undefined}>
+				<RutasDelSitio vistaPrevia={vistaPrevia} />
 			</BrowserRouter>
 		</QueryClientProvider>
 	</StrictMode>,
