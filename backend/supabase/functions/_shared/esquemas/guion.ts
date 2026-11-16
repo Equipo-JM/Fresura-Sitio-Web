@@ -41,6 +41,15 @@ export function maximoCaracteresVoz(duracion: DuracionVideo): number {
 	return duracion * 20;
 }
 
+/**
+ * Caracteres de voz que se le piden al modelo: el 80 % del máximo. Los modelos
+ * cuentan mal los caracteres (con 300 pedidos llegaron a devolver 355), así que
+ * se pide con margen y la validación sigue usando `maximoCaracteresVoz`.
+ */
+export function objetivoCaracteresVoz(duracion: DuracionVideo): number {
+	return Math.floor(maximoCaracteresVoz(duracion) * 0.8);
+}
+
 const texto = (maximo: number) => z.string().min(1).max(maximo);
 
 const escena = z.strictObject({

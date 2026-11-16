@@ -6,7 +6,9 @@ import {
 import {
 	type InstruccionGuion,
 	maximoCaracteresVoz,
+	objetivoCaracteresVoz,
 } from "../../supabase/functions/_shared/esquemas/guion";
+import { crearEsquemaPromptVideo } from "../../supabase/functions/_shared/esquemas/prompt-video";
 import {
 	armarPromptGuion,
 	datosDelProducto,
@@ -117,7 +119,7 @@ describe("límite de la voz (DT-01, 25.4)", () => {
 			{ ...instruccion, duracion_s: 15 },
 			producto,
 		);
-		expect(usuario).toContain("300 caracteres");
+		expect(usuario).toContain("240 caracteres");
 	});
 
 	it("el prompt de avatar da el máximo exacto y permite resumir la voz", () => {
@@ -125,8 +127,34 @@ describe("límite de la voz (DT-01, 25.4)", () => {
 			red: "instagram",
 			duracion_s: 15,
 		});
-		expect(usuario).toContain("300 caracteres");
+		expect(usuario).toContain("240 caracteres");
 		expect(sistema).toMatch(/resúm/i);
+	});
+
+	it("al modelo se le pide el 80 % del máximo, por margen", () => {
+		expect(objetivoCaracteresVoz(15)).toBe(240);
+		expect(objetivoCaracteresVoz(30)).toBe(480);
+		expect(objetivoCaracteresVoz(60)).toBe(960);
+	});
+
+	it("la validación del avatar sigue en el máximo y dice cuánto sumó", () => {
+		const guion = guionDePrueba();
+		const esquema = crearEsquemaPromptVideo("avatar", guion, 15);
+		const salida = (largo: number) => ({
+			estilo_general: "Presentador cercano",
+			escenas: guion.escenas.map((_escena, i) => ({
+				orden: i + 1,
+				texto_avatar: "a".repeat(largo),
+				indicaciones: "Mira a cámara",
+			})),
+		});
+		const n = guion.escenas.length;
+		expect(esquema.safeParse(salida(Math.floor(300 / n))).success).toBe(true);
+		const resultado = esquema.safeParse(salida(Math.floor(300 / n) + 1));
+		expect(resultado.success).toBe(false);
+		expect(resultado.error?.issues[0].message).toMatch(
+			/suma \d+ caracteres y el máximo es 300/,
+		);
 	});
 
 	it("el prompt de escenas no lleva el límite del avatar", () => {

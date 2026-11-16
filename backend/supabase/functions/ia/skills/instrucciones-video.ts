@@ -1,7 +1,7 @@
 import {
 	type Guion,
 	type InstruccionGuion,
-	maximoCaracteresVoz,
+	objetivoCaracteresVoz,
 } from "../../_shared/esquemas/guion.ts";
 import type { HerramientaVideo } from "../../_shared/esquemas/prompt-video.ts";
 import type { PromptGuion } from "../proveedor/generar.ts";
@@ -36,6 +36,6 @@ export function armarPromptVideo(
 	).replaceAll("<", "\\u003c");
 	return {
 		sistema: `${SISTEMA_VIDEO}\n\n${REGLAS_HERRAMIENTA[herramienta]}`,
-		usuario: `Adapta el guion aprobado a ${herramienta} para un video vertical 9:16.${herramienta === "avatar" ? ` El texto_avatar de todas las escenas suma como máximo ${maximoCaracteresVoz(instruccion.duracion_s)} caracteres.` : ""}\n\n<datos>\n${datos}\n</datos>`,
+		usuario: `Adapta el guion aprobado a ${herramienta} para un video vertical 9:16.${herramienta === "avatar" ? ` El texto_avatar de todas las escenas suma como máximo ${objetivoCaracteresVoz(instruccion.duracion_s)} caracteres.` : ""}\n\n<datos>\n${datos}\n</datos>`,
 	};
 }

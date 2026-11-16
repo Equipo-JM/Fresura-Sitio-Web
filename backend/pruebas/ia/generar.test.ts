@@ -5,6 +5,7 @@ import {
 	ErrorIa,
 	estadoDelProveedor,
 	generarGuion,
+	generarSalida,
 	type LlamarModelo,
 	type RespuestaModelo,
 } from "../../supabase/functions/ia/proveedor/generar";
@@ -250,5 +251,85 @@ describe("clasificarErrorProveedor", () => {
 		[new TypeError("fetch failed"), "ia_tiempo"],
 	])("%s → %s", (error, codigo) => {
 		expect(clasificarErrorProveedor(error)).toBe(codigo);
+	});
+});
+
+describe("reintento por estructura con aviso", () => {
+	type Salida = { total: number };
+	const validarTotal = (datos: unknown) => {
+		const total = (datos as Salida | undefined)?.total;
+		return typeof total === "number" && total <= 300
+			? { success: true as const, data: { total } }
+			: {
+					success: false as const,
+					error: {
+						issues: [
+							{
+								path: ["escenas"],
+								message: `El texto hablado suma ${total} caracteres y el máximo es 300`,
+							},
+						],
+					},
+				};
+	};
+	const respuesta = (datos: unknown): RespuestaModelo => ({
+		texto: JSON.stringify(datos),
+		bloqueado: false,
+	});
+	function salida(llamar: LlamarModelo) {
+		return generarSalida<Salida>({
+			llamar,
+			modeloPrincipal: "principal",
+			modeloRespaldo: "respaldo",
+			prompt: { sistema: "s", usuario: "u" },
+			esquemaJson: {},
+			validar: validarTotal,
+		});
+	}
+
+	it("el reintento le dice al modelo qué regla no cumplió", async () => {
+		const llamar = proveedor(
+			respuesta({ total: 355 }),
+			respuesta({ total: 250 }),
+		);
+		await expect(salida(llamar)).resolves.toEqual({
+			salida: { total: 250 },
+			modelo: "principal",
+		});
+		const [primera, segunda] = llamar.mock.calls.map(([p]) => p.prompt);
+		expect(primera).toEqual({ sistema: "s", usuario: "u" });
+		expect(segunda.sistema).toBe("s");
+		expect(segunda.usuario).toMatch(/^u\n\n/);
+		expect(segunda.usuario).toContain(
+			"- escenas: El texto hablado suma 355 caracteres y el máximo es 300",
+		);
+	});
+
+	it("si la respuesta no es JSON, el aviso lo dice", async () => {
+		const llamar = proveedor(
+			{ texto: "no es json", bloqueado: false },
+			respuesta({ total: 10 }),
+		);
+		await salida(llamar);
+		expect(llamar.mock.calls[1][0].prompt.usuario).toContain("JSON");
+	});
+
+	it("el respaldo tras el reintento también recibe el aviso", async () => {
+		const llamar = proveedor(
+			respuesta({ total: 400 }),
+			cupoDiario,
+			respuesta({ total: 100 }),
+		);
+		await expect(salida(llamar)).resolves.toMatchObject({ modelo: "respaldo" });
+		expect(llamar.mock.calls[2][0].prompt.usuario).toContain("suma 400");
+	});
+
+	it("da ia_estructura si el reintento con aviso tampoco cumple", async () => {
+		const llamar = proveedor(
+			respuesta({ total: 400 }),
+			respuesta({ total: 350 }),
+		);
+		expect(await codigoDeError(salida(llamar))).toBe("ia_estructura");
+		expect(llamar).toHaveBeenCalledTimes(2);
 	});
 });

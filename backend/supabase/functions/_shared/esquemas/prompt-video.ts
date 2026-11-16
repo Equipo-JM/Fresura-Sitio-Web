@@ -70,7 +70,7 @@ export function crearEsquemaPromptVideo(
 				contexto.addIssue({
 					code: "custom",
 					path: ["escenas"],
-					message: "El texto hablado no cabe en la duración del video",
+					message: `El texto hablado suma ${caracteres} caracteres y el máximo es ${maximoCaracteresVoz(duracion)}`,
 				});
 		}
 	});
