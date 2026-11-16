@@ -21,6 +21,7 @@ import { PantallaCodigo, Salir } from "./acceso/PantallaCodigo";
 import { PantallaEntrar } from "./acceso/PantallaEntrar";
 import { useSesionPanel } from "./acceso/useSesionPanel";
 import { CambiarFoto } from "./CambiarFoto";
+import { GuionesPanel } from "./guiones/GuionesPanel";
 import { VersionesPanel } from "./versiones/VersionesPanel";
 import { VistaPrevia } from "./versiones/VistaPrevia";
 
@@ -59,6 +60,7 @@ export function PaginaPanel({ vistaPrevia }: { vistaPrevia?: ReactNode }) {
 function PanelReal({ vistaPrevia }: { vistaPrevia?: ReactNode }) {
 	const cliente = obtenerClientePanel();
 	const { estado, refrescar } = useSesionPanel(cliente);
+	const [seccion, setSeccion] = useState<"versiones" | "guiones">("versiones");
 
 	switch (estado) {
 		case "cargando":
@@ -91,8 +93,16 @@ function PanelReal({ vistaPrevia }: { vistaPrevia?: ReactNode }) {
 		case "dentro":
 			return vistaPrevia ? (
 				<VistaPrevia cliente={cliente}>{vistaPrevia}</VistaPrevia>
+			) : seccion === "guiones" ? (
+				<GuionesPanel
+					cliente={cliente}
+					irVersiones={() => setSeccion("versiones")}
+				/>
 			) : (
-				<VersionesPanel cliente={cliente} />
+				<VersionesPanel
+					cliente={cliente}
+					irGuiones={() => setSeccion("guiones")}
+				/>
 			);
 	}
 }
