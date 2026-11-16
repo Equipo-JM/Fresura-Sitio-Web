@@ -1,0 +1,4 @@
+# El panel administrativo no se rastrea. El sitemap se agrega cuando haya dominio
+# definitivo (fresura.com), porque sus direcciones deben ser absolutas.
+User-agent: *
+Disallow: /admin
