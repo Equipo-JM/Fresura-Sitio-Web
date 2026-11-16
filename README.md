@@ -73,14 +73,15 @@ Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos
 
 ## Rutas del sitio
 
-| Ruta                | Pantalla                                                                                                        |
-| ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `/`                 | Inicio: portada, «Hoy se me antoja…», menú por categorías, «Lo más reciente», calificación, sedes y preguntas   |
-| `/producto/:id`     | Ficha de un producto: tamaños, qué incluye y las acciones                                                       |
-| `/personalizar/:id` | Personalización: tamaño, opciones por grupo con límites, cantidad, indicaciones y agregar al carrito            |
-| `/carrito`          | Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje de WhatsApp                        |
-| `/privacidad`       | Aviso de tratamiento de datos (en revisión)                                                                     |
-| `/admin`            | Panel: acceso con contraseña, Turnstile y código de la app autenticadora; cambio de fotos (portada y productos) |
+| Ruta                  | Pantalla                                                                                                            |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `/`                   | Inicio: portada, «Hoy se me antoja…», menú por categorías, «Lo más reciente», calificación, sedes y preguntas       |
+| `/producto/:id`       | Ficha de un producto: tamaños, qué incluye y las acciones                                                           |
+| `/personalizar/:id`   | Personalización: tamaño, opciones por grupo con límites, cantidad, indicaciones y agregar al carrito                |
+| `/carrito`            | Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje de WhatsApp                            |
+| `/privacidad`         | Aviso de tratamiento de datos (en revisión)                                                                         |
+| `/admin`              | Panel real: acceso con contraseña, Turnstile y código de la app autenticadora; borrador, publicación y restauración |
+| `/admin/vista-previa` | Sitio con el borrador del administrador, franja de aviso y regreso al panel; sus enlaces conservan esta base        |
 
 El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `frontend/src/compartido/carrito/reglas.ts` y tienen pruebas en `frontend/pruebas/carrito.test.ts`.
 
@@ -94,7 +95,11 @@ El sitio lee la versión publicada en Supabase; si no puede o no cumple el contr
 
 Las fotos de producto se leen de `imagen.ruta` del contenido: mientras sean de ejemplo (dominio `.invalid`) se muestra el espacio «Foto del producto», y cuando el panel suba la foto al bucket `fotos` aparece sola. La portada y «Lo más reciente» usan fotos de referencia del kit de marca en `frontend/public/ejemplos/`, marcadas «Foto de ejemplo»: no consta que Fresura tenga sus derechos, así que se reemplazan antes de publicar. Las fotos de ejemplo de más de 400 px tienen al lado una variante `-400.webp`, que `FotoEjemplo` ofrece con `srcset`. En `frontend/public/ejemplos/productos/` están las fotos provisionales de los productos, en WebP (de 16 a 69 KB), tomadas de la tienda de Fresura en Rappi (una por producto; la de Fresota Ácida repite la de Fresota Explosiva porque allí no tiene foto). Falta que Fresura confirme que el sitio puede usarlas. Todavía no están conectadas al catálogo y se cambiarán por las que entregue Fresura. El contrato aún no tiene campo para esas fotos; mientras tanto se cambian en `frontend/src/sitio/inicio/copy.ts`. Los textos de presentación que el contrato no trae (frases de categoría, selector de antojos y «Lo más reciente») están en el mismo archivo y son propuesta por validar con Fresura.
 
-`/admin` usa el acceso real cuando el entorno tiene `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`: contraseña con Turnstile (clave pública en `frontend/src/compartido/turnstile/useTurnstile.ts`, DD-05) y segundo paso con la app autenticadora; la primera vez muestra el código QR para registrarla. Solo entra el rol `admin` con `aal2`, como exige la base. Sin esas variables, o con `/admin?demo`, queda el modo demostración con acceso simulado. En los dos casos, por ahora, las fotos se reducen a WebP de hasta 300 KB (como DD-18) y se guardan en IndexedDB del navegador (`frontend/src/compartido/fotos/`): solo las ve quien las subió, en ese navegador. El paso siguiente es subirlas al bucket `fotos` y publicarlas con vista previa.
+`/admin` usa el acceso real cuando el entorno tiene `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`: contraseña con Turnstile (clave pública en `frontend/src/compartido/turnstile/useTurnstile.ts`, DD-05) y segundo paso con la app autenticadora; la primera vez muestra el código QR para registrarla. Solo entra el rol `admin` con `aal2`, como exige la base. La sección Versiones permite copiar la publicada a un borrador, guardarlo comprobando la revisión, descartarlo con confirmación, publicar indicando la aprobación de Fresura y restaurar la anterior. Las operaciones y el hook están en `frontend/src/panel/versiones/`; publicar y restaurar requieren el contrato de la función `panel` implementado en su rama correspondiente. Los formularios de contenido y la subida de fotos siguen pendientes.
+
+«Ver vista previa» guarda primero el borrador y abre `/admin/vista-previa`. Esa entrada reutiliza las rutas públicas con una base propia, comprueba la sesión y sustituye el contenido solo dentro de la vista previa. Lee el borrador con el cliente del panel y RLS, sin respaldo público ni fotos locales de la demostración. La lectura pública conserva su cliente y su caché independientes.
+
+Sin las variables de Supabase, o con `/admin?demo`, queda el modo demostración con acceso simulado y cambio de fotos. Estas se reducen a WebP de hasta 300 KB (como DD-18) y se guardan en IndexedDB del navegador (`frontend/src/compartido/fotos/`): solo las ve quien las subió, en ese navegador.
 
 Los campos del paso de entrega están validados con Fresura (DT-01, DD-09). Pendiente por validar con Fresura: el número de WhatsApp, los medios de pago y la licencia de Restora Neue (hoy se usa la serif de respaldo).
 

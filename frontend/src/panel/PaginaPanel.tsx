@@ -21,6 +21,8 @@ import { PantallaCodigo, Salir } from "./acceso/PantallaCodigo";
 import { PantallaEntrar } from "./acceso/PantallaEntrar";
 import { useSesionPanel } from "./acceso/useSesionPanel";
 import { CambiarFoto } from "./CambiarFoto";
+import { VersionesPanel } from "./versiones/VersionesPanel";
+import { VistaPrevia } from "./versiones/VistaPrevia";
 
 /** Clave de la sesión simulada: dura lo que la pestaña. */
 const CLAVE_SESION = "fresura-panel-demo-sesion";
@@ -47,13 +49,14 @@ function guardarSesion(abierta: boolean) {
  * Turnstile y código de la app autenticadora (etapa 3). Sin configuración, o
  * con `?demo`, queda el modo demostración con acceso simulado.
  */
-export function PaginaPanel() {
+export function PaginaPanel({ vistaPrevia }: { vistaPrevia?: ReactNode }) {
 	const [busqueda] = useSearchParams();
+	if (vistaPrevia) return <PanelReal vistaPrevia={vistaPrevia} />;
 	if (panelConfigurado() && !busqueda.has("demo")) return <PanelReal />;
 	return <PanelDemo />;
 }
 
-function PanelReal() {
+function PanelReal({ vistaPrevia }: { vistaPrevia?: ReactNode }) {
 	const cliente = obtenerClientePanel();
 	const { estado, refrescar } = useSesionPanel(cliente);
 
@@ -86,18 +89,10 @@ function PanelReal() {
 				</MarcoAcceso>
 			);
 		case "dentro":
-			return (
-				<ContenidoPanel
-					etiqueta="Sesión verificada"
-					aviso={
-						<>
-							<strong>Entraste con tu cuenta y tu código.</strong> Por ahora las
-							fotos que cambies se guardan solo en este navegador; subirlas a la
-							nube y publicarlas con vista previa es el siguiente paso.
-						</>
-					}
-					onSalir={() => void cliente.auth.signOut()}
-				/>
+			return vistaPrevia ? (
+				<VistaPrevia cliente={cliente}>{vistaPrevia}</VistaPrevia>
+			) : (
+				<VersionesPanel cliente={cliente} />
 			);
 	}
 }
