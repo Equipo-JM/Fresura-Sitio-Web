@@ -69,7 +69,11 @@ export function Portada({
 									height={FOTO_PORTADA.alto}
 								/>
 							) : (
-								<FotoEjemplo {...FOTO_PORTADA} prioridad />
+								<FotoEjemplo
+									{...FOTO_PORTADA}
+									tamanos="(min-width: 900px) 40vw, 90vw"
+									prioridad
+								/>
 							)}
 						</div>
 						<img
