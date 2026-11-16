@@ -3,13 +3,18 @@ import {
 	type Contenido,
 	esquemaContenido,
 } from "../../supabase/functions/_shared/esquemas/contenido";
-import type { InstruccionGuion } from "../../supabase/functions/_shared/esquemas/guion";
+import {
+	type InstruccionGuion,
+	maximoCaracteresVoz,
+} from "../../supabase/functions/_shared/esquemas/guion";
 import {
 	armarPromptGuion,
 	datosDelProducto,
 	fechaColombia,
 } from "../../supabase/functions/ia/skills/instrucciones";
+import { armarPromptVideo } from "../../supabase/functions/ia/skills/instrucciones-video";
 import ejemplo from "../datos/contenido-1.0.1.ejemplo.json";
+import { guionDePrueba } from "../datos/guion";
 
 function contenidoDePrueba(): Contenido {
 	return esquemaContenido.parse(structuredClone(ejemplo));
@@ -91,5 +96,44 @@ describe("armarPromptGuion", () => {
 			producto,
 		);
 		expect(usuario.match(/<\/datos>/g)).toHaveLength(1);
+	});
+});
+
+describe("límite de la voz (DT-01, 25.4)", () => {
+	it("es de 20 caracteres por segundo", () => {
+		expect(maximoCaracteresVoz(15)).toBe(300);
+		expect(maximoCaracteresVoz(30)).toBe(600);
+		expect(maximoCaracteresVoz(60)).toBe(1200);
+	});
+
+	it("el guion pide que la voz quepa en la duración", () => {
+		const producto = datosDelProducto(
+			contenidoDePrueba(),
+			"arma-tu-fresota",
+			"2026-11-12",
+		);
+		if (!producto) throw new Error("El ejemplo debe tener el producto");
+		const { usuario } = armarPromptGuion(
+			{ ...instruccion, duracion_s: 15 },
+			producto,
+		);
+		expect(usuario).toContain("300 caracteres");
+	});
+
+	it("el prompt de avatar da el máximo exacto y permite resumir la voz", () => {
+		const { sistema, usuario } = armarPromptVideo("avatar", guionDePrueba(), {
+			red: "instagram",
+			duracion_s: 15,
+		});
+		expect(usuario).toContain("300 caracteres");
+		expect(sistema).toMatch(/resúm/i);
+	});
+
+	it("el prompt de escenas no lleva el límite del avatar", () => {
+		const { usuario } = armarPromptVideo("escenas", guionDePrueba(), {
+			red: "instagram",
+			duracion_s: 15,
+		});
+		expect(usuario).not.toContain("caracteres");
 	});
 });

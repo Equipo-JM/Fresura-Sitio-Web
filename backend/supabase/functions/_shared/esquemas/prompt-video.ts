@@ -1,5 +1,9 @@
 import { z } from "zod";
-import type { DuracionVideo, Guion } from "./guion.ts";
+import {
+	type DuracionVideo,
+	type Guion,
+	maximoCaracteresVoz,
+} from "./guion.ts";
 
 /** Entrada estricta de IF-10; el guion guardado es la única fuente de contenido. */
 export const esquemaPeticionPromptVideo = z.strictObject({
@@ -62,7 +66,7 @@ export function crearEsquemaPromptVideo(
 					total + ("texto_avatar" in escena ? escena.texto_avatar.length : 0),
 				0,
 			);
-			if (caracteres > duracion * 20)
+			if (caracteres > maximoCaracteresVoz(duracion))
 				contexto.addIssue({
 					code: "custom",
 					path: ["escenas"],

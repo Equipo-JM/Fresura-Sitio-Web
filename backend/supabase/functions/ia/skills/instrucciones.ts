@@ -1,5 +1,8 @@
 import type { Contenido } from "../../_shared/esquemas/contenido.ts";
-import type { InstruccionGuion } from "../../_shared/esquemas/guion.ts";
+import {
+	type InstruccionGuion,
+	maximoCaracteresVoz,
+} from "../../_shared/esquemas/guion.ts";
 import type { PromptGuion } from "../proveedor/generar.ts";
 
 /**
@@ -130,6 +133,6 @@ export function armarPromptGuion(
 
 	return {
 		sistema: SISTEMA,
-		usuario: `Escribe el guion de un video vertical de ${instruccion.duracion_s} segundos para ${instruccion.red}.\n\n<datos>\n${json}\n</datos>`,
+		usuario: `Escribe el guion de un video vertical de ${instruccion.duracion_s} segundos para ${instruccion.red}. La voz de todas las escenas suma como máximo ${maximoCaracteresVoz(instruccion.duracion_s)} caracteres, para que se alcance a decir.\n\n<datos>\n${json}\n</datos>`,
 	};
 }
