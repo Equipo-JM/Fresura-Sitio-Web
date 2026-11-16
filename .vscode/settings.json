@@ -4,5 +4,13 @@
 	"editor.codeActionsOnSave": {
 		"source.organizeImports.biome": "explicit"
 	},
-	"typescript.tsdk": "node_modules/typescript/lib"
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.expand": false,
+	"explorer.fileNesting.patterns": {
+		"package.json": "package-lock.json, .nvmrc, biome.json, vite.config.ts, wrangler.jsonc, tsconfig.json, tsconfig.*.json",
+		".gitignore": ".gitattributes",
+		".env.example": ".env, .env.*",
+		"README.md": "AGENTS.md, CLAUDE.md, CLAUDE.local.md, opencode.json, opencode.jsonc"
+	}
 }
