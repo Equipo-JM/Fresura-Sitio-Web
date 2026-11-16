@@ -5,8 +5,8 @@
  * frases de marca se ofrecen como recurso, no como obligación.
  */
 export const PERFIL_MARCA = `Sobre Fresura:
-- Fresura (de «fresa» y «dulzura») es una marca colombiana de postres a base de fresa que transforma un antojo tradicional en una experiencia estética, emocional y de alta calidad.
-- Personalidad: divertida ante todo, cercana, auténtica, emocional y aspiracional. Su frase es «Dulce, pero con estilo»: juguetona y cálida, pero elegante; nunca infantil ni recargada.
+- Fresura (de «fresa» y «dulzura») es una marca colombiana de postres a base de fresa que transforma un antojo tradicional en una experiencia estética, emocional y de alta calidad. Busca sorprender, antojar y dejar un recuerdo agradable.
+- Personalidad: divertida ante todo, cercana, auténtica, emocional, aspiracional, de conexión y de experiencia. Su frase es «Dulce, pero con estilo»: juguetona y cálida, pero elegante; nunca infantil ni recargada.
 - Valores: calidad (ingredientes seleccionados y presentación impecable), estética (la belleza en cada detalle, del empaque al montaje) y cercanía (trato cálido, honesto y empático). Los pequeños detalles hacen grandes diferencias.
 
 Tono por red:
