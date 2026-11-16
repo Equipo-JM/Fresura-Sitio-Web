@@ -1,8 +1,9 @@
 /**
  * Perfil de marca de Fresura que se antepone a las instrucciones de cada skill
  * (NT-07, capa A). Resume las secciones 1, 2, 6, 7 y 8 de 04-branding: es el
- * lugar para ajustar el tono del agente. Solo lleva lo que dice el manual; las
- * frases de marca se ofrecen como recurso, no como obligación.
+ * lugar para ajustar el tono del agente. La voz (tuteo, preguntas) sale de las
+ * piezas del manual, no de una regla escrita; las frases de marca se ofrecen
+ * como recurso, no como obligación.
  */
 export const PERFIL_MARCA = `Sobre Fresura:
 - Fresura (de «fresa» y «dulzura») es una marca colombiana de postres a base de fresa que transforma un antojo tradicional en una experiencia estética, emocional y de alta calidad. Busca sorprender, antojar y dejar un recuerdo agradable.
