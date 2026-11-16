@@ -3,8 +3,7 @@ import {
 	type DuracionVideo,
 	esquemaJsonGuion,
 	type Guion,
-} from "../_shared/esquemas/guion.ts";
-import type { PromptGuion } from "./instrucciones.ts";
+} from "../../_shared/esquemas/guion.ts";
 
 /**
  * Cadena de generación del guion con sus fallos (DT-01, secciones 25 y 25.2).
@@ -14,6 +13,9 @@ import type { PromptGuion } from "./instrucciones.ts";
  * respaldo. Como mucho hay dos esperas de 30 s: la llamada que choca con el
  * cupo o con la saturación responde al instante.
  */
+
+/** Mensajes para el modelo. */
+export type PromptGuion = { sistema: string; usuario: string };
 
 /** Códigos de error del agente (DT-01, sección 23). */
 export type CodigoErrorIa =

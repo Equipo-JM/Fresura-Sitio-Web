@@ -1,6 +1,6 @@
-import type { Guion, InstruccionGuion } from "../_shared/esquemas/guion.ts";
-import type { HerramientaVideo } from "../_shared/esquemas/prompt-video.ts";
-import type { PromptGuion } from "./instrucciones.ts";
+import type { Guion, InstruccionGuion } from "../../_shared/esquemas/guion.ts";
+import type { HerramientaVideo } from "../../_shared/esquemas/prompt-video.ts";
+import type { PromptGuion } from "../proveedor/generar.ts";
 
 // Plantillas base de 25.4: este es el lugar para ajustar el tono de ambas herramientas.
 const SISTEMA_VIDEO = `Eres guionista de videos verticales de Fresura, una marca colombiana de postres a base de fresa. Adaptas un guion aprobado a una herramienta de video.

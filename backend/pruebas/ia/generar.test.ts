@@ -7,8 +7,8 @@ import {
 	generarGuion,
 	type LlamarModelo,
 	type RespuestaModelo,
-} from "../supabase/functions/ia/generar";
-import { guionDePrueba } from "./datos/guion";
+} from "../../supabase/functions/ia/proveedor/generar";
+import { guionDePrueba } from "../datos/guion";
 
 const valido: RespuestaModelo = {
 	texto: JSON.stringify(guionDePrueba()),

@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
 	type Contenido,
 	esquemaContenido,
-} from "../supabase/functions/_shared/esquemas/contenido";
-import type { InstruccionGuion } from "../supabase/functions/_shared/esquemas/guion";
+} from "../../supabase/functions/_shared/esquemas/contenido";
+import type { InstruccionGuion } from "../../supabase/functions/_shared/esquemas/guion";
 import {
 	armarPromptGuion,
 	datosDelProducto,
 	fechaColombia,
-} from "../supabase/functions/ia/instrucciones";
-import ejemplo from "./datos/contenido-1.0.1.ejemplo.json";
+} from "../../supabase/functions/ia/skills/instrucciones";
+import ejemplo from "../datos/contenido-1.0.1.ejemplo.json";
 
 function contenidoDePrueba(): Contenido {
 	return esquemaContenido.parse(structuredClone(ejemplo));

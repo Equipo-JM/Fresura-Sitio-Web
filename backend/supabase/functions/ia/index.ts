@@ -1,31 +1,15 @@
 import { createClient } from "@supabase/supabase-js";
 import { type ConjuntoClaves, crearVerificadorJwt } from "../_shared/acceso.ts";
 import { crearLectorEntorno } from "../_shared/entorno.ts";
-import { esquemaContenido } from "../_shared/esquemas/contenido.ts";
-import { esquemaInstruccionGuion } from "../_shared/esquemas/guion.ts";
-import {
-	leerCuerpoJson,
-	leerOrigenesPermitidos,
-	responderCuerpoInvalido,
-	responderError,
-	responderJson,
-} from "../_shared/http.ts";
-import { type ContextoRuta, crearServidor } from "../_shared/servidor.ts";
-import { crearLlamadaGemini } from "./gemini.ts";
-import {
-	datosRegistroFallo,
-	ErrorIa,
-	generarGuion,
-	RESPUESTAS_ERROR_IA,
-} from "./generar.ts";
-import {
-	armarPromptGuion,
-	datosDelProducto,
-	fechaColombia,
-} from "./instrucciones.ts";
-import { crearRutaPromptVideo } from "./prompt-video.ts";
+import { leerOrigenesPermitidos } from "../_shared/http.ts";
+import { crearServidor } from "../_shared/servidor.ts";
+import { crearLlamadaGemini } from "./proveedor/gemini.ts";
+import { datosRegistroFallo } from "./proveedor/generar.ts";
+import { crearRutaGuion } from "./skills/guion.ts";
+import { crearRutaPromptVideo } from "./skills/prompt-video.ts";
 
-// Ambas rutas usan el JWT del administrador para que las lecturas y escrituras apliquen RLS.
+// Solo cableado: entorno, proveedor y rutas. Cada ruta es una skill en `skills/`
+// y la llamada a Gemini con su cadena de modelos está en `proveedor/`.
 
 const entorno = crearLectorEntorno((nombre) => Deno.env.get(nombre));
 const urlSupabase = entorno.obligatoria("SUPABASE_URL");
@@ -36,82 +20,21 @@ const llamarGemini = crearLlamadaGemini(entorno.obligatoria("GEMINI_API_KEY"));
 
 const opcionesAuth = { persistSession: false, autoRefreshToken: false };
 
-// DD-20: el registro lleva fecha, tipo de error y, si lo hay, el código HTTP del
-// proveedor; nunca su mensaje, la clave ni el formulario.
-function registrarFallo(tipo: string, estadoProveedor?: number) {
-	console.error(JSON.stringify(datosRegistroFallo(tipo, estadoProveedor)));
-}
+// Ambas rutas usan el JWT del administrador para que las lecturas y escrituras apliquen RLS.
+const opcionesRuta = {
+	crearCliente: (jwt: string) =>
+		createClient(urlSupabase, clavePublicable, {
+			auth: opcionesAuth,
+			global: { headers: { Authorization: `Bearer ${jwt}` } },
+		}),
+	llamar: llamarGemini,
+	modeloPrincipal,
+	modeloRespaldo,
+};
 
-async function generarGuionDesdePeticion({
-	peticion,
-	jwt,
-	cors,
-}: ContextoRuta): Promise<Response> {
-	const cuerpo = await leerCuerpoJson(peticion);
-	if (!cuerpo.valido) return responderCuerpoInvalido(cuerpo.motivo, cors);
-
-	const instruccion = esquemaInstruccionGuion.safeParse(cuerpo.datos);
-	if (!instruccion.success) {
-		return responderError(
-			400,
-			"datos_no_validos",
-			"Revisa los campos del formulario.",
-			cors,
-		);
-	}
-
-	// Se lee con el JWT del administrador, así aplica RLS (IF-17).
-	const cliente = createClient(urlSupabase, clavePublicable, {
-		auth: opcionesAuth,
-		global: { headers: { Authorization: `Bearer ${jwt}` } },
-	});
-	const { data, error } = await cliente
-		.from("versiones_contenido")
-		.select("json")
-		.eq("estado", "publicada")
-		.maybeSingle();
-	if (error) throw new Error("lectura_contenido");
-	if (!data) {
-		return responderError(
-			409,
-			"sin_publicada",
-			"Primero publica el contenido del sitio.",
-			cors,
-		);
-	}
-
-	const contenido = esquemaContenido.safeParse(data.json);
-	if (!contenido.success) throw new Error("contenido_no_valido");
-
-	const producto = datosDelProducto(
-		contenido.data,
-		instruccion.data.producto_id,
-		fechaColombia(new Date()),
-	);
-	if (!producto) {
-		return responderError(
-			404,
-			"producto_no_encontrado",
-			"Ese producto no existe o no está vigente.",
-			cors,
-		);
-	}
-
-	try {
-		const resultado = await generarGuion({
-			llamar: llamarGemini,
-			modeloPrincipal,
-			modeloRespaldo,
-			prompt: armarPromptGuion(instruccion.data, producto),
-			duracion: instruccion.data.duracion_s,
-		});
-		return responderJson(200, resultado, cors);
-	} catch (error) {
-		if (!(error instanceof ErrorIa)) throw error;
-		registrarFallo(error.codigo, error.estadoProveedor);
-		const { estado, mensaje } = RESPUESTAS_ERROR_IA[error.codigo];
-		return responderError(estado, error.codigo, mensaje, cors);
-	}
+// DD-20: el registro lleva fecha y tipo de error, nunca la clave ni el formulario.
+function registrarFallo(tipo: string) {
+	console.error(JSON.stringify(datosRegistroFallo(tipo)));
 }
 
 Deno.serve(
@@ -124,17 +47,8 @@ Deno.serve(
 			entorno.json("SUPABASE_JWKS") as ConjuntoClaves,
 		),
 		rutas: {
-			guion: generarGuionDesdePeticion,
-			"prompt-video": crearRutaPromptVideo({
-				crearCliente: (jwt) =>
-					createClient(urlSupabase, clavePublicable, {
-						auth: opcionesAuth,
-						global: { headers: { Authorization: `Bearer ${jwt}` } },
-					}),
-				llamar: llamarGemini,
-				modeloPrincipal,
-				modeloRespaldo,
-			}),
+			guion: crearRutaGuion(opcionesRuta),
+			"prompt-video": crearRutaPromptVideo(opcionesRuta),
 		},
 		mensajeSinPermiso: "Tu cuenta no tiene permiso para usar el agente.",
 		mensajeErrorInterno:

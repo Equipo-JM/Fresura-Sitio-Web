@@ -3,8 +3,8 @@ import {
 	crearEsquemaGuion,
 	esquemaInstruccionGuion,
 	esquemaJsonGuion,
-} from "../supabase/functions/_shared/esquemas/guion";
-import { guionDePrueba } from "./datos/guion";
+} from "../../supabase/functions/_shared/esquemas/guion";
+import { guionDePrueba } from "../datos/guion";
 
 const instruccionValida = {
 	producto_id: "arma-tu-fresota",
