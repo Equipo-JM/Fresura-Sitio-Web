@@ -138,6 +138,12 @@ npm run functions:deploy -- panel
 
 Cada pull request hacia `main` pasa por `.github/workflows/revision.yml`: `biome ci`, `npm run build` y `npm test`.
 
+Las pruebas de permisos y de la base (PU-01 a PU-06, PU-08 y PU-15) corren contra el proyecto enlazado y no dejan datos, porque todo ocurre en una transacción que no se confirma. Cada fila del resultado debe tener `pasa: true`:
+
+```bash
+npm run supabase -- db query --linked -f pruebas/rls/permisos.sql
+```
+
 ### Si se automatiza el despliegue
 
 Hoy se despliega a mano. Si más adelante se conectan las integraciones con GitHub, estos son los valores con la estructura actual:
