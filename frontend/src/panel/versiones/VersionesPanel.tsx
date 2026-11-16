@@ -13,12 +13,14 @@ function fecha(valor: string | null) {
 		: "Sin fecha de publicación";
 }
 
-/** Única sección habilitada del panel real hasta incorporar contenido y guiones. */
+/** Administración de versiones publicadas y borradores, con acceso a los guiones del panel. */
 export function VersionesPanel({
 	cliente,
+	irGuiones,
 	abrirVistaPrevia = () => window.location.assign("/admin/vista-previa"),
 }: {
 	cliente: SupabaseClient<Database>;
+	irGuiones?: () => void;
 	abrirVistaPrevia?: () => void;
 }) {
 	const panel = useVersiones(cliente);
@@ -68,6 +70,16 @@ export function VersionesPanel({
 					<a href="#versiones" aria-current="page">
 						Versiones
 					</a>
+					{irGuiones && (
+						<button
+							className="boton-texto"
+							type="button"
+							disabled={ocupado}
+							onClick={irGuiones}
+						>
+							Guiones
+						</button>
+					)}
 				</nav>
 				<main id="versiones" tabIndex={-1} aria-busy={ocupado}>
 					<h1>Versiones</h1>
