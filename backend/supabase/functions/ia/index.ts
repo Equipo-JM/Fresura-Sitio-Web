@@ -5,6 +5,7 @@ import { leerOrigenesPermitidos } from "../_shared/http.ts";
 import { crearServidor } from "../_shared/servidor.ts";
 import { crearLlamadaGemini } from "./proveedor/gemini.ts";
 import { datosRegistroFallo } from "./proveedor/generar.ts";
+import { crearRutaChat } from "./skills/chat.ts";
 import { crearRutaGuion } from "./skills/guion.ts";
 import { crearRutaPromptVideo } from "./skills/prompt-video.ts";
 
@@ -16,7 +17,8 @@ const urlSupabase = entorno.obligatoria("SUPABASE_URL");
 const clavePublicable = entorno.clavePorDefecto("SUPABASE_PUBLISHABLE_KEYS");
 const modeloPrincipal = entorno.obligatoria("IA_MODELO");
 const modeloRespaldo = entorno.obligatoria("IA_MODELO_RESPALDO");
-const llamarGemini = crearLlamadaGemini(entorno.obligatoria("GEMINI_API_KEY"));
+const claveGemini = entorno.obligatoria("GEMINI_API_KEY");
+const llamarGemini = crearLlamadaGemini(claveGemini);
 
 const opcionesAuth = { persistSession: false, autoRefreshToken: false };
 
@@ -47,6 +49,11 @@ Deno.serve(
 			entorno.json("SUPABASE_JWKS") as ConjuntoClaves,
 		),
 		rutas: {
+			chat: crearRutaChat({
+				...opcionesRuta,
+				claveGemini,
+				modeloAgente: entorno.opcional("IA_MODELO_AGENTE") ?? modeloPrincipal,
+			}),
 			guion: crearRutaGuion(opcionesRuta),
 			"prompt-video": crearRutaPromptVideo(opcionesRuta),
 		},
