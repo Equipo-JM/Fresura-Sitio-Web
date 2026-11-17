@@ -151,6 +151,17 @@ npm run functions:deploy -- ia
 npm run functions:deploy -- panel
 ```
 
+
+## Respaldo semanal
+
+Cada **viernes**, desde la raíz del repositorio:
+
+```bash
+bash backend/respaldo.sh
+```
+
+Exporta a JSON cada tabla de `public`, copia el bucket `fotos` y guarda el commit cuyas migraciones reconstruyen el esquema. Lo deja en `../respaldos/AAAA-MM-DD/`, **fuera del repositorio** (el script se niega a guardar dentro), y conserva las últimas 4 copias (DT-01, sección 7). Necesita la CLI de Supabase con sesión iniciada y el proyecto enlazado. No usa `supabase db dump` porque ese comando exige Docker.
+
 ## Despliegue
 
 `npm run deploy` publica `frontend/dist/` como archivos estáticos en Cloudflare. `frontend/public/_headers` aplica la política de seguridad de contenido (CSP), `nosniff`, `noindex` en `/admin` y caché larga en `/assets/`; `frontend/public/robots.txt` excluye `/admin`. El sitemap se agrega cuando haya dominio definitivo. Si se suma otro origen externo (por ejemplo, otro proveedor de imágenes), hay que añadirlo a la CSP.
