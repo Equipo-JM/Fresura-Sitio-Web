@@ -12,7 +12,7 @@ import { LoMasReciente } from "./inicio/Secciones";
 export function PaginaInicio() {
 	return (
 		<ConContenido>
-			{(contenido) => {
+			{(contenido, origen) => {
 				const { presentacion, sedes } = contenido.negocio;
 				return (
 					<>
@@ -22,7 +22,7 @@ export function PaginaInicio() {
 							sedes={sedes.map((s) => s.nombre)}
 						/>
 						<Antojos />
-						<Explora />
+						<Explora contenido={contenido} respaldo={origen === "respaldo"} />
 						<LoMasReciente contenido={contenido} />
 					</>
 				);

@@ -1262,3 +1262,201 @@ button.paso-num {
 	font-size: clamp(2.5rem, 2rem + 2vw, 3.75rem);
 	margin-bottom: 8px;
 }
+
+/* Franja «Explora» del inicio (RF-02): el menú como tarjeta principal y las
+   demás páginas en cuadrícula. Solo colores de la paleta; texto Peat Brown
+   sobre We Peep (7,7:1) y Dust Storm (6,8:1), y Platinum sobre Peat Brown (8,2:1). */
+.explora h2 {
+	font-size: clamp(2.6rem, 1.6rem + 3.4vw, 4.2rem);
+	line-height: 1.02;
+	max-width: 12ch;
+	margin-bottom: clamp(28px, 4vw, 48px);
+}
+.explora h2 em {
+	font-weight: 600;
+}
+.explora-tarjetas {
+	display: grid;
+	gap: 16px;
+	grid-template-columns: 1.15fr 1fr 1fr;
+	grid-template-rows: repeat(2, minmax(210px, auto));
+}
+.explora-tarjetas > li:first-child {
+	grid-row: span 2;
+}
+/* Con el contenido de respaldo no hay Promociones: Ayuda ocupa el espacio que queda. */
+.explora-tarjetas.sin-promos > li:last-child {
+	grid-column: span 2;
+}
+.explora-tarjeta {
+	position: relative;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
+	gap: 8px;
+	padding: 26px 26px 24px;
+	border-radius: 22px;
+	color: var(--texto);
+	text-decoration: none;
+	background: var(--superficie);
+	transition:
+		transform 0.25s ease,
+		box-shadow 0.25s ease;
+}
+.explora-tarjetas > li:nth-child(odd):not(:first-child) .explora-tarjeta {
+	background: var(--superficie-alterna);
+}
+.explora-tarjeta.principal {
+	padding: 34px;
+	background: var(--superficie-oscura);
+	color: var(--texto-sobre-oscuro);
+}
+.explora-tarjeta:hover,
+.explora-tarjeta:focus-visible {
+	transform: translateY(-4px);
+	box-shadow: 0 18px 32px -18px rgb(91 59 36 / 0.55);
+}
+.explora-tarjeta:focus-visible {
+	outline: 3px solid var(--foco);
+	outline-offset: 3px;
+}
+.explora-ilustracion {
+	position: absolute;
+	top: 22px;
+	left: 24px;
+	width: auto;
+	height: 64px;
+}
+.principal .explora-ilustracion {
+	top: 32px;
+	left: 34px;
+	height: 110px;
+}
+.explora-tarjeta strong {
+	font-family: var(--fuente-titulos);
+	font-weight: 600;
+	font-size: clamp(1.9rem, 1.4rem + 1vw, 2.4rem);
+	line-height: 1.05;
+}
+.explora-tarjeta.principal strong {
+	font-size: clamp(2.6rem, 1.8rem + 2vw, 3.6rem);
+	max-width: 8ch;
+}
+.explora-bajada {
+	max-width: 26ch;
+	line-height: 1.4;
+}
+.principal .explora-bajada {
+	max-width: 22ch;
+	font-size: 1.1rem;
+}
+.explora-flecha {
+	position: absolute;
+	top: 22px;
+	right: 22px;
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	border-radius: var(--radio-pildora);
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+	transition: transform 0.25s ease;
+}
+.principal .explora-flecha {
+	top: 32px;
+	right: 32px;
+	width: 52px;
+	height: 52px;
+	background: var(--color-we-peep);
+	color: var(--texto);
+}
+.explora-tarjeta:hover .explora-flecha {
+	transform: translateX(3px);
+}
+.explora-etiqueta {
+	align-self: flex-start;
+	padding: 5px 12px;
+	border-radius: var(--radio-pildora);
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+	font-weight: 700;
+	font-size: 0.8rem;
+	letter-spacing: 0.04em;
+}
+@media (max-width: 900px) {
+	.explora-tarjetas {
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: none;
+	}
+	.explora-tarjetas > li:first-child {
+		grid-column: 1 / -1;
+		grid-row: auto;
+	}
+	.explora-tarjetas.sin-promos > li:last-child {
+		grid-column: 1 / -1;
+	}
+	.explora-tarjeta {
+		min-height: 180px;
+	}
+	.explora-tarjeta.principal {
+		min-height: 260px;
+	}
+}
+@media (max-width: 520px) {
+	.explora-tarjetas {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+	.explora-tarjeta {
+		min-height: 0;
+		justify-content: center;
+		padding: 20px 76px 20px 92px;
+	}
+	.explora-ilustracion {
+		top: 50%;
+		left: 22px;
+		max-width: 52px;
+		height: 52px;
+		object-fit: contain;
+		transform: translateY(-50%);
+	}
+	.explora-flecha {
+		top: 50%;
+		right: 18px;
+		transform: translateY(-50%);
+	}
+	.explora-tarjeta:hover .explora-flecha {
+		transform: translateY(-50%) translateX(3px);
+	}
+	.explora-tarjeta strong {
+		font-size: 1.75rem;
+	}
+	.explora-tarjeta.principal {
+		min-height: 0;
+		justify-content: flex-end;
+		padding: 128px 28px 28px;
+	}
+	.principal .explora-ilustracion {
+		top: 26px;
+		left: 28px;
+		max-width: none;
+		height: 86px;
+		transform: none;
+	}
+	.principal .explora-flecha {
+		top: 26px;
+		transform: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.explora-tarjeta,
+	.explora-flecha {
+		transition: none;
+	}
+	.explora-tarjeta:hover,
+	.explora-tarjeta:focus-visible {
+		transform: none;
+	}
+}
