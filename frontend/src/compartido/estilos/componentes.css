@@ -1460,3 +1460,23 @@ button.paso-num {
 		transform: none;
 	}
 }
+
+/* Promociones vigentes en la ficha de producto (RNF-16) */
+.ficha-promos {
+	display: grid;
+	gap: 10px;
+}
+.ficha-promos-etiqueta {
+	justify-self: start;
+	padding: 4px 12px;
+	border-radius: var(--radio-pildora);
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+	font-family: var(--fuente-texto);
+	font-size: var(--texto-chico);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+.ficha-promos .promo-mini h3 {
+	font-size: 1.375rem;
+}

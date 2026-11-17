@@ -5,8 +5,9 @@ import { ConContenido } from "./ConContenido";
 import { FotoProducto } from "./FotoProducto";
 import { MarcaPorValidar } from "./MarcaPorValidar";
 import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
+import { PromocionesFicha } from "./PromocionesFicha";
 
-/** Ficha de un producto: foto, tamaños, lo que incluye y las dos acciones. */
+/** Ficha de un producto: foto, promociones vigentes, tamaños, lo que incluye y las dos acciones. */
 export function PaginaProducto() {
 	const { idProducto } = useParams();
 	return (
@@ -52,6 +53,12 @@ export function PaginaProducto() {
 												: `Desde ${pesos(Math.min(...precios))}`}
 										</p>
 									</div>
+									{origen === "principal" && (
+										<PromocionesFicha
+											contenido={contenido}
+											idProducto={producto.id}
+										/>
+									)}
 									<div className="ficha-bloque">
 										<div className="ficha-bloque-titulo">
 											<h2>Descripción</h2>

@@ -289,4 +289,53 @@ describe("sitio de varias páginas (RF-02)", () => {
 			expect(region().getAllByRole("link")).toHaveLength(4);
 		});
 	});
+
+	describe("promociones en la ficha de producto (RNF-16)", () => {
+		const id = prueba.productos[0].id;
+		const promo = (extra: object) => ({
+			id: "promo-ficha",
+			titulo: "Martes de prueba",
+			productos: [id],
+			vigencia: { desde: "2000-01-03", hasta: "2999-11-24" },
+			condiciones: "Solo en la sede U Nacional.",
+			...extra,
+		});
+		const caja = () =>
+			screen.queryByRole("region", { name: "Promoción vigente" });
+
+		it("muestra la promoción vigente del producto con vigencia y condiciones", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [promo({})];
+			mostrar(`/producto/${id}`, contenido);
+			const bloque = within(
+				screen.getByRole("region", { name: "Promoción vigente" }),
+			);
+			expect(
+				bloque.getByRole("heading", { name: "Martes de prueba" }),
+			).toBeInTheDocument();
+			expect(
+				bloque.getByText(/3 de enero de 2000 al 24 de noviembre de 2999/),
+			).toBeInTheDocument();
+			expect(
+				bloque.getByText("Solo en la sede U Nacional."),
+			).toBeInTheDocument();
+		});
+
+		it("no muestra promociones vencidas ni de otros productos", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [
+				promo({ vigencia: { desde: "2000-01-01", hasta: "2000-01-02" } }),
+				promo({ id: "otra", productos: [prueba.productos[1].id] }),
+			];
+			mostrar(`/producto/${id}`, contenido);
+			expect(caja()).toBeNull();
+		});
+
+		it("con el contenido de respaldo no muestra promociones", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [promo({})];
+			mostrar(`/producto/${id}`, contenido, "respaldo");
+			expect(caja()).toBeNull();
+		});
+	});
 });
