@@ -6,6 +6,11 @@ import { ANTOJOS } from "./copy";
  * «Hoy se me antoja…», al inicio de /menu: elegir un antojo completa la frase
  * y baja a la categoría correspondiente. Solo cambia la frase; no hay movimiento automático.
  */
+/** Mayúscula inicial para el óvalo; la frase «Hoy se me antoja…» conserva la minúscula. */
+function conMayuscula(texto: string): string {
+	return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
 export function Antojos() {
 	const [elegido, setElegido] = useState<string | null>(null);
 	const navegar = useNavigate();
@@ -46,7 +51,9 @@ export function Antojos() {
 								aria-pressed={elegido === antojo.texto}
 								onClick={() => elegir(antojo.texto, antojo.categoria)}
 							>
-								<span className="antojo-nombre">{antojo.texto}</span>
+								<span className="antojo-nombre">
+									{conMayuscula(antojo.texto)}
+								</span>
 								<span className="antojo-dato">{antojo.detalle}</span>
 							</button>
 						</li>

@@ -547,7 +547,7 @@ describe("otras vistas", () => {
 		).not.toBeInTheDocument();
 		expect(
 			screen
-				.getByRole("combobox", { name: "País / Región" })
+				.getByRole("combobox", { name: "País / región" })
 				.parentElement?.querySelector("svg"),
 		).not.toBeNull();
 		expect(

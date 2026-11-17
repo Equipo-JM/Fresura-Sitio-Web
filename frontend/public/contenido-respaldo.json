@@ -1059,11 +1059,11 @@
 		{
 			"id": "fresitas-frutos-secos",
 			"categoria": "fresitas",
-			"nombre": "Frutos Secos",
+			"nombre": "Frutos secos",
 			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
-				"alt": "Frutos Secos, foto por validar",
+				"alt": "Frutos secos, foto por validar",
 				"ancho": 800,
 				"alto": 800
 			},

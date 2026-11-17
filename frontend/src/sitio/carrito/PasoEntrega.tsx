@@ -205,7 +205,7 @@ export function PasoEntrega({
 
 				<div className="rejilla">
 					<div className="cf">
-						<label htmlFor="c-pais">País / Región</label>
+						<label htmlFor="c-pais">País / región</label>
 						<select
 							id="c-pais"
 							name="pais"
