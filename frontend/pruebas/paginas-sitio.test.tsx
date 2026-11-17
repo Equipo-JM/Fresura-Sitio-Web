@@ -16,13 +16,17 @@ declare const process: {
 };
 const { readFileSync, readdirSync } = process.getBuiltinModule("fs");
 
-function mostrar(ruta = "/", contenido: unknown = structuredClone(prueba)) {
+function mostrar(
+	ruta = "/",
+	contenido: unknown = structuredClone(prueba),
+	origen = "principal",
+) {
 	const cliente = new QueryClient({
 		defaultOptions: { queries: { retry: false } },
 	});
 	cliente.setQueryData(["contenido"], {
 		contenido: esquemaContenido.parse(contenido),
-		origen: "principal",
+		origen,
 	});
 	return render(
 		<QueryClientProvider client={cliente}>
@@ -135,7 +139,7 @@ describe("sitio de varias páginas (RF-02)", () => {
 			"titulo-reciente",
 		]);
 		const explora = within(
-			screen.getByRole("region", { name: "Explora Fresura" }),
+			screen.getByRole("region", { name: "Todo Fresura, a un toque" }),
 		);
 		expect(
 			explora.getAllByRole("link").map((a) => a.getAttribute("href")),
@@ -206,5 +210,61 @@ describe("sitio de varias páginas (RF-02)", () => {
 			),
 		);
 		expect(conAncla).toEqual([]);
+	});
+
+	describe("franja Explora", () => {
+		const vigente = (id: string) => ({
+			id,
+			titulo: `Promo ${id}`,
+			productos: [prueba.productos[0].id],
+			vigencia: { desde: "2000-01-01", hasta: "2999-12-31" },
+			condiciones: "Por tiempo limitado.",
+		});
+		const vencida = {
+			...vigente("vieja"),
+			vigencia: { desde: "2000-01-01", hasta: "2000-01-02" },
+		};
+		const region = () =>
+			within(screen.getByRole("region", { name: "Todo Fresura, a un toque" }));
+		const tarjetaPromociones = () =>
+			region().getByRole("link", { name: /Promociones/ });
+
+		it("el menú es la tarjeta principal", () => {
+			mostrar();
+			expect(region().getByRole("link", { name: /Nuestro menú/ })).toHaveClass(
+				"explora-tarjeta",
+				"principal",
+			);
+		});
+
+		it("cuenta las promociones vigentes hoy, sin las vencidas", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [vigente("a"), vigente("b"), vencida];
+			mostrar("/", contenido);
+			expect(tarjetaPromociones()).toHaveTextContent("¡Hay 2 promos activas!");
+		});
+
+		it("usa el singular con una sola promoción", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [vigente("a")];
+			mostrar("/", contenido);
+			expect(tarjetaPromociones()).toHaveTextContent("¡Hay 1 promo activa!");
+		});
+
+		it("sin promociones vigentes no promete nada", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [vencida];
+			mostrar("/", contenido);
+			expect(tarjetaPromociones()).toHaveTextContent(
+				"Pronto, nuevas sorpresas dulces",
+			);
+			expect(tarjetaPromociones()).not.toHaveTextContent("¡Hay");
+		});
+
+		it("con el contenido de respaldo no ofrece Promociones", () => {
+			mostrar("/", structuredClone(prueba), "respaldo");
+			expect(region().queryByRole("link", { name: /Promociones/ })).toBeNull();
+			expect(region().getAllByRole("link")).toHaveLength(4);
+		});
 	});
 });

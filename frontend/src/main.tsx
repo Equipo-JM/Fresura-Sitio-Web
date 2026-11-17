@@ -5,6 +5,11 @@ import { BrowserRouter } from "react-router";
 import { RutasDelSitio } from "./RutasDelSitio";
 // Plus Jakarta Sans se sirve desde el propio sitio, sin pedir nada a Google:
 // la política de datos no lista Google Fonts entre quienes intervienen (SRS 11.6).
+// Playfair Display reemplaza a Restora Neue mientras no haya licencia web (DT-01, DD-31).
+import "@fontsource/playfair-display/400.css";
+import "@fontsource/playfair-display/400-italic.css";
+import "@fontsource/playfair-display/600.css";
+import "@fontsource/playfair-display/600-italic.css";
 import "@fontsource/plus-jakarta-sans/300.css";
 import "@fontsource/plus-jakarta-sans/400.css";
 import "@fontsource/plus-jakarta-sans/700.css";

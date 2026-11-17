@@ -30,8 +30,9 @@
 	--foco: var(--color-peat-brown);
 
 	/* Tipografía */
+	/* Restora Neue requiere licencia web; mientras tanto se usa Playfair Display (DT-01, DD-31). */
 	--fuente-titulos:
-		"Restora Neue", "Iowan Old Style", Georgia, serif; /* Restora Neue requiere licencia web */
+		"Restora Neue", "Playfair Display", "Iowan Old Style", Georgia, serif;
 	--fuente-texto: "Plus Jakarta Sans", system-ui, sans-serif;
 	--peso-ligero: 300;
 	--peso-normal: 400;

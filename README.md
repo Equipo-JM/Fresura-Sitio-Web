@@ -115,7 +115,7 @@ Las fotos de producto se leen de `imagen.ruta` del contenido: la foto publicada 
 
 Sin las variables de Supabase, o con `/admin?demo`, queda el modo demostración con acceso simulado y cambio de fotos. Estas se reducen a WebP de hasta 300 KB (como DD-18) y se guardan en IndexedDB del navegador (`frontend/src/compartido/fotos/`): solo las ve quien las subió, en ese navegador.
 
-Los campos del paso de entrega están validados con Fresura (DT-01, DD-09). Pendiente por validar con Fresura: el número de WhatsApp, los medios de pago y la licencia de Restora Neue (hoy se usa la serif de respaldo).
+Los campos del paso de entrega están validados con Fresura (DT-01, DD-09). Pendiente por validar con Fresura: el número de WhatsApp, los medios de pago y la licencia de Restora Neue (mientras tanto, los títulos usan Playfair Display, DD-31).
 
 ## Base de datos
 
