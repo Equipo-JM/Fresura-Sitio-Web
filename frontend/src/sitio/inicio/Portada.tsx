@@ -64,7 +64,7 @@ export function Portada({
 							<Link className="boton" to="/menu">
 								Ver el menú
 							</Link>
-							<Link className="boton secundario" to="/#antojos">
+							<Link className="boton secundario" to="/menu#antojos">
 								¿No sabes qué pedir?
 							</Link>
 						</div>

@@ -298,6 +298,7 @@ describe("paridad del inicio", () => {
 				.getAllByRole("region")
 				.map((r) => r.getAttribute("aria-labelledby")),
 		).toEqual([
+			"titulo-antojos",
 			"titulo-fresitas",
 			"titulo-fresotas",
 			"titulo-fresuras",

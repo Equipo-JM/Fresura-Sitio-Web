@@ -132,12 +132,7 @@ describe("sitio de varias páginas (RF-02)", () => {
 			screen
 				.getAllByRole("region")
 				.map((r) => r.getAttribute("aria-labelledby")),
-		).toEqual([
-			"titulo-portada",
-			"titulo-antojos",
-			"titulo-explora",
-			"titulo-reciente",
-		]);
+		).toEqual(["titulo-portada", "titulo-explora", "titulo-reciente"]);
 		const explora = within(
 			screen.getByRole("region", { name: "Todo Fresura, a un toque" }),
 		);
@@ -190,12 +185,22 @@ describe("sitio de varias páginas (RF-02)", () => {
 		expect(document.querySelectorAll("details").length).toBeGreaterThan(0);
 	});
 
-	it("elegir un antojo abre el menú en su categoría", async () => {
+	it("el selector de antojos está en /menu y no en el inicio", () => {
 		mostrar();
-		const antojos = within(screen.getByRole("region", { name: /antoja/i }));
-		fireEvent.click(antojos.getAllByRole("button")[0]);
+		expect(screen.queryByRole("region", { name: /antoja/i })).toBeNull();
 		expect(
-			await screen.findByRole("heading", { level: 1, name: "Nuestro menú" }),
+			screen.getByRole("link", { name: "¿No sabes qué pedir?" }),
+		).toHaveAttribute("href", "/menu#antojos");
+	});
+
+	it("elegir un antojo completa la frase en el menú", () => {
+		mostrar("/menu");
+		const region = screen.getByRole("region", { name: /antoja/i });
+		const boton = within(region).getAllByRole("button")[0];
+		fireEvent.click(boton);
+		expect(boton).toHaveAttribute("aria-pressed", "true");
+		expect(
+			screen.getByRole("heading", { level: 1, name: "Nuestro menú" }),
 		).toBeInTheDocument();
 	});
 

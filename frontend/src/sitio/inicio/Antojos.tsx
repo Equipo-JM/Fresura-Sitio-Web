@@ -3,8 +3,8 @@ import { useNavigate } from "react-router";
 import { ANTOJOS } from "./copy";
 
 /**
- * «Hoy se me antoja…»: elegir un antojo completa la frase y lleva a la categoría
- * correspondiente en /menu. Solo cambia la frase; no hay movimiento automático.
+ * «Hoy se me antoja…», al inicio de /menu: elegir un antojo completa la frase
+ * y baja a la categoría correspondiente. Solo cambia la frase; no hay movimiento automático.
  */
 export function Antojos() {
 	const [elegido, setElegido] = useState<string | null>(null);
