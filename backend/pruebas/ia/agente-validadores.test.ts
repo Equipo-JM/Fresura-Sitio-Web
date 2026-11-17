@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { esquemaContenido } from "../../supabase/functions/_shared/esquemas/contenido";
 import {
 	extraerPrecios,
+	preciosDelProducto,
 	preciosPublicados,
 	validarGuionContraDatos,
 	validarTextoContraDatos,
@@ -18,6 +19,8 @@ describe("extraerPrecios", () => {
 		["Llévala por 15.000 pesos", [15000]],
 		["Solo 20 mil pesos", [20000]],
 		["Por 12 mil", [12000]],
+		["A solo 20k", [20000]],
+		["Por 18 lucas", [18000]],
 	])("%s → %j", (texto, precios) => {
 		expect(extraerPrecios(texto)).toEqual(precios);
 	});
@@ -65,6 +68,25 @@ describe("validadores contra lo publicado (DT-01, 25.6)", () => {
 		expect(validarGuionContraDatos(guion, "Arma tu Fresota", precios)).toEqual([
 			"El guion no nombra el producto «Arma tu Fresota».",
 		]);
+	});
+
+	it("los precios publicados solo cuentan productos vigentes", () => {
+		const datos = contenido();
+		datos.productos[0].vigente = false;
+		expect(preciosPublicados(datos).has(20900)).toBe(false);
+	});
+
+	it("los precios de un producto son sus presentaciones y adicionales", () => {
+		const [producto] = contenido().productos;
+		expect([...preciosDelProducto(producto)]).toEqual([20900, 3000]);
+	});
+
+	it("el producto debe aparecer como palabra completa", () => {
+		const guion = guionDePrueba();
+		guion.texto_publicacion = "Mira la pantalla";
+		expect(
+			validarGuionContraDatos(guion, "Pan", preciosPublicados(contenido())),
+		).toEqual(["El guion no nombra el producto «Pan»."]);
 	});
 
 	it("reconoce el producto sin importar mayúsculas ni tildes", () => {

@@ -106,6 +106,12 @@ describe("herramientas de solo lectura del agente (DT-01, 25.6)", () => {
 		expect(verPromociones(contenido, "2026-12-01")).toEqual([]);
 	});
 
+	it("ver_promociones omite las promociones cuyos productos no están vigentes", () => {
+		const contenido = contenidoDePrueba();
+		contenido.productos[0].vigente = false;
+		expect(verPromociones(contenido, HOY)).toEqual([]);
+	});
+
 	it("PU-18: ver_sedes no entrega coordenadas ni WhatsApp", () => {
 		const contenido = contenidoDePrueba();
 		contenido.negocio.sedes[0].whatsapp = "573001234567";
@@ -151,6 +157,21 @@ describe("entregar_guion", () => {
 				{ contenido, productosConsultados: new Set(["arma-tu-fresota"]) },
 			),
 		).toEqual({ ok: true, instruccion, guion });
+	});
+
+	it("rechaza en el guion el precio de otro producto", () => {
+		const guion = guionDePrueba();
+		guion.texto_publicacion = "Arma tu Fresota desde $14.900";
+		const resultado = entregarGuion(
+			{ instruccion, guion },
+			{ contenido, productosConsultados: new Set(["arma-tu-fresota"]) },
+		);
+		expect(resultado).toEqual({
+			ok: false,
+			errores: [
+				"El precio $14.900 no está publicado; usa solo los precios de las herramientas.",
+			],
+		});
 	});
 
 	it("devuelve todos los errores juntos para que el agente los corrija", () => {

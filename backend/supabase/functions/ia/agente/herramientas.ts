@@ -6,7 +6,7 @@ import {
 	maximoCaracteresVoz,
 } from "../../_shared/esquemas/guion.ts";
 import { datosDelProducto } from "../skills/instrucciones.ts";
-import { preciosPublicados, validarGuionContraDatos } from "./validadores.ts";
+import { preciosDelProducto, validarGuionContraDatos } from "./validadores.ts";
 
 /**
  * Lógica de las herramientas del agente conversacional (DT-01, 25.6): funciones
@@ -64,9 +64,14 @@ export function verProducto(
 	);
 }
 
-/** Promociones vigentes en `hoy` (fecha de Colombia), con el nombre de sus productos. */
+/**
+ * Promociones vigentes en `hoy` (fecha de Colombia), con sus productos vigentes.
+ * Una promoción sin productos vigentes no se entrega.
+ */
 export function verPromociones(contenido: Contenido, hoy: string) {
-	const nombres = new Map(contenido.productos.map((p) => [p.id, p.nombre]));
+	const vigentes = new Map(
+		contenido.productos.filter((p) => p.vigente).map((p) => [p.id, p.nombre]),
+	);
 	return contenido.promociones
 		.filter(
 			(promo) => promo.vigencia.desde <= hoy && hoy <= promo.vigencia.hasta,
@@ -76,11 +81,11 @@ export function verPromociones(contenido: Contenido, hoy: string) {
 			desde: promo.vigencia.desde,
 			hasta: promo.vigencia.hasta,
 			condiciones: promo.condiciones,
-			productos: promo.productos.map((id) => ({
-				id,
-				nombre: nombres.get(id) ?? id,
-			})),
-		}));
+			productos: promo.productos
+				.filter((id) => vigentes.has(id))
+				.map((id) => ({ id, nombre: vigentes.get(id) ?? id })),
+		}))
+		.filter((promo) => promo.productos.length > 0);
 }
 
 /** Sedes sin coordenadas ni WhatsApp (A-19, PU-18): solo lo que sirve para un guion. */
@@ -95,7 +100,9 @@ export function verSedes(contenido: Contenido) {
 
 /** Título y texto de presentación del negocio. */
 export function verNegocio(contenido: Contenido) {
-	return contenido.negocio.presentacion;
+	// Campos elegidos uno por uno: un campo nuevo del contrato no llega al modelo por accidente.
+	const { titulo, texto } = contenido.negocio.presentacion;
+	return { titulo, texto };
 }
 
 /** Lo que `entregarGuion` necesita saber de la conversación en curso. */
@@ -157,7 +164,7 @@ export function entregarGuion(
 		...validarGuionContraDatos(
 			guion,
 			producto.nombre,
-			preciosPublicados(contenido),
+			preciosDelProducto(producto),
 		),
 	);
 	return errores.length > 0

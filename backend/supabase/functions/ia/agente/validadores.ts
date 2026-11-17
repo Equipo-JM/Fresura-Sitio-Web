@@ -7,10 +7,10 @@ import type { Guion } from "../../_shared/esquemas/guion.ts";
  * que los precios y el producto se comparan con lo que entregaron las herramientas.
  */
 
-// Un precio es un número con «$» delante, o seguido de «mil», «pesos» o «COP».
+// Un precio es un número con «$» delante, o seguido de «mil», «k», «lucas», «pesos» o «COP».
 // Así no se confunden tamaños (13 oz), horas (12:00) ni direcciones (# 28-10).
 const PRECIO =
-	/\$\s?(\d{1,3}(?:[.,]\d{3})+|\d+)|(\d+)\s*mil\b(?:\s*pesos)?|(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:pesos|cop)\b/gi;
+	/\$\s?(\d{1,3}(?:[.,]\d{3})+|\d+)|(\d+)\s*(?:mil|k|lucas)\b(?:\s*pesos)?|(\d{1,3}(?:[.,]\d{3})+|\d+)\s*(?:pesos|cop)\b/gi;
 
 /** Precios en pesos que aparecen en un texto, en el orden en que aparecen. */
 export function extraerPrecios(texto: string): number[] {
@@ -21,20 +21,29 @@ export function extraerPrecios(texto: string): number[] {
 	);
 }
 
-/** Precios de la versión publicada: presentaciones y adicionales, sin nulos ni ceros. */
-export function preciosPublicados(contenido: Contenido): Set<number> {
+type Producto = Contenido["productos"][number];
+
+/** Precios de un producto: sus presentaciones y adicionales, sin nulos ni ceros. */
+export function preciosDelProducto(producto: Producto): Set<number> {
 	const precios = new Set<number>();
-	for (const producto of contenido.productos) {
-		for (const presentacion of producto.presentaciones) {
-			if (presentacion.precio) precios.add(presentacion.precio);
-		}
-		for (const grupo of producto.grupos_opciones) {
-			for (const opcion of grupo.opciones) {
-				if (opcion.adicional) precios.add(opcion.adicional);
-			}
+	for (const presentacion of producto.presentaciones) {
+		if (presentacion.precio) precios.add(presentacion.precio);
+	}
+	for (const grupo of producto.grupos_opciones) {
+		for (const opcion of grupo.opciones) {
+			if (opcion.adicional) precios.add(opcion.adicional);
 		}
 	}
 	return precios;
+}
+
+/** Precios de todos los productos vigentes; con ellos se revisa el texto del chat. */
+export function preciosPublicados(contenido: Contenido): Set<number> {
+	return new Set(
+		contenido.productos
+			.filter((p) => p.vigente)
+			.flatMap((p) => [...preciosDelProducto(p)]),
+	);
 }
 
 /** Errores por cada precio del texto que no está publicado; vacío si todo cuadra. */
@@ -65,10 +74,19 @@ export function validarGuionContraDatos(
 		guion.notas_produccion,
 	].join("\n");
 	const errores = validarTextoContraDatos(texto, precios);
-	if (!normalizar(texto).includes(normalizar(nombreProducto))) {
+	if (!nombraPalabra(normalizar(texto), normalizar(nombreProducto))) {
 		errores.unshift(`El guion no nombra el producto «${nombreProducto}».`);
 	}
 	return errores;
+}
+
+// Palabra completa: «Pan» no cuenta dentro de «pantalla».
+function nombraPalabra(texto: string, nombre: string): boolean {
+	const escapado = nombre.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	return new RegExp(
+		`(^|[^\\p{L}\\p{N}])${escapado}($|[^\\p{L}\\p{N}])`,
+		"u",
+	).test(texto);
 }
 
 function normalizar(texto: string): string {
