@@ -53,6 +53,7 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `frontend/src/sitio/`                          | Páginas públicas                                                                                                                           |
 | `frontend/src/panel/`                          | Panel `/admin`                                                                                                                             |
+| `frontend/src/panel/agente/`                   | Chat con AI SDK v7, historial bajo RLS y tarjetas que se guardan como borrador mediante el servicio de guiones |
 | `frontend/src/panel/guiones/`                  | Formulario, editor, estados y prompts de video; servicio y hook con cliente del panel inyectado                                            |
 | `frontend/src/compartido/`                     | Lo que usan el sitio y el panel                                                                                                            |
 | `frontend/public/`                             | Lo que se publica tal cual: contenido de respaldo, marca, fotos de ejemplo, `_headers` y `robots.txt`                                      |
@@ -96,6 +97,8 @@ Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos
 El sitio es de varias páginas (RF-02): cada opción del menú y del pie abre su propia ruta, y cada una tiene su título y su descripción para buscadores (`frontend/src/sitio/useTituloPagina.ts`). Sus pruebas están en `frontend/pruebas/paginas-sitio.test.tsx`.
 
 El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `frontend/src/compartido/carrito/reglas.ts` y tienen pruebas en `frontend/pruebas/carrito.test.ts`.
+
+La primera opción de «Guiones» es «Conversar con el agente»: permite crear, retomar y borrar conversaciones, ver la respuesta en flujo, detenerla y guardar las tarjetas de guion como borradores para abrir el editor. El transporte reutiliza `functions.invoke` y consulta la sesión en cada envío; solo manda `{conversacion_id, mensaje}` a `ia/chat`. Las pruebas de flujo SSE y memoria están en `frontend/pruebas/agente-panel.test.tsx`. El formulario se conserva como alternativa.
 
 La sección «Guiones» del panel real permite generar con los productos publicados, editar, copiar y guardar como borrador; también aprobar, descartar, recuperar y eliminar. Editar un aprobado pide confirmación y lo devuelve a borrador; la base borra su prompt. Solo un aprobado permite solicitar el prompt para avatar o escenas. El cliente usa los contratos de `ia/guion` e `ia/prompt-video`. Ninguna acción de «Guiones» publica contenido. Sus pruebas con cliente simulado están en `frontend/pruebas/guiones-panel.test.tsx`.
 

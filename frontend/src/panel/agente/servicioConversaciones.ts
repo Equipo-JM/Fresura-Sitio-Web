@@ -1,0 +1,147 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { modelMessageSchema, type UIMessage } from "ai";
+import {
+	crearEsquemaGuion,
+	esquemaInstruccionGuion,
+	type Guion,
+	type InstruccionGuion,
+} from "../../../../backend/supabase/functions/_shared/esquemas/guion";
+import type { Database } from "../../tipos/database.types";
+
+/** Entrega validada; guardarla sigue siendo una acción explícita de la administradora. */
+export type TarjetaGuion = { instruccion: InstruccionGuion; guion: Guion };
+/** Metadatos enviados al terminar el flujo, nunca texto de herramientas internas. */
+export type MensajeAgente = UIMessage<{
+	tarjetaGuion?: TarjetaGuion;
+	aviso?: { tipo: string; mensaje: string };
+}>;
+/** Resumen suficiente para seleccionar una conversación sin cargar sus mensajes. */
+export type Conversacion = Pick<
+	Database["public"]["Tables"]["agente_conversaciones"]["Row"],
+	"id" | "titulo" | "actualizado_en"
+>;
+
+/** Conserva palabras completas salvo si la primera supera por sí sola el máximo. */
+export function tituloConversacion(mensaje: string) {
+	const texto = mensaje.trim().replace(/\s+/g, " ");
+	if (texto.length <= 60) return texto;
+	const corte = texto.lastIndexOf(" ", 60);
+	return texto.slice(0, corte > 0 ? corte : 60);
+}
+
+/** Valida también las entregas recuperadas de la memoria antes de ofrecer guardarlas. */
+export function leerTarjeta(valor: unknown): TarjetaGuion | undefined {
+	if (
+		!valor ||
+		typeof valor !== "object" ||
+		!("instruccion" in valor) ||
+		!("guion" in valor)
+	)
+		return;
+	const instruccion = esquemaInstruccionGuion.safeParse(valor.instruccion);
+	if (!instruccion.success) return;
+	const guion = crearEsquemaGuion(instruccion.data.duracion_s).safeParse(
+		valor.guion,
+	);
+	if (guion.success)
+		return { instruccion: instruccion.data, guion: guion.data };
+}
+
+/** Une resultados exitosos a su llamada por ID; omite razonamiento, herramientas y archivos. */
+export function convertirHistorial(
+	filas: readonly { id: string; contenido: unknown }[],
+): MensajeAgente[] {
+	const mensajes: MensajeAgente[] = [];
+	const llamadas = new Map<
+		string,
+		{ mensaje: MensajeAgente; tarjeta: TarjetaGuion }
+	>();
+	for (const fila of filas) {
+		const modelo = modelMessageSchema.parse(fila.contenido);
+		if (modelo.role === "system") continue;
+		const partes =
+			typeof modelo.content === "string"
+				? [{ type: "text" as const, text: modelo.content }]
+				: modelo.content;
+		const mensaje: MensajeAgente = {
+			id: fila.id,
+			role: modelo.role === "user" ? "user" : "assistant",
+			parts: partes
+				.filter((p) => p.type === "text")
+				.map((p) => ({ type: "text", text: p.text })),
+		};
+		if (modelo.role !== "tool") mensajes.push(mensaje);
+		for (const parte of partes) {
+			if (parte.type === "tool-call" && parte.toolName === "entregar_guion") {
+				const tarjeta = leerTarjeta(parte.input);
+				if (tarjeta) llamadas.set(parte.toolCallId, { mensaje, tarjeta });
+			}
+			if (
+				parte.type === "tool-result" &&
+				parte.toolName === "entregar_guion" &&
+				parte.output.type === "json"
+			) {
+				const valor = parte.output.value;
+				const llamada = llamadas.get(parte.toolCallId);
+				if (
+					llamada &&
+					valor &&
+					typeof valor === "object" &&
+					"ok" in valor &&
+					valor.ok === true
+				)
+					llamada.mensaje.metadata = { tarjetaGuion: llamada.tarjeta };
+			}
+		}
+	}
+	return mensajes.filter((m) => m.parts.length || m.metadata?.tarjetaGuion);
+}
+
+/** CRUD bajo RLS; el servidor es el único que escribe los mensajes del chat. */
+export function crearServicioConversaciones(cliente: SupabaseClient<Database>) {
+	return {
+		async listar(): Promise<Conversacion[]> {
+			const { data, error } = await cliente
+				.from("agente_conversaciones")
+				.select("id,titulo,actualizado_en")
+				.order("actualizado_en", { ascending: false });
+			if (error)
+				throw new Error(
+					"No pudimos cargar las conversaciones. Inténtalo de nuevo.",
+				);
+			return data ?? [];
+		},
+		async crear(mensaje: string): Promise<Conversacion> {
+			const { data, error } = await cliente
+				.from("agente_conversaciones")
+				.insert({ titulo: tituloConversacion(mensaje) })
+				.select("id,titulo,actualizado_en")
+				.maybeSingle();
+			if (error || !data)
+				throw new Error(
+					"No pudimos crear la conversación. Inténtalo de nuevo.",
+				);
+			return data;
+		},
+		async borrar(id: string) {
+			const { error } = await cliente
+				.from("agente_conversaciones")
+				.delete()
+				.eq("id", id);
+			if (error)
+				throw new Error(
+					"No pudimos borrar la conversación. Inténtalo de nuevo.",
+				);
+		},
+		async cargar(id: string) {
+			const { data, error } = await cliente
+				.from("agente_mensajes")
+				.select("id,contenido")
+				.eq("conversacion_id", id)
+				.order("creado_en", { ascending: true });
+			if (error)
+				throw new Error("No pudimos cargar los mensajes. Inténtalo de nuevo.");
+			return convertirHistorial(data ?? []);
+		},
+	};
+}

@@ -86,6 +86,41 @@ export function leerGuionGuardado(fila: GuionGuardado) {
 	};
 }
 
+/** Invoca IA mediante Supabase, que conserva la URL y renueva la sesión en cada petición. */
+export async function invocarFuncionIa(
+	cliente: SupabaseClient<Database>,
+	ruta: string,
+	body: object,
+	generico: string,
+	signal?: AbortSignal,
+) {
+	const { data: sesion, error: errorSesion } = await cliente.auth.getSession();
+	if (errorSesion || !sesion.session)
+		throw new Error("Tu sesión venció. Vuelve a entrar al panel.");
+	const respuesta = await cliente.functions
+		.invoke<unknown>(`ia/${ruta}`, {
+			body,
+			signal,
+			headers: { Authorization: `Bearer ${sesion.session.access_token}` },
+		})
+		.catch(() => {
+			throw new Error(generico);
+		});
+	if (respuesta.error) {
+		let mensaje = generico;
+		if (respuesta.error.context instanceof Response) {
+			try {
+				const datos = objeto(await respuesta.error.context.json());
+				if (typeof datos.mensaje === "string") mensaje = datos.mensaje;
+			} catch {
+				/* Los errores de red pueden carecer de JSON. */
+			}
+		}
+		throw new Error(mensaje);
+	}
+	return respuesta.data;
+}
+
 /** CRUD con RLS y llamadas a IA; nunca escribe prompts ni publica contenido desde el cliente. */
 export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
 	async function invocar(
@@ -95,26 +130,7 @@ export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
 			| { guion_id: string; herramienta: "avatar" | "escenas" },
 	) {
 		const generico = `No se pudo generar ${ruta === "guion" ? "el guion" : "el prompt"}. Inténtalo de nuevo en unos minutos.`;
-		const respuesta = await cliente.functions
-			.invoke<unknown>(`ia/${ruta}`, {
-				body,
-			})
-			.catch(() => {
-				throw new Error(generico);
-			});
-		if (respuesta.error) {
-			let mensaje = generico;
-			if (respuesta.error.context instanceof Response) {
-				try {
-					const datos = objeto(await respuesta.error.context.json());
-					if (typeof datos.mensaje === "string") mensaje = datos.mensaje;
-				} catch {
-					// Un fallo de red puede no traer un cuerpo JSON.
-				}
-			}
-			throw new Error(mensaje);
-		}
-		return objeto(respuesta.data);
+		return objeto(await invocarFuncionIa(cliente, ruta, body, generico));
 	}
 	const conflicto =
 		"El guion cambió o ya no está disponible. Recarga la lista antes de continuar.";

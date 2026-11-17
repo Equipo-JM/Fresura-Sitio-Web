@@ -58,7 +58,13 @@ function simularCliente(iniciales: Fila[] = []) {
 	});
 	const cliente = {
 		functions: { invoke },
-		auth: { signOut: vi.fn() },
+		auth: {
+			signOut: vi.fn(),
+			getSession: vi.fn().mockResolvedValue({
+				data: { session: { access_token: "sesion-prueba" } },
+				error: null,
+			}),
+		},
 		from(tabla: string) {
 			let operacion = "leer";
 			let valores: Record<string, unknown> = {};

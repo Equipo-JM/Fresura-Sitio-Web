@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { useRef } from "react";
 import { Link } from "react-router";
 import type { Database } from "../../tipos/database.types";
+import { ChatAgente } from "../agente/ChatAgente";
 import { EditorGuion } from "./EditorGuion";
 import { FormularioGuion } from "./FormularioGuion";
 import { PromptGuion } from "./PromptGuion";
@@ -31,6 +33,7 @@ export function GuionesPanel({
 	irVersiones: () => void;
 }) {
 	const panel = useGuiones(cliente);
+	const formularioRef = useRef<HTMLDivElement>(null);
 	const { trabajo, ocupado, datos } = panel;
 	const estado = trabajo?.fila?.estado;
 	return (
@@ -113,13 +116,26 @@ export function GuionesPanel({
 					>
 						Recargar lista y productos
 					</button>
-					<FormularioGuion
-						valor={panel.formulario}
-						cambiar={panel.setFormulario}
+					<ChatAgente
+						cliente={cliente}
 						productos={datos?.productos ?? []}
-						ocupado={ocupado}
-						generar={() => void panel.generar()}
+						abrirGuion={(fila) => {
+							panel.abrir(fila);
+						}}
+						usarFormulario={() => {
+							formularioRef.current?.scrollIntoView?.({ behavior: "smooth" });
+							formularioRef.current?.querySelector("select")?.focus();
+						}}
 					/>
+					<div ref={formularioRef}>
+						<FormularioGuion
+							valor={panel.formulario}
+							cambiar={panel.setFormulario}
+							productos={datos?.productos ?? []}
+							ocupado={ocupado}
+							generar={() => void panel.generar()}
+						/>
+					</div>
 					<section
 						className="panel-seccion"
 						aria-labelledby="lista-guiones-titulo"
@@ -155,7 +171,13 @@ export function GuionesPanel({
 							className="panel-seccion"
 							aria-labelledby="editor-guion-titulo"
 						>
-							<h2 id="editor-guion-titulo">Revisar guion</h2>
+							<h2
+								id="editor-guion-titulo"
+								ref={panel.tituloEditor}
+								tabIndex={-1}
+							>
+								Revisar guion
+							</h2>
 							<p>
 								{trabajo.productoNombre} · {trabajo.instruccion.red} ·{" "}
 								{trabajo.instruccion.duracion_s} segundos ·{" "}
