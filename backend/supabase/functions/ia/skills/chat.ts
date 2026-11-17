@@ -4,9 +4,9 @@ import {
 	createUIMessageStream,
 	createUIMessageStreamResponse,
 	isStepCount,
-	type LanguageModel,
 	type ModelMessage,
 	streamText,
+	wrapLanguageModel,
 } from "ai";
 import { esquemaChat } from "../../_shared/esquemas/chat.ts";
 import { esquemaContenido } from "../../_shared/esquemas/contenido.ts";
@@ -46,8 +46,11 @@ export type OpcionesRutaChat = {
 	claveGemini: string;
 	modeloAgente: string;
 	modeloRespaldo: string;
-	crearModelo?: (id: string) => LanguageModel;
+	crearModelo?: (id: string) => ModeloBase;
 };
+
+/** Modelo que acepta el envoltorio del SDK (el de Google y los simulados de las pruebas). */
+type ModeloBase = Parameters<typeof wrapLanguageModel>[0]["model"];
 
 function clasificarFallo(error: unknown): ErrorIa {
 	const estado =
@@ -70,8 +73,41 @@ function clasificarFallo(error: unknown): ErrorIa {
  * POST /chat (IF-20). El chunk finish lleva messageMetadata.tarjetaGuion =
  * {instruccion, guion} y messageMetadata.aviso = {tipo, mensaje} cuando el texto
  * contiene precios o nombres explícitos de sedes no publicados. El panel debe leer ambos en message.metadata.
- * El respaldo solo se intenta antes del primer texto o llamada de herramienta.
+ * Cada paso del agente pasa al modelo de respaldo si el principal responde 503
+ * o cupo agotado, aunque la respuesta ya haya empezado (ver `modeloConRespaldo`).
  */
+/**
+ * Envuelve el modelo principal para que cada llamada (cada paso del bucle de
+ * herramientas) pase una vez al modelo de respaldo ante un 503 o cupo agotado.
+ * El 17 nov Gemini respondió 503 en un paso intermedio, ya con herramientas
+ * usadas, y el turno se perdía porque el respaldo solo cubría el primer paso.
+ */
+export function modeloConRespaldo(
+	principal: ModeloBase,
+	crearRespaldo: () => ModeloBase,
+	registrar: (tipo: string, estado?: number) => void,
+) {
+	return wrapLanguageModel({
+		model: principal,
+		middleware: {
+			wrapStream: async ({ doStream, params }) => {
+				try {
+					return await doStream();
+				} catch (error) {
+					const fallo = clasificarFallo(error);
+					if (fallo.codigo !== "ia_cupo" && fallo.estadoProveedor !== 503)
+						throw error;
+					registrar(fallo.codigo, fallo.estadoProveedor);
+					return wrapLanguageModel({
+						model: crearRespaldo(),
+						middleware: {},
+					}).doStream(params);
+				}
+			},
+		},
+	});
+}
+
 export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 	const crearModelo =
 		opciones.crearModelo ??
@@ -126,114 +162,107 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			onError: () => RESPUESTAS_ERROR_IA.ia_tiempo.mensaje,
 			execute: async ({ writer }) => {
 				writer.write({ type: "start", messageId: crypto.randomUUID() });
-				let emitido = false;
-				for (let intento = 0; intento < 2; intento++) {
-					let fallo: unknown;
-					let texto = "";
-					const resultado = streamText({
-						model: crearModelo(
-							intento === 0 ? opciones.modeloAgente : opciones.modeloRespaldo,
-						),
-						system: INSTRUCCIONES_AGENTE,
-						messages: [...historial, nuevo],
-						tools: herramientas,
-						stopWhen: isStepCount(MAXIMO_PASOS_AGENTE),
-						maxRetries: 0,
-						// Un turno puede encadenar hasta MAXIMO_PASOS_AGENTE llamadas; 60 s deja
-						// margen frente a los 150 s de la Edge Function (DT-01, sección 11).
-						abortSignal: AbortSignal.timeout(60_000),
-						onError: ({ error }) => {
-							fallo = error;
-						},
-						onFinish: async ({ responseMessages }) => {
-							if (fallo === undefined)
-								await guardarMensajes(cliente, id, responseMessages);
-						},
-					});
-					const lector = resultado
-						.toUIMessageStream({
-							sendStart: false,
-							onError: () => "error_proveedor",
-						})
-						.getReader();
-					try {
-						while (true) {
-							const { done, value: parte } = await lector.read();
-							if (done) break;
-							if (parte.type === "error") {
-								fallo ??= new Error("fallo_flujo");
-								continue;
-							}
-							if (fallo !== undefined) continue;
-							if (parte.type === "text-delta") texto += parte.delta;
-							if (parte.type === "text-start" || parte.type.startsWith("tool-"))
-								emitido = true;
-							if (parte.type === "finish") {
-								const errores = validarTextoContraDatos(
-									texto,
-									preciosPublicados(contenido.data),
-									contenido.data.negocio.sedes.map((sede) => sede.nombre),
-								);
-								const tipoAviso = errores.some((error) =>
-									error.startsWith("La sede"),
-								)
-									? "sede_no_publicada"
-									: "precio_no_publicado";
-								if (errores.length)
-									console.error(JSON.stringify(datosRegistroFallo(tipoAviso)));
-								const entrega = estado.guionEntregado;
-								writer.write({
-									...parte,
-									messageMetadata: {
-										...(entrega
-											? {
-													tarjetaGuion: {
-														instruccion: entrega.instruccion,
-														guion: entrega.guion,
-													},
-												}
-											: {}),
-										...(errores.length
-											? {
-													aviso: {
-														tipo: tipoAviso,
-														mensaje:
-															"La respuesta menciona datos no publicados. Revisa los datos antes de usarla.",
-													},
-												}
-											: {}),
-									},
-								});
-							} else writer.write(parte);
-						}
-					} catch (error) {
-						fallo = error;
-					} finally {
-						lector.releaseLock();
-					}
-					if (fallo === undefined) return;
-					const clasificado = clasificarFallo(fallo);
-					console.error(
-						JSON.stringify(
-							datosRegistroFallo(
-								clasificado.codigo,
-								clasificado.estadoProveedor,
+				let fallo: unknown;
+				let texto = "";
+				const resultado = streamText({
+					model: modeloConRespaldo(
+						crearModelo(opciones.modeloAgente),
+						() => crearModelo(opciones.modeloRespaldo),
+						(tipo, estadoProveedor) =>
+							console.error(
+								JSON.stringify(datosRegistroFallo(tipo, estadoProveedor)),
 							),
-						),
-					);
-					if (
-						intento === 0 &&
-						!emitido &&
-						(clasificado.codigo === "ia_cupo" ||
-							clasificado.estadoProveedor === 503)
-					)
-						continue;
-					writer.write({
-						type: "error",
-						errorText: RESPUESTAS_ERROR_IA[clasificado.codigo].mensaje,
-					});
-					return;
+					),
+					system: INSTRUCCIONES_AGENTE,
+					messages: [...historial, nuevo],
+					tools: herramientas,
+					stopWhen: isStepCount(MAXIMO_PASOS_AGENTE),
+					// Sin reintentos del SDK: el 503 y el cupo los atiende `modeloConRespaldo`,
+					// y reintentar con los dos modelos caídos solo gastaría cupo.
+					maxRetries: 0,
+					// Un turno encadena hasta MAXIMO_PASOS_AGENTE llamadas y, con Gemini saturado,
+					// el 17 nov tardó 46 s antes de un 503; 100 s deja espacio al respaldo dentro
+					// de los 150 s de la Edge Function (DT-01, sección 11).
+					abortSignal: AbortSignal.timeout(100_000),
+					onError: ({ error }) => {
+						fallo = error;
+					},
+					onFinish: async ({ responseMessages }) => {
+						if (fallo === undefined)
+							await guardarMensajes(cliente, id, responseMessages);
+					},
+				});
+				const lector = resultado
+					.toUIMessageStream({
+						sendStart: false,
+						onError: () => "error_proveedor",
+					})
+					.getReader();
+				try {
+					while (true) {
+						const { done, value: parte } = await lector.read();
+						if (done) break;
+						if (parte.type === "error") {
+							fallo ??= new Error("fallo_flujo");
+							continue;
+						}
+						if (fallo !== undefined) continue;
+						if (parte.type === "text-delta") texto += parte.delta;
+						if (parte.type === "finish") {
+							const errores = validarTextoContraDatos(
+								texto,
+								preciosPublicados(contenido.data),
+								contenido.data.negocio.sedes.map((sede) => sede.nombre),
+							);
+							const tipoAviso = errores.some((error) =>
+								error.startsWith("La sede"),
+							)
+								? "sede_no_publicada"
+								: "precio_no_publicado";
+							if (errores.length)
+								console.error(JSON.stringify(datosRegistroFallo(tipoAviso)));
+							const entrega = estado.guionEntregado;
+							writer.write({
+								...parte,
+								messageMetadata: {
+									...(entrega
+										? {
+												tarjetaGuion: {
+													instruccion: entrega.instruccion,
+													guion: entrega.guion,
+												},
+											}
+										: {}),
+									...(errores.length
+										? {
+												aviso: {
+													tipo: tipoAviso,
+													mensaje:
+														"La respuesta menciona datos no publicados. Revisa los datos antes de usarla.",
+												},
+											}
+										: {}),
+								},
+							});
+						} else writer.write(parte);
+					}
+				} catch (error) {
+					fallo = error;
+				} finally {
+					lector.releaseLock();
 				}
+				if (fallo === undefined) return;
+				const clasificado = clasificarFallo(fallo);
+				console.error(
+					JSON.stringify(
+						datosRegistroFallo(clasificado.codigo, clasificado.estadoProveedor),
+					),
+				);
+				writer.write({
+					type: "error",
+					errorText: RESPUESTAS_ERROR_IA[clasificado.codigo].mensaje,
+				});
+				return;
 			},
 		});
 		return createUIMessageStreamResponse({ stream: flujo, headers: cors });
