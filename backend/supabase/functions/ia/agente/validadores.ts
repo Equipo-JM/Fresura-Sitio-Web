@@ -46,17 +46,36 @@ export function preciosPublicados(contenido: Contenido): Set<number> {
 	);
 }
 
-/** Errores por cada precio del texto que no está publicado; vacío si todo cuadra. */
+/** Revisa precios y, si se pasan sedes, nombres propios explícitos tras «sede». No interpreta referencias indirectas a lugares. */
 export function validarTextoContraDatos(
 	texto: string,
 	precios: ReadonlySet<number>,
+	sedes?: readonly string[],
 ): string[] {
-	return extraerPrecios(texto)
-		.filter((precio) => !precios.has(precio))
-		.map(
-			(precio) =>
-				`El precio $${precio.toLocaleString("es-CO")} no está publicado; usa solo los precios de las herramientas.`,
-		);
+	const erroresSedes = sedes
+		? [
+				...texto.matchAll(
+					/\b[Ss]ede\s+(?:(?:de|en|del)\s+)?[«“"]?([\p{Lu}][\p{L}\p{N}-]*(?:\s+[\p{Lu}][\p{L}\p{N}-]*)*)/gu,
+				),
+			]
+				.filter(
+					([, nombre]) =>
+						!sedes.some(
+							(sede) =>
+								normalizar(sede).replace(/^sede\s+/, "") === normalizar(nombre),
+						),
+				)
+				.map(() => "La sede mencionada no está publicada.")
+		: [];
+	return [
+		...erroresSedes,
+		...extraerPrecios(texto)
+			.filter((precio) => !precios.has(precio))
+			.map(
+				(precio) =>
+					`El precio $${precio.toLocaleString("es-CO")} no está publicado; usa solo los precios de las herramientas.`,
+			),
+	];
 }
 
 /** Valida el guion entregado: que nombre el producto y que sus precios estén publicados. */

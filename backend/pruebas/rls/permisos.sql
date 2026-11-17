@@ -1,4 +1,4 @@
--- Pruebas PU-01 a PU-06, PU-08 y PU-15 (DT-01, secciones 20, 21 y 27.1) contra la base real.
+-- Pruebas PU-01 a PU-06, PU-08, PU-15 y memoria del agente (DT-01, secciones 20, 21, 25.6 y 27.1) contra la base real.
 -- Simula cada sesión con su rol y sus claims de JWT, como hace PostgREST, sin crear usuarios.
 -- Todo ocurre en una transacción que nunca se confirma: no deja datos.
 -- Ejecutar: npm run supabase -- db query --linked -f pruebas/rls/permisos.sql
@@ -45,6 +45,10 @@ declare
   sin_rol jsonb := jsonb_build_object('role', 'authenticated', 'aal', 'aal2', 'sub', gen_random_uuid());
   admin_aal1 jsonb := jsonb_build_object('role', 'authenticated', 'aal', 'aal1', 'sub', admin, 'app_metadata', '{"rol":"admin"}'::jsonb);
   admin_aal2 jsonb := jsonb_build_object('role', 'authenticated', 'aal', 'aal2', 'sub', admin, 'app_metadata', '{"rol":"admin"}'::jsonb);
+  conversacion uuid := gen_random_uuid();
+  mensaje uuid := gen_random_uuid();
+  crear_conversacion text;
+  crear_mensaje text;
   crear_borrador text := $q$insert into public.versiones_contenido (estado, version_contrato, json) values ('borrador', '1.0.1', '{}')$q$;
 begin
   if admin is null then
@@ -102,6 +106,47 @@ begin
   perform pg_temp.probar('PU-15 descartado a aprobado', 'error P0001', 'authenticated', admin_aal2, $q$update public.guiones set estado = 'aprobado' where instruccion ->> 'prueba' = 'pu15'$q$);
   perform pg_temp.probar('PU-15 recuperar descartado', 'filas=1', 'authenticated', admin_aal2, $q$update public.guiones set estado = 'borrador' where instruccion ->> 'prueba' = 'pu15'$q$);
   perform pg_temp.probar('PU-15 eliminar guion', 'filas=1', 'authenticated', admin_aal2, $q$delete from public.guiones where instruccion ->> 'prueba' = 'pu15'$q$);
+
+  -- Memoria: mismos claims y comprobaciones de filas/SQLSTATE que guiones.
+  -- now() es constante en esta transacción: la fecha inicial se atrasa para probar el disparador.
+  crear_conversacion := format($q$insert into public.agente_conversaciones (id, titulo, actualizado_en) values (%L, 'Prueba de memoria', now() - interval '1 day')$q$, conversacion);
+  crear_mensaje := format($q$insert into public.agente_mensajes (id, conversacion_id, rol, contenido) values (%L, %L, 'administrador', '{}')$q$, mensaje, conversacion);
+  perform pg_temp.probar('Memoria admin aal2 crea conversación', 'filas=1', 'authenticated', admin_aal2, crear_conversacion);
+  perform pg_temp.probar('Memoria admin aal2 inserta mensaje', 'filas=1', 'authenticated', admin_aal2, crear_mensaje);
+  perform pg_temp.probar('Memoria anon lee conversación', 'error 42501', 'anon', anonimo, format('select id from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria anon crea conversación', 'error 42501', 'anon', anonimo, crear_conversacion);
+  perform pg_temp.probar('Memoria anon cambia conversación', 'error 42501', 'anon', anonimo, format($q$update public.agente_conversaciones set titulo = 'Cambio prohibido' where id = %L$q$, conversacion));
+  perform pg_temp.probar('Memoria anon borra conversación', 'error 42501', 'anon', anonimo, format('delete from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria anon lee mensaje', 'error 42501', 'anon', anonimo, format('select id from public.agente_mensajes where id = %L', mensaje));
+  perform pg_temp.probar('Memoria anon crea mensaje', 'error 42501', 'anon', anonimo, crear_mensaje);
+  perform pg_temp.probar('Memoria anon cambia mensaje', 'error 42501', 'anon', anonimo, format($q$update public.agente_mensajes set contenido = '{}' where id = %L$q$, mensaje));
+  perform pg_temp.probar('Memoria anon borra mensaje', 'error 42501', 'anon', anonimo, format('delete from public.agente_mensajes where id = %L', mensaje));
+  perform pg_temp.probar('Memoria sin rol lee conversación', 'filas=0', 'authenticated', sin_rol, format('select id from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria sin rol crea conversación', 'error 42501', 'authenticated', sin_rol, crear_conversacion);
+  perform pg_temp.probar('Memoria sin rol cambia conversación', 'filas=0', 'authenticated', sin_rol, format($q$update public.agente_conversaciones set titulo = 'Cambio prohibido' where id = %L$q$, conversacion));
+  perform pg_temp.probar('Memoria sin rol borra conversación', 'filas=0', 'authenticated', sin_rol, format('delete from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria sin rol lee mensaje', 'filas=0', 'authenticated', sin_rol, format('select id from public.agente_mensajes where id = %L', mensaje));
+  perform pg_temp.probar('Memoria sin rol crea mensaje', 'error 42501', 'authenticated', sin_rol, crear_mensaje);
+  perform pg_temp.probar('Memoria sin rol cambia mensaje', 'filas=0', 'authenticated', sin_rol, format($q$update public.agente_mensajes set contenido = '{}' where id = %L$q$, mensaje));
+  perform pg_temp.probar('Memoria sin rol borra mensaje', 'filas=0', 'authenticated', sin_rol, format('delete from public.agente_mensajes where id = %L', mensaje));
+  perform pg_temp.probar('Memoria admin aal1 lee conversación', 'filas=0', 'authenticated', admin_aal1, format('select id from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria admin aal1 crea conversación', 'error 42501', 'authenticated', admin_aal1, crear_conversacion);
+  perform pg_temp.probar('Memoria admin aal1 cambia conversación', 'filas=0', 'authenticated', admin_aal1, format($q$update public.agente_conversaciones set titulo = 'Cambio prohibido' where id = %L$q$, conversacion));
+  perform pg_temp.probar('Memoria admin aal1 borra conversación', 'filas=0', 'authenticated', admin_aal1, format('delete from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria admin aal1 lee mensaje', 'filas=0', 'authenticated', admin_aal1, format('select id from public.agente_mensajes where id = %L', mensaje));
+  perform pg_temp.probar('Memoria admin aal1 crea mensaje', 'error 42501', 'authenticated', admin_aal1, crear_mensaje);
+  perform pg_temp.probar('Memoria admin aal1 cambia mensaje', 'filas=0', 'authenticated', admin_aal1, format($q$update public.agente_mensajes set contenido = '{}' where id = %L$q$, mensaje));
+  perform pg_temp.probar('Memoria admin aal1 borra mensaje', 'filas=0', 'authenticated', admin_aal1, format('delete from public.agente_mensajes where id = %L', mensaje));
+  perform pg_temp.probar('Memoria admin aal2 lee conversación', 'filas=1', 'authenticated', admin_aal2, format('select id from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria admin aal2 lee mensaje', 'filas=1', 'authenticated', admin_aal2, format('select id from public.agente_mensajes where id = %L', mensaje));
+  perform pg_temp.probar('Memoria insertar mensaje actualiza fecha', 'filas=1', 'authenticated', admin_aal2, format('select id from public.agente_conversaciones where id = %L and actualizado_en = now() and actualizado_en > now() - interval ''1 day'' and creado_por = auth.uid()', conversacion));
+  perform pg_temp.probar('Memoria rol inválido', 'error 23514', 'authenticated', admin_aal2, format($q$insert into public.agente_mensajes (id, conversacion_id, rol, contenido) values (gen_random_uuid(), %L, 'invalido', '{}')$q$, conversacion));
+  perform pg_temp.probar('Memoria título vacío', 'error 23514', 'authenticated', admin_aal2, $q$insert into public.agente_conversaciones (titulo) values ('   ')$q$);
+  perform pg_temp.probar('Memoria título demasiado largo', 'error 23514', 'authenticated', admin_aal2, $q$insert into public.agente_conversaciones (titulo) values (repeat('a', 121))$q$);
+  perform pg_temp.probar('Memoria admin aal2 cambia conversación', 'filas=1', 'authenticated', admin_aal2, format($q$update public.agente_conversaciones set titulo = 'Título cambiado', actualizado_en = now() - interval '2 days' where id = %L$q$, conversacion));
+  perform pg_temp.probar('Memoria actualizar conversación fija fecha', 'filas=1', 'authenticated', admin_aal2, format('select id from public.agente_conversaciones where id = %L and actualizado_en = now()', conversacion));
+  perform pg_temp.probar('Memoria admin aal2 borra conversación', 'filas=1', 'authenticated', admin_aal2, format('delete from public.agente_conversaciones where id = %L', conversacion));
+  perform pg_temp.probar('Memoria borrado en cascada del mensaje', 'filas=0', 'service_role', '{"role":"service_role"}', format('select id from public.agente_mensajes where id = %L', mensaje));
 
   -- PU-08: publicar y restaurar con service_role, como la función `panel` (sección 21.1).
   perform pg_temp.probar('PU-08 admin crea borrador', 'filas=1', 'authenticated', admin_aal2, $q$insert into public.versiones_contenido (estado, version_contrato, json) values ('borrador', '1.0.1', '{"marca":"pu08"}')$q$);

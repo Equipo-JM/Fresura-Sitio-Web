@@ -50,6 +50,11 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 	const [mensaje, setMensaje] = useState("");
 	const bloqueo = useRef(false);
 	const avisoError = useRef<HTMLParagraphElement>(null);
+	const tituloEditor = useRef<HTMLHeadingElement>(null);
+	const filaAbierta = trabajo?.fila?.id;
+	useEffect(() => {
+		if (filaAbierta) tituloEditor.current?.focus();
+	}, [filaAbierta]);
 	const sinGuardar = trabajo?.sinGuardar ?? false;
 	useEffect(() => {
 		if (error) avisoError.current?.focus();
@@ -162,6 +167,13 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 					"No pudimos abrir este guion: sus campos no son válidos.",
 				);
 			}
+			setDatos(
+				(actual) =>
+					actual && {
+						...actual,
+						guiones: [fila, ...actual.guiones.filter((g) => g.id !== fila.id)],
+					},
+			);
 			setTrabajo({ ...contenido, fila, sinGuardar: false });
 			setPrompt(null);
 			if (fila.estado === "aprobado")
@@ -270,6 +282,7 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 		copiar,
 		puedeSalir,
 		avisoError,
+		tituloEditor,
 		editar: (editado: Guion) =>
 			setTrabajo(
 				(actual) => actual && { ...actual, editado, sinGuardar: true },

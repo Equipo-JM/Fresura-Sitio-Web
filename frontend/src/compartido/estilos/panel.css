@@ -383,3 +383,45 @@
 	content-visibility: auto;
 	contain-intrinsic-size: auto 100px;
 }
+
+/* El chat conserva las superficies y medidas ya usadas en el panel. */
+.agente-distribucion {
+	display: grid;
+	gap: 16px;
+}
+.agente-distribucion > *,
+.agente-chat,
+.agente-tarjeta {
+	min-width: 0;
+}
+.agente-mensaje {
+	background: var(--color-we-peep);
+	color: var(--color-peat-brown);
+}
+.agente-texto {
+	white-space: pre-wrap;
+}
+.agente-tarjeta {
+	display: grid;
+	gap: 16px;
+}
+.agente-tarjeta h3 {
+	font-family: "Restora Neue", serif;
+}
+.agente-tarjeta details {
+	max-width: 100%;
+}
+.agente-tarjeta .guiones-editor {
+	min-width: 0;
+}
+@media (min-width: 768px) {
+	.agente-distribucion {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+	}
+}
+.agente-chat .panel-aviso {
+	flex-wrap: wrap;
+}
+.agente-tarjeta .guiones-editor fieldset {
+	min-width: 0;
+}

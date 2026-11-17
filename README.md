@@ -49,26 +49,27 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 
 ## Estructura
 
-| Carpeta                                        | Contenido                                                                                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `frontend/src/sitio/`                          | Páginas públicas                                                                                                          |
-| `frontend/src/panel/`                          | Panel `/admin`                                                                                                            |
-| `frontend/src/panel/guiones/`                  | Formulario, editor, estados y prompts de video; servicio y hook con cliente del panel inyectado                           |
-| `frontend/src/compartido/`                     | Lo que usan el sitio y el panel                                                                                           |
-| `frontend/public/`                             | Lo que se publica tal cual: contenido de respaldo, marca, fotos de ejemplo, `_headers` y `robots.txt`                     |
-| `frontend/pruebas/`                            | Pruebas de pantallas, carrito y lectura del contenido; `datos/` tiene el contenido de prueba                              |
-| `backend/supabase/functions/_shared/esquemas/` | Esquemas Zod, únicos para el sitio, el panel y las funciones (contrato de contenido y guion)                              |
-| `backend/supabase/functions/_shared/`          | Código común de las funciones: esqueleto de la petición, acceso de administrador, variables y respuestas                  |
-| `backend/supabase/functions/panel/`            | Función `panel`: publica el borrador validado con control de revisión y restaura la versión anterior                      |
-| `backend/supabase/functions/ia/`               | Función `ia` (agente de IA): `index.ts` solo une el entorno, el proveedor y las rutas                                     |
-| `backend/supabase/functions/ia/skills/`        | Una skill por ruta: `guion.ts` (`POST /guion`) y `prompt-video.ts` (`POST /prompt-video`), con sus instrucciones          |
-| `backend/supabase/functions/ia/proveedor/`     | Llamada a Gemini (`gemini.ts`) y cadena de modelos con reintento, respaldo y errores (`generar.ts`)                       |
-| `backend/supabase/functions/ia/agente/`        | Agente conversacional (ADR-002): herramientas de solo lectura, validadores contra lo publicado y definición con el AI SDK |
-| `backend/supabase/migrations/`                 | Tablas, permisos (RLS), bucket de fotos y semilla del contenido                                                           |
-| `backend/pruebas/`                             | Pruebas de las funciones y de los esquemas; `datos/` tiene el ejemplo y los casos del contrato                            |
-| `backend/pruebas/ia/`                          | Pruebas del agente: rutas, instrucciones, cadena de modelos y esquema del guion                                           |
-| `prototipo/`                                   | Prototipo anterior, solo como referencia                                                                                  |
-| `.github/workflows/`                           | Revisión automática de cada pull request: Biome, compilación y pruebas                                                    |
+| Carpeta                                        | Contenido                                                                                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `frontend/src/sitio/`                          | Páginas públicas                                                                                                                           |
+| `frontend/src/panel/`                          | Panel `/admin`                                                                                                                             |
+| `frontend/src/panel/agente/`                   | Chat con AI SDK v7, historial bajo RLS y tarjetas que se guardan como borrador mediante el servicio de guiones |
+| `frontend/src/panel/guiones/`                  | Formulario, editor, estados y prompts de video; servicio y hook con cliente del panel inyectado                                            |
+| `frontend/src/compartido/`                     | Lo que usan el sitio y el panel                                                                                                            |
+| `frontend/public/`                             | Lo que se publica tal cual: contenido de respaldo, marca, fotos de ejemplo, `_headers` y `robots.txt`                                      |
+| `frontend/pruebas/`                            | Pruebas de pantallas, carrito y lectura del contenido; `datos/` tiene el contenido de prueba                                               |
+| `backend/supabase/functions/_shared/esquemas/` | Esquemas Zod, únicos para el sitio, el panel y las funciones (contrato de contenido y guion)                                               |
+| `backend/supabase/functions/_shared/`          | Código común de las funciones: esqueleto de la petición, acceso de administrador, variables y respuestas                                   |
+| `backend/supabase/functions/panel/`            | Función `panel`: publica el borrador validado con control de revisión y restaura la versión anterior                                       |
+| `backend/supabase/functions/ia/`               | Función `ia` (agente de IA): `index.ts` solo une el entorno, el proveedor y las rutas                                                      |
+| `backend/supabase/functions/ia/skills/`        | Una skill por ruta: `chat.ts` (`POST /chat`), `guion.ts` (`POST /guion`) y `prompt-video.ts` (`POST /prompt-video`), con sus instrucciones |
+| `backend/supabase/functions/ia/proveedor/`     | Llamada a Gemini (`gemini.ts`) y cadena de modelos con reintento, respaldo y errores (`generar.ts`)                                        |
+| `backend/supabase/functions/ia/agente/`        | Agente conversacional (ADR-002): herramientas de solo lectura, validadores contra lo publicado, memoria con RLS y definición con el AI SDK |
+| `backend/supabase/migrations/`                 | Tablas, permisos (RLS), bucket de fotos y semilla del contenido                                                                            |
+| `backend/pruebas/`                             | Pruebas de las funciones y de los esquemas; `datos/` tiene el ejemplo y los casos del contrato                                             |
+| `backend/pruebas/ia/`                          | Pruebas del agente: rutas, instrucciones, cadena de modelos y esquema del guion                                                            |
+| `prototipo/`                                   | Prototipo anterior, solo como referencia                                                                                                   |
+| `.github/workflows/`                           | Revisión automática de cada pull request: Biome, compilación y pruebas                                                                     |
 
 El frontend importa los esquemas Zod de `backend/supabase/functions/_shared/esquemas/` con una ruta relativa, para que haya una sola definición (DD-33); por eso `frontend/vite.config.ts` permite a Vite servir archivos de fuera de `frontend/`. Las funciones no importan nada del frontend.
 
@@ -96,6 +97,8 @@ Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos
 El sitio es de varias páginas (RF-02): cada opción del menú y del pie abre su propia ruta, y cada una tiene su título y su descripción para buscadores (`frontend/src/sitio/useTituloPagina.ts`). Sus pruebas están en `frontend/pruebas/paginas-sitio.test.tsx`.
 
 El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `frontend/src/compartido/carrito/reglas.ts` y tienen pruebas en `frontend/pruebas/carrito.test.ts`.
+
+La primera opción de «Guiones» es «Conversar con el agente»: permite crear, retomar y borrar conversaciones, ver la respuesta en flujo, detenerla y guardar las tarjetas de guion como borradores para abrir el editor. El transporte reutiliza `functions.invoke` y consulta la sesión en cada envío; solo manda `{conversacion_id, mensaje}` a `ia/chat`. Las pruebas de flujo SSE y memoria están en `frontend/pruebas/agente-panel.test.tsx`. El formulario se conserva como alternativa.
 
 La sección «Guiones» del panel real permite generar con los productos publicados, editar, copiar y guardar como borrador; también aprobar, descartar, recuperar y eliminar. Editar un aprobado pide confirmación y lo devuelve a borrador; la base borra su prompt. Solo un aprobado permite solicitar el prompt para avatar o escenas. El cliente usa los contratos de `ia/guion` e `ia/prompt-video`. Ninguna acción de «Guiones» publica contenido. Sus pruebas con cliente simulado están en `frontend/pruebas/guiones-panel.test.tsx`.
 
