@@ -1562,3 +1562,13 @@ button.paso-num {
 	text-decoration: underline;
 	text-underline-offset: 3px;
 }
+
+/* Franja de destacados del inicio (RF-07). */
+.destacados-encabezado {
+	margin-bottom: clamp(24px, 3vw, 40px);
+}
+.destacados-encabezado h2 {
+	font-size: clamp(2.4rem, 1.6rem + 3vw, 3.75rem);
+	line-height: 1.05;
+	margin-bottom: 8px;
+}
