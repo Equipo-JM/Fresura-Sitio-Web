@@ -233,6 +233,38 @@ describe("POST /chat", () => {
 		expect(p.crearModelo.mock.calls).toEqual([["principal"], ["respaldo"]]);
 		expect(p.guardados.map((f) => f.rol)).toEqual(["administrador", "agente"]);
 	});
+	it("pasa al respaldo si el 503 llega después de usar herramientas", async () => {
+		// Caso del 17 nov: Gemini saturado en un paso intermedio del turno.
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		let llamadas = 0;
+		const p = preparar(
+			new MockLanguageModelV3({
+				doStream: async () => {
+					llamadas++;
+					if (llamadas === 1)
+						return respuestaHerramienta("ver_negocio", {}, "a");
+					if (llamadas === 2)
+						throw new APICallError({
+							message: "The model is overloaded",
+							url: "https://proveedor.test",
+							requestBodyValues: {},
+							statusCode: 503,
+						});
+					return respuestaTexto();
+				},
+			}),
+		);
+		const texto = await (await p.pedir()).text();
+		expect(texto).toContain('"delta":"Hola"');
+		expect(texto).not.toContain('"type":"error"');
+		expect(p.crearModelo.mock.calls).toEqual([["principal"], ["respaldo"]]);
+		expect(p.guardados.map((f) => f.rol)).toEqual([
+			"administrador",
+			"agente",
+			"herramienta",
+			"agente",
+		]);
+	});
 	it("no repite un turno que ya emitió texto", async () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});
 		const p = preparar(
