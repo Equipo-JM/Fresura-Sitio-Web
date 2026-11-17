@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type {
 	Guion,
 	InstruccionGuion,
@@ -51,14 +51,17 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 	const bloqueo = useRef(false);
 	const avisoError = useRef<HTMLParagraphElement>(null);
 	const tituloEditor = useRef<HTMLHeadingElement>(null);
+	const aperturaPendiente = useRef<string | null>(null);
 	const filaAbierta = trabajo?.fila?.id;
-	useEffect(() => {
-		if (filaAbierta) tituloEditor.current?.focus();
-	}, [filaAbierta]);
 	const sinGuardar = trabajo?.sinGuardar ?? false;
-	useEffect(() => {
+	useLayoutEffect(() => {
+		// Espera también la carga del prompt para dar prioridad a cualquier error al abrir.
+		if (ocupado) return;
+		const enfocarEditor = aperturaPendiente.current === filaAbierta;
+		aperturaPendiente.current = null;
 		if (error) avisoError.current?.focus();
-	}, [error]);
+		else if (enfocarEditor) tituloEditor.current?.focus();
+	}, [error, filaAbierta, ocupado]);
 
 	useEffect(() => {
 		let vigente = true;
@@ -174,6 +177,7 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 						guiones: [fila, ...actual.guiones.filter((g) => g.id !== fila.id)],
 					},
 			);
+			if (fila.id !== filaAbierta) aperturaPendiente.current = fila.id;
 			setTrabajo({ ...contenido, fila, sinGuardar: false });
 			setPrompt(null);
 			if (fila.estado === "aprobado")
