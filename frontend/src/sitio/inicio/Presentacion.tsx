@@ -2,11 +2,13 @@ import { Link } from "react-router";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { nombreProducto } from "../../compartido/carrito/reglas";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
+import { promocionesVigentes } from "../../compartido/contenido/vigencia";
 import { MarcaPorValidar } from "../MarcaPorValidar";
 import { NOSOTROS } from "./copy";
 
 /**
- * Promociones publicadas con su vigencia, productos y condiciones (RNF-16).
+ * Promociones vigentes hoy en Colombia, con su vigencia, productos y condiciones
+ * (RNF-16). Las vencidas o futuras se quedan en el panel sin mostrarse.
  * `comoPagina` usa el título como la `h1` de /promociones.
  */
 export function Promociones({
@@ -17,6 +19,7 @@ export function Promociones({
 	comoPagina?: boolean;
 }) {
 	const Titulo = comoPagina ? "h1" : "h2";
+	const vigentes = promocionesVigentes(contenido.promociones);
 	return (
 		<section
 			className="seccion fondo-flamingo"
@@ -38,12 +41,12 @@ export function Promociones({
 						Promociones
 					</Titulo>
 				</div>
-				{contenido.promociones.length === 0 ? (
+				{vigentes.length === 0 ? (
 					<Cupon>
 						<h3>Por ahora no tenemos promociones publicadas</h3>
 					</Cupon>
 				) : (
-					contenido.promociones.map((p) => (
+					vigentes.map((p) => (
 						<Cupon key={p.id}>
 							<h3>{p.titulo}</h3>
 							{contenido.estado === "ejemplo" && <MarcaPorValidar />}

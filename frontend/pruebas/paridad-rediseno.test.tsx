@@ -206,13 +206,13 @@ describe("paridad del inicio", () => {
 				id: "martes",
 				titulo: "Martes de fresas",
 				productos: ["fresitas-caribena"],
-				vigencia: { desde: "2026-11-01", hasta: "2026-11-30" },
+				vigencia: { desde: "2000-11-01", hasta: "2999-11-30" },
 				condiciones: "Solo en U Nacional",
 			},
 		];
 		mostrar("/promociones", contenido);
 		const bloque = within(screen.getByRole("region", { name: "Promociones" }));
-		expect(bloque.getByText(/2026-11-01.*2026-11-30/)).toBeInTheDocument();
+		expect(bloque.getByText(/2000-11-01.*2999-11-30/)).toBeInTheDocument();
 		expect(bloque.getByText(/Fresitas: Caribeña/)).toBeInTheDocument();
 		expect(bloque.getByText(/Solo en U Nacional/)).toBeInTheDocument();
 	});
