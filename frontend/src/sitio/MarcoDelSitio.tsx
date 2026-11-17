@@ -264,12 +264,14 @@ export function MarcoDelSitio() {
 				</footer>
 			)}
 			{!compra && contenido && (
+				// En celular es un círculo con el ícono: la píldora con texto tapaba
+				// precios, horarios y botones (revisión en 360 px, 17 nov).
 				<a
 					className="boton wa-flotante"
 					href={`https://wa.me/${contenido.negocio.whatsapp}`}
 				>
 					<Icono nombre="chat" />
-					WhatsApp
+					<span className="oculto">WhatsApp</span>
 				</a>
 			)}
 		</>
