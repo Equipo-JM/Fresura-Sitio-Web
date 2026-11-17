@@ -78,16 +78,22 @@ Las dependencias se instalan con versión exacta (`npm i -E`) y con al menos dos
 
 ## Rutas del sitio
 
-| Ruta                  | Pantalla                                                                                                                     |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `/`                   | Inicio: portada, cinta, «Hoy se me antoja…», promociones, categorías, Nosotros, Google, sedes, «Lo más reciente» y preguntas |
-| `/sedes`              | Sedes y contacto, con horarios y enlaces para llegar por Google Maps                                                         |
-| `/producto/:id`       | Ficha de un producto: tamaños, qué incluye y las acciones                                                                    |
-| `/personalizar/:id`   | Personalización: tamaño, opciones por grupo con límites, cantidad, indicaciones y agregar al carrito                         |
-| `/carrito`            | Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje de WhatsApp                                     |
-| `/privacidad`         | Aviso de tratamiento de datos (en revisión)                                                                                  |
-| `/admin`              | Panel real: acceso con contraseña, Turnstile y código de la app autenticadora; borrador, publicación y restauración          |
-| `/admin/vista-previa` | Sitio con el borrador del administrador, franja de aviso y regreso al panel; sus enlaces conservan esta base                 |
+| Ruta                  | Pantalla                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                   | Inicio: portada, cinta, «Hoy se me antoja…» (lleva a la categoría en `/menu`), «Explora Fresura» con accesos a las demás páginas y «Lo más reciente» |
+| `/menu`               | Menú completo por categorías; el desplegable del encabezado abre `/menu#cat-<categoría>`                                                             |
+| `/promociones`        | Promociones con vigencia, productos y condiciones (oculta en la navegación si se usa el contenido de respaldo)                                       |
+| `/nosotros`           | Historia, valores y calificación de Google                                                                                                           |
+| `/ayuda`              | Preguntas frecuentes                                                                                                                                 |
+| `/sedes`              | Sedes y contacto, con horarios y enlaces para llegar por Google Maps                                                                                 |
+| `/producto/:id`       | Ficha de un producto: tamaños, qué incluye y las acciones                                                                                            |
+| `/personalizar/:id`   | Personalización: tamaño, opciones por grupo con límites, cantidad, indicaciones y agregar al carrito                                                 |
+| `/carrito`            | Carrito en tres pasos: tu pedido, entrega y datos, y revisión con el mensaje de WhatsApp                                                             |
+| `/privacidad`         | Aviso de tratamiento de datos (en revisión)                                                                                                          |
+| `/admin`              | Panel real: acceso con contraseña, Turnstile y código de la app autenticadora; borrador, publicación y restauración                                  |
+| `/admin/vista-previa` | Sitio con el borrador del administrador, franja de aviso y regreso al panel; sus enlaces conservan esta base                                         |
+
+El sitio es de varias páginas (RF-02): cada opción del menú y del pie abre su propia ruta, y cada una tiene su título y su descripción para buscadores (`frontend/src/sitio/useTituloPagina.ts`). Sus pruebas están en `frontend/pruebas/paginas-sitio.test.tsx`.
 
 El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `frontend/src/compartido/carrito/reglas.ts` y tienen pruebas en `frontend/pruebas/carrito.test.ts`.
 

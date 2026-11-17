@@ -7,19 +7,14 @@ import { useContenido } from "../compartido/contenido/useContenido";
 import { useDesplazamientoAlNavegar } from "../compartido/movimiento/useDesplazamientoAlNavegar";
 import { useDesplazamientoSuave } from "../compartido/movimiento/useDesplazamientoSuave";
 import { AvisoRespaldo } from "./AvisoRespaldo";
+import { PAGINAS_SITIO } from "./inicio/Explora";
 import { useMomentosDesplazamiento } from "./inicio/useMomentosDesplazamiento";
 import { MarcaPorValidar } from "./MarcaPorValidar";
 import { useCierreNavegacion } from "./useCierreNavegacion";
 import { useTituloPagina } from "./useTituloPagina";
 
-/** Enlaces de la navegación, en el orden de la referencia (menú, ¿Qué pido?, Nosotros, Sedes, Ayuda). */
-const SECCIONES = [
-	{ id: "antojos", texto: "¿Qué pido?" },
-	{ id: "promociones", texto: "Promociones" },
-	{ id: "nosotros", texto: "Nosotros" },
-	{ id: "sedes", texto: "Sedes" },
-	{ id: "ayuda", texto: "Ayuda" },
-] as const;
+/** Páginas de la navegación después del desplegable «Menú»: cada opción abre su propia página (RF-02). */
+const SECCIONES = PAGINAS_SITIO.filter((p) => p.ruta !== "/menu");
 
 /**
  * Estructura común de las páginas públicas: encabezado con navegación y carrito,
@@ -101,7 +96,7 @@ export function MarcoDelSitio() {
 						/>
 					</Link>
 					{compra ? (
-						<Link className="compra-volver" to="/#menu">
+						<Link className="compra-volver" to="/menu">
 							<Icono nombre="atras" />
 							{pathname === "/carrito" ? "Seguir comprando" : "Volver al menú"}
 						</Link>
@@ -130,9 +125,14 @@ export function MarcoDelSitio() {
 										id="desplegable"
 										hidden={!categoriasAbiertas}
 									>
+										<li>
+											<Link to="/menu" onClick={cerrarMenu}>
+												Todo el menú
+											</Link>
+										</li>
 										{contenido?.categorias.map((c) => (
 											<li key={c.id}>
-												<Link to={`/#cat-${c.id}`} onClick={cerrarMenu}>
+												<Link to={`/menu#cat-${c.id}`} onClick={cerrarMenu}>
 													{c.nombre}
 												</Link>
 											</li>
@@ -140,15 +140,12 @@ export function MarcoDelSitio() {
 									</ul>
 								</li>
 								{SECCIONES.filter(
-									(s) => s.id !== "promociones" || !respaldo,
+									(s) => s.ruta !== "/promociones" || !respaldo,
 								).map((s) => (
-									<li key={s.id}>
-										<Link
-											to={s.id === "sedes" ? "/sedes" : `/#${s.id}`}
-											onClick={cerrarMenu}
-										>
+									<li key={s.ruta}>
+										<NavLink to={s.ruta} onClick={cerrarMenu}>
 											{s.texto}
-										</Link>
+										</NavLink>
 									</li>
 								))}
 							</ul>
@@ -233,6 +230,16 @@ export function MarcoDelSitio() {
 									</li>
 								</ul>
 							</div>
+							<nav aria-label="Explora">
+								<h2>Explora</h2>
+								<ul>
+									{PAGINAS_SITIO.map((p) => (
+										<li key={p.ruta}>
+											<Link to={p.ruta}>{p.texto}</Link>
+										</li>
+									))}
+								</ul>
+							</nav>
 							<div>
 								<h2>Redes</h2>
 								<ul>

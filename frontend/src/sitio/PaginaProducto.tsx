@@ -30,7 +30,7 @@ export function PaginaProducto() {
 				return (
 					<section className="pagina">
 						<div className="envoltura">
-							<Link className="volver" to="/#menu">
+							<Link className="volver" to="/menu">
 								← Volver al menú
 							</Link>
 							<div className="ficha">

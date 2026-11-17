@@ -30,7 +30,7 @@ export function PasoPedido({
 					Tu carrito está <em>vacío</em>
 				</h1>
 				<p>Crea tu Fresura ideal y aquí la verás.</p>
-				<Link className="boton" to="/#menu">
+				<Link className="boton" to="/menu">
 					Ver el menú
 				</Link>
 			</div>

@@ -56,18 +56,22 @@ beforeEach(() => {
 
 describe("paridad del inicio", () => {
 	it("marca las referencias arriba y una sola vez, sin segunda foto de chocolate", () => {
-		mostrar();
+		const inicio = mostrar();
 		expect(screen.queryAllByText("Foto de ejemplo")).toHaveLength(0);
-		for (const tarjeta of document.querySelectorAll(".tarjeta")) {
-			expect(tarjeta.querySelectorAll(".pv-foto")).toHaveLength(1);
-		}
 		for (const foto of document.querySelectorAll(".polaroid-foto:has(> img)")) {
 			expect(foto.querySelectorAll(".pv-foto")).toHaveLength(1);
+		}
+		inicio.unmount();
+		const menu = mostrar("/menu");
+		for (const tarjeta of document.querySelectorAll(".tarjeta")) {
+			expect(tarjeta.querySelectorAll(".pv-foto")).toHaveLength(1);
 		}
 		const chocolate = screen.getByRole("region", {
 			name: "Fresas con chocolate",
 		});
 		expect(chocolate.querySelectorAll(".cara.b")).toHaveLength(0);
+		menu.unmount();
+		mostrar("/nosotros");
 		expect(document.querySelector(".nosotros-foto img")).toHaveAttribute(
 			"src",
 			"/ejemplos/nosotros-interior.webp",
@@ -81,7 +85,7 @@ describe("paridad del inicio", () => {
 			expect.stringContaining("nosotros-interior-400.webp 400w"),
 		);
 	});
-	it.each(["/", "/sedes"])(
+	it.each(["/sedes"])(
 		"presenta Horario y el pie sin prefijos de sede en %s",
 		(ruta) => {
 			mostrar(ruta);
@@ -100,17 +104,20 @@ describe("paridad del inicio", () => {
 		expect(Number(gsap.getProperty(foto, "scaleX"))).toBeGreaterThan(1);
 	});
 	it("liga el sello y Nosotros al desplazamiento y limpia al salir", () => {
-		const { unmount } = mostrar();
-		expect(ScrollTrigger.getAll().map((t) => t.trigger)).toEqual(
-			expect.arrayContaining([
-				document.querySelector(".portada"),
-				document.querySelector("#nosotros"),
-			]),
-		);
-		unmount();
+		const inicio = mostrar();
+		expect(ScrollTrigger.getAll().map((t) => t.trigger)).toEqual([
+			document.querySelector(".portada"),
+		]);
+		inicio.unmount();
+		expect(ScrollTrigger.getAll()).toHaveLength(0);
+		const nosotros = mostrar("/nosotros");
+		expect(ScrollTrigger.getAll().map((t) => t.trigger)).toEqual([
+			document.querySelector("#nosotros"),
+		]);
+		nosotros.unmount();
 		expect(ScrollTrigger.getAll()).toHaveLength(0);
 	});
-	it("ofrece Promociones entre ¿Qué pido? y Nosotros", () => {
+	it("ofrece Promociones en la navegación, con página propia", () => {
 		mostrar();
 		const nav = within(screen.getByRole("navigation", { name: "Principal" }));
 		expect(nav.getAllByRole("link").map((a) => a.textContent)).toEqual(
@@ -118,7 +125,7 @@ describe("paridad del inicio", () => {
 		);
 		expect(nav.getByRole("link", { name: "Promociones" })).toHaveAttribute(
 			"href",
-			"/#promociones",
+			"/promociones",
 		);
 	});
 	it("despliega las categorías desde Menú", () => {
@@ -131,7 +138,7 @@ describe("paridad del inicio", () => {
 				"link",
 				{ name: "Fresitas" },
 			),
-		).toHaveAttribute("href", "/#cat-fresitas");
+		).toHaveAttribute("href", "/menu#cat-fresitas");
 	});
 	it("Escape cierra las categorías y devuelve el foco a Menú", () => {
 		mostrar();
@@ -183,14 +190,14 @@ describe("paridad del inicio", () => {
 	it("ofrece el menú cuando no hay promociones", () => {
 		const contenido = structuredClone(prueba);
 		contenido.promociones = [];
-		mostrar("/", contenido);
+		mostrar("/promociones", contenido);
 		const bloque = screen.getByRole("region", { name: "Promociones" });
 		expect(
 			within(bloque).getByText("Por ahora no tenemos promociones publicadas"),
 		).toBeInTheDocument();
 		expect(
 			within(bloque).getByRole("link", { name: "Ver el menú" }),
-		).toHaveAttribute("href", "/#menu");
+		).toHaveAttribute("href", "/menu");
 	});
 	it("muestra vigencia, productos y condiciones sin aplicar descuentos", () => {
 		const contenido = structuredClone(prueba);
@@ -203,7 +210,7 @@ describe("paridad del inicio", () => {
 				condiciones: "Solo en U Nacional",
 			},
 		];
-		mostrar("/", contenido);
+		mostrar("/promociones", contenido);
 		const bloque = within(screen.getByRole("region", { name: "Promociones" }));
 		expect(bloque.getByText(/2026-11-01.*2026-11-30/)).toBeInTheDocument();
 		expect(bloque.getByText(/Fresitas: Caribeña/)).toBeInTheDocument();
@@ -223,7 +230,7 @@ describe("paridad del inicio", () => {
 		["Miti Miti", "Fresitas, Fresotas y Fresuras"],
 		["Para compartir", "Ensalada de frutas, Merengón y Fresubowl"],
 	])("presenta el dato completo de %s", (nombre, dato) => {
-		mostrar();
+		mostrar("/menu");
 		expect(
 			within(screen.getByRole("region", { name: nombre })).getByText(dato, {
 				exact: false,
@@ -231,7 +238,7 @@ describe("paridad del inicio", () => {
 		).toBeInTheDocument();
 	});
 	it("identifica la posición de los carruseles", () => {
-		mostrar();
+		mostrar("/menu");
 		const categoria = within(screen.getByRole("region", { name: "Fresitas" }));
 		expect(categoria.getByText("1 de 5")).toBeInTheDocument();
 		expect(
@@ -239,7 +246,7 @@ describe("paridad del inicio", () => {
 		).toBeInTheDocument();
 	});
 	it("el carrusel recorre páginas con flechas y teclado y anuncia los extremos", () => {
-		mostrar();
+		mostrar("/menu");
 		const categoria = screen.getByRole("region", { name: "Fresitas" });
 		const carril = within(categoria).getByRole("list", {
 			name: /Productos, usa/,
@@ -268,7 +275,7 @@ describe("paridad del inicio", () => {
 		const contenido = structuredClone(prueba);
 		contenido.productos[1].imagen.ruta =
 			"https://fotos.example.com/caribena.webp";
-		mostrar("/", contenido);
+		mostrar("/menu", contenido);
 		const tarjeta = screen.getByRole("link", {
 			name: /Fresitas: Caribeña, Desde/,
 		});
@@ -284,27 +291,22 @@ describe("paridad del inicio", () => {
 			within(pendiente).getByText("Segunda foto por validar"),
 		).toBeInTheDocument();
 	});
-	it("ordena las secciones e incluye Nosotros y sus valores", () => {
-		mostrar();
-		const nombres = screen
-			.getAllByRole("region")
-			.map((r) => r.getAttribute("aria-labelledby"));
-		expect(nombres).toEqual([
-			"titulo-portada",
-			"titulo-antojos",
-			"titulo-promociones",
+	it("ordena las categorías del menú e incluye Nosotros y sus valores", () => {
+		const menu = mostrar("/menu");
+		expect(
+			screen
+				.getAllByRole("region")
+				.map((r) => r.getAttribute("aria-labelledby")),
+		).toEqual([
 			"titulo-fresitas",
 			"titulo-fresotas",
 			"titulo-fresuras",
 			"titulo-chocolate",
 			"titulo-miti",
 			"titulo-compartir",
-			"titulo-nosotros",
-			"titulo-google",
-			"titulo-sedes",
-			"titulo-reciente",
-			"titulo-ayuda",
 		]);
+		menu.unmount();
+		mostrar("/nosotros");
 		for (const valor of ["Calidad", "Estética", "Cercanía"])
 			expect(screen.getByRole("heading", { name: valor })).toBeInTheDocument();
 	});
@@ -317,12 +319,15 @@ describe("paridad del inicio", () => {
 		expect(reciente.getByText(/También estamos en/)).toHaveTextContent(
 			"También estamos en TikTok y Facebook.",
 		);
+	});
+	it("muestra el espacio del logo de Google en Nosotros", () => {
+		mostrar("/nosotros");
 		expect(
 			screen.getByText("Espacio para el logo de Google"),
 		).toBeInTheDocument();
 	});
 	it("presenta el mapa como enlace y separa el cierre por almuerzo", () => {
-		mostrar();
+		mostrar("/sedes");
 		expect(screen.getAllByText("Ubicación en Google Maps")).toHaveLength(2);
 		expect(
 			screen.getByRole("rowheader", { name: "Cierre por almuerzo" }),
@@ -491,7 +496,7 @@ describe("paridad de ficha y personalización", () => {
 		).toBeInTheDocument();
 		expect(
 			within(dialogo).getByRole("link", { name: "Seguir comprando" }),
-		).toHaveAttribute("href", "/#menu");
+		).toHaveAttribute("href", "/menu");
 		expect(
 			within(dialogo).getByRole("link", { name: "Ver carrito" }),
 		).toHaveAttribute("href", "/carrito");
@@ -733,9 +738,12 @@ describe("otras vistas", () => {
 		).toHaveAttribute("href", expect.stringContaining("https://wa.me/"));
 	});
 	it("oculta promociones y compra con el respaldo, conservando el menú", () => {
-		mostrar("/", respaldo, "respaldo");
+		mostrar("/menu", respaldo, "respaldo");
 		expect(
-			screen.queryByRole("region", { name: "Promociones" }),
+			within(screen.getByRole("navigation", { name: "Principal" })).queryByRole(
+				"link",
+				{ name: "Promociones" },
+			),
 		).not.toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: /Carrito desactivado/ }),
@@ -834,13 +842,16 @@ describe("estilos de paridad sin medición de geometría", () => {
 		expect(foto.querySelector(".tarjeta-foto")).toBeInTheDocument();
 	});
 	it("usa fondos planos en las fotos pendientes y el encuadre de portada", () => {
-		mostrar();
-		const pendiente = document.querySelector(".tarjeta .foto-pendiente");
+		const inicio = mostrar();
 		const portada = document.querySelector(".portada-arco img");
-		if (!pendiente || !portada) throw new Error("Faltan las fotos del inicio");
+		if (!portada) throw new Error("Falta la foto de portada");
+		expect(getComputedStyle(portada).objectPosition).toBe("45% 72%");
+		inicio.unmount();
+		mostrar("/menu");
+		const pendiente = document.querySelector(".tarjeta .foto-pendiente");
+		if (!pendiente) throw new Error("Falta una foto pendiente del menú");
 		expect(getComputedStyle(pendiente).backgroundImage).toBe("none");
 		expect(getComputedStyle(pendiente).gap).toBe("12px");
-		expect(getComputedStyle(portada).objectPosition).toBe("45% 72%");
 	});
 	it("conserva los espacios y tamaños del formulario y del carrito", () => {
 		agregarLinea({
