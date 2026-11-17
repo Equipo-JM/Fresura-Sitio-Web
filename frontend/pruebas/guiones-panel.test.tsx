@@ -1,5 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { GuionesPanel } from "../src/panel/guiones/GuionesPanel";
@@ -175,7 +181,7 @@ describe("guiones del panel", () => {
 		fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
 		const aviso = await screen.findByRole("alert");
 		expect(aviso).toHaveTextContent("Vuelve a entrar al panel");
-		expect(aviso).toHaveFocus();
+		await waitFor(() => expect(aviso).toHaveFocus());
 		expect(screen.getByLabelText("Título")).toHaveValue("Un antojo Fresura");
 		expect(simulado.filas).toHaveLength(0);
 	});
@@ -203,6 +209,30 @@ describe("guiones del panel", () => {
 		);
 		fireEvent.click(screen.getByRole("button", { name: "Versiones" }));
 		await waitFor(() => expect(irVersiones).toHaveBeenCalledOnce());
+	});
+	it("enfoca el editor al abrir otro guion y conserva el foco al guardar o reabrir el mismo", async () => {
+		montar();
+		await generar();
+		const campoTitulo = await screen.findByLabelText("Título");
+		const encabezado = screen.getByRole("heading", { name: "Revisar guion" });
+		campoTitulo.focus();
+		await act(async () => {
+			fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+		});
+		expect(screen.getByText("Guion guardado como borrador.")).toBeVisible();
+		expect(campoTitulo).toHaveFocus();
+		const abrir = screen.getByRole("button", { name: /^Abrir/ });
+		abrir.focus();
+		await act(async () => {
+			fireEvent.click(abrir);
+		});
+		expect(abrir).toHaveFocus();
+
+		await generar();
+		await waitFor(() => expect(abrir).toBeEnabled());
+		vi.spyOn(window, "confirm").mockReturnValue(true);
+		fireEvent.click(abrir);
+		await waitFor(() => expect(encabezado).toHaveFocus());
 	});
 	it("abre un aprobado con su prompt guardado y lo oculta después de confirmar la edición", async () => {
 		const fila: Fila = {
