@@ -1,12 +1,16 @@
 import { Route, Routes } from "react-router";
 import { PaginaPanel } from "./panel/PaginaPanel";
 import { MarcoDelSitio } from "./sitio/MarcoDelSitio";
+import { PaginaAyuda } from "./sitio/PaginaAyuda";
 import { PaginaCarrito } from "./sitio/PaginaCarrito";
 import { PaginaInicio } from "./sitio/PaginaInicio";
+import { PaginaMenu } from "./sitio/PaginaMenu";
 import { PaginaNoEncontrada } from "./sitio/PaginaNoEncontrada";
+import { PaginaNosotros } from "./sitio/PaginaNosotros";
 import { PaginaPersonalizar } from "./sitio/PaginaPersonalizar";
 import { PaginaPrivacidad } from "./sitio/PaginaPrivacidad";
 import { PaginaProducto } from "./sitio/PaginaProducto";
+import { PaginaPromociones } from "./sitio/PaginaPromociones";
 import { PaginaSedes } from "./sitio/PaginaSedes";
 
 /**
@@ -34,6 +38,10 @@ function RutasPublicas() {
 		<Routes>
 			<Route element={<MarcoDelSitio />}>
 				<Route path="/" element={<PaginaInicio />} />
+				<Route path="/menu" element={<PaginaMenu />} />
+				<Route path="/promociones" element={<PaginaPromociones />} />
+				<Route path="/nosotros" element={<PaginaNosotros />} />
+				<Route path="/ayuda" element={<PaginaAyuda />} />
 				<Route path="/producto/:idProducto" element={<PaginaProducto />} />
 				<Route
 					path="/personalizar/:idProducto"

@@ -256,8 +256,18 @@ export function Sedes({
 	);
 }
 
-/** Preguntas frecuentes con desplegable, desde el contrato. */
-export function Preguntas({ contenido }: { contenido: Contenido }) {
+/**
+ * Preguntas frecuentes con desplegable, desde el contrato. `comoPagina` usa el
+ * título como la `h1` de /ayuda.
+ */
+export function Preguntas({
+	contenido,
+	comoPagina = false,
+}: {
+	contenido: Contenido;
+	comoPagina?: boolean;
+}) {
+	const Titulo = comoPagina ? "h1" : "h2";
 	const preguntas = [...contenido.preguntas_frecuentes].sort(
 		(a, b) => a.orden - b.orden,
 	);
@@ -269,9 +279,9 @@ export function Preguntas({ contenido }: { contenido: Contenido }) {
 		>
 			<div className="envoltura">
 				<div className="preguntas">
-					<h2 id="titulo-ayuda" tabIndex={-1}>
+					<Titulo id="titulo-ayuda" tabIndex={-1}>
 						Preguntas frecuentes
-					</h2>
+					</Titulo>
 					{preguntas.map((p) => (
 						<details key={p.id}>
 							<summary>

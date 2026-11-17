@@ -353,7 +353,7 @@ function Personalizador({
 									{nombre}, {presentacion.nombre} × {cantidad}
 								</p>
 								<div className="hoja-acciones">
-									<Link className="boton secundario" to="/#menu">
+									<Link className="boton secundario" to="/menu">
 										Seguir comprando
 									</Link>
 									<Link className="boton" to="/carrito">

@@ -61,7 +61,7 @@ export function Portada({
 						</h1>
 						<p className="portada-bajada portada-entrada">{texto}</p>
 						<div className="portada-acciones portada-entrada">
-							<Link className="boton" to="/#menu">
+							<Link className="boton" to="/menu">
 								Ver el menú
 							</Link>
 							<Link className="boton secundario" to="/#antojos">

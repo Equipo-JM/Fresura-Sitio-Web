@@ -1583,7 +1583,8 @@ dialog::backdrop {
 		gap: 32px;
 	}
 	.pie-grid {
-		grid-template-columns: 1.2fr 1fr 1fr 1fr;
+		/* Marca, Contacto, Explora, Redes y Sedes (RF-02). */
+		grid-template-columns: 1.2fr repeat(4, 1fr);
 	}
 	.ficha {
 		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

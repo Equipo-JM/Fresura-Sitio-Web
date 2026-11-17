@@ -1253,3 +1253,12 @@ button.paso-num {
 .hoja .sello-hoja {
 	background: var(--color-we-peep);
 }
+
+/* Encabezado de las páginas interiores sin sección propia (RF-02) */
+.pagina-encabezado {
+	padding-block: clamp(24px, 4vw, 56px) 8px;
+}
+.pagina-encabezado h1 {
+	font-size: clamp(2.5rem, 2rem + 2vw, 3.75rem);
+	margin-bottom: 8px;
+}

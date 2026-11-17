@@ -1,20 +1,18 @@
 import { ConContenido } from "./ConContenido";
 import { Antojos } from "./inicio/Antojos";
-import { Categorias } from "./inicio/Categorias";
+import { Explora } from "./inicio/Explora";
 import { Portada } from "./inicio/Portada";
-import { Nosotros, Promociones } from "./inicio/Presentacion";
-import {
-	Calificacion,
-	LoMasReciente,
-	Preguntas,
-	Sedes,
-} from "./inicio/Secciones";
+import { LoMasReciente } from "./inicio/Secciones";
 
-/** Inicio: portada, selector de antojos, menú por categorías, reciente, calificación, sedes y preguntas. */
+/**
+ * Inicio: portada, selector de antojos, accesos a las demás páginas y lo más
+ * reciente. El menú, las promociones, Nosotros, las sedes y la ayuda tienen
+ * página propia (RF-02).
+ */
 export function PaginaInicio() {
 	return (
 		<ConContenido>
-			{(contenido, origen) => {
+			{(contenido) => {
 				const { presentacion, sedes } = contenido.negocio;
 				return (
 					<>
@@ -24,19 +22,8 @@ export function PaginaInicio() {
 							sedes={sedes.map((s) => s.nombre)}
 						/>
 						<Antojos />
-						{origen === "principal" && <Promociones contenido={contenido} />}
-						<Categorias
-							contenido={contenido}
-							respaldo={origen === "respaldo"}
-						/>
-						<Nosotros />
-						<Calificacion
-							opiniones={contenido.opiniones}
-							estado={contenido.estado}
-						/>
-						<Sedes contenido={contenido} />
+						<Explora />
 						<LoMasReciente contenido={contenido} />
-						<Preguntas contenido={contenido} />
 					</>
 				);
 			}}

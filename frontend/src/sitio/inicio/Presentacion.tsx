@@ -5,8 +5,18 @@ import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { MarcaPorValidar } from "../MarcaPorValidar";
 import { NOSOTROS } from "./copy";
 
-/** Promociones publicadas con su vigencia, productos y condiciones (RNF-16). */
-export function Promociones({ contenido }: { contenido: Contenido }) {
+/**
+ * Promociones publicadas con su vigencia, productos y condiciones (RNF-16).
+ * `comoPagina` usa el título como la `h1` de /promociones.
+ */
+export function Promociones({
+	contenido,
+	comoPagina = false,
+}: {
+	contenido: Contenido;
+	comoPagina?: boolean;
+}) {
+	const Titulo = comoPagina ? "h1" : "h2";
 	return (
 		<section
 			className="seccion fondo-flamingo"
@@ -20,9 +30,13 @@ export function Promociones({ contenido }: { contenido: Contenido }) {
 			/>
 			<div className="envoltura promo-grid">
 				<div>
-					<h2 id="titulo-promociones" className="promo-titulo" tabIndex={-1}>
+					<Titulo
+						id="titulo-promociones"
+						className="promo-titulo"
+						tabIndex={-1}
+					>
 						Promociones
-					</h2>
+					</Titulo>
 				</div>
 				{contenido.promociones.length === 0 ? (
 					<Cupon>
@@ -64,7 +78,7 @@ function Cupon({ children }: { children: React.ReactNode }) {
 			<div className="cupon-rayas" aria-hidden="true" />
 			<div className="cupon-cuerpo">
 				{children}
-				<Link className="boton" to="/#menu">
+				<Link className="boton" to="/menu">
 					Ver el menú
 				</Link>
 			</div>
@@ -72,8 +86,12 @@ function Cupon({ children }: { children: React.ReactNode }) {
 	);
 }
 
-/** Historia y valores del rediseño; la fotografía conserva su aviso de ejemplo. */
-export function Nosotros() {
+/**
+ * Historia y valores del rediseño; la fotografía conserva su aviso de ejemplo.
+ * `comoPagina` usa el título como la `h1` de /nosotros.
+ */
+export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
+	const Titulo = comoPagina ? "h1" : "h2";
 	return (
 		<section
 			className="seccion fondo-peep"
@@ -107,9 +125,9 @@ export function Nosotros() {
 					/>
 				</div>
 				<div className="nosotros-texto">
-					<h2 id="titulo-nosotros" tabIndex={-1}>
+					<Titulo id="titulo-nosotros" tabIndex={-1}>
 						Dulce, <em>pero con estilo.</em>
-					</h2>
+					</Titulo>
 					<p>{NOSOTROS.texto}</p>
 					<ul className="valores">
 						{NOSOTROS.valores.map((v) => (

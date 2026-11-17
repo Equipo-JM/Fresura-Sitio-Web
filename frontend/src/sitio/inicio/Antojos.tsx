@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { desplazarA } from "../../compartido/movimiento/desplazar";
+import { useNavigate } from "react-router";
 import { ANTOJOS } from "./copy";
 
 /**
  * «Hoy se me antoja…»: elegir un antojo completa la frase y lleva a la categoría
- * correspondiente. Solo cambia la frase; no hay movimiento automático.
+ * correspondiente en /menu. Solo cambia la frase; no hay movimiento automático.
  */
 export function Antojos() {
 	const [elegido, setElegido] = useState<string | null>(null);
+	const navegar = useNavigate();
 
 	function elegir(texto: string, categoria: string) {
 		setElegido(texto);
-		const destino = document.getElementById(`cat-${categoria}`);
-		if (destino) desplazarA(destino, true);
+		navegar(`/menu#cat-${categoria}`);
 	}
 
 	return (
