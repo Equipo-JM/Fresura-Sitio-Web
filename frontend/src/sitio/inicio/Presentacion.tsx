@@ -136,20 +136,17 @@ export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 						height="50"
 						loading="lazy"
 					/>
+					{comoPagina && (
+						<Calcomania
+							nombre="dulce-pero-con-estilo-gafas"
+							className="calcomania-en-foto"
+						/>
+					)}
 				</div>
 				<div className="nosotros-texto">
-					<div
-						className={
-							comoPagina
-								? "titulo-con-calcomania calcomania-nosotros"
-								: undefined
-						}
-					>
-						<Titulo id="titulo-nosotros" tabIndex={-1}>
-							Dulce, <em>pero con estilo.</em>
-						</Titulo>
-						{comoPagina && <Calcomania nombre="dulce-pero-con-estilo-gafas" />}
-					</div>
+					<Titulo id="titulo-nosotros" tabIndex={-1}>
+						Dulce, <em>pero con estilo.</em>
+					</Titulo>
 					<p>{NOSOTROS.texto}</p>
 					<ul className="valores">
 						{NOSOTROS.valores.map((v) => (
