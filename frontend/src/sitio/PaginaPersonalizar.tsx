@@ -39,6 +39,7 @@ export function PaginaPersonalizar() {
 					<Personalizador
 						key={producto.id}
 						producto={producto}
+						whatsapp={contenido.negocio.whatsapp}
 						nombre={
 							producto.nombre.startsWith("Arma tu")
 								? producto.nombre
@@ -55,9 +56,11 @@ export function PaginaPersonalizar() {
 function Personalizador({
 	producto,
 	nombre,
+	whatsapp,
 }: {
 	producto: Producto;
 	nombre: string;
+	whatsapp: string;
 }) {
 	const [idPresentacion, setIdPresentacion] = useState(
 		producto.presentaciones[0].id,
@@ -83,6 +86,11 @@ function Personalizador({
 		indicaciones,
 	};
 	const precio = precioLinea(producto, linea);
+	// En esta pantalla no aparece el botón flotante (lo taparía la barra de
+	// compra), así que WhatsApp va dentro del formulario (RF-08).
+	const mensajeWhatsapp = encodeURIComponent(
+		`Hola, Fresura. Tengo una pregunta sobre ${nombre}.`,
+	);
 
 	// El aviso «¡Ya está en tu carrito!» describe lo último agregado: si la
 	// persona cambia algo después, deja de ser cierto y se oculta.
@@ -309,6 +317,17 @@ function Personalizador({
 							</span>
 						</div>
 					</div>
+
+					<p className="pz-whatsapp">
+						<a
+							href={`https://wa.me/${whatsapp}?text=${mensajeWhatsapp}`}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<Icono nombre="chat" />
+							¿Tienes dudas? Pregúntanos por WhatsApp
+						</a>
+					</p>
 
 					{aviso && (
 						<p className="alerta" role="alert">

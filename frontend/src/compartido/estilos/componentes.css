@@ -1550,3 +1550,15 @@ button.paso-num {
 		width: 160px;
 	}
 }
+
+/* Enlace a WhatsApp en la personalización (RF-08): aquí no hay botón flotante. */
+.pz-whatsapp a {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	font-weight: 700;
+	color: var(--texto);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
