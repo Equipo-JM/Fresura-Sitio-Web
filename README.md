@@ -53,7 +53,7 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `frontend/src/sitio/`                          | Páginas públicas                                                                                                                           |
 | `frontend/src/panel/`                          | Panel `/admin`                                                                                                                             |
-| `frontend/src/panel/agente/`                   | Chat con AI SDK v7, historial bajo RLS y tarjetas que se guardan como borrador mediante el servicio de guiones |
+| `frontend/src/panel/agente/`                   | Chat con AI SDK v7, historial bajo RLS y tarjetas que se guardan como borrador mediante el servicio de guiones                             |
 | `frontend/src/panel/guiones/`                  | Formulario, editor, estados y prompts de video; servicio y hook con cliente del panel inyectado                                            |
 | `frontend/src/compartido/`                     | Lo que usan el sitio y el panel                                                                                                            |
 | `frontend/public/`                             | Lo que se publica tal cual: contenido de respaldo, marca, fotos de ejemplo, `_headers` y `robots.txt`                                      |
