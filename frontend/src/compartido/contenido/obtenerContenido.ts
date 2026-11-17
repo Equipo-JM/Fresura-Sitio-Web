@@ -2,7 +2,6 @@ import {
 	type Contenido,
 	esquemaContenido,
 } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
-import { obtenerClientePublico } from "../supabase/clientePublico";
 
 /**
  * De dónde salió el contenido. En `respaldo` el sitio oculta precios y
@@ -20,20 +19,44 @@ export type ContenidoLeido = {
 export type LectorContenido = () => Promise<unknown>;
 
 /**
- * Fuente principal: la versión publicada en Supabase (DT-01, sección 4).
- * Las columnas se piden por nombre porque `anon` solo tiene permiso sobre las
- * públicas; un `select('*')` sería rechazado.
+ * Fuente principal: la versión publicada en Supabase (DT-01, sección 4), leída
+ * con `fetch` a la API REST y la clave publicable (rol `anon`). No se usa el
+ * cliente completo de Supabase: sumaba inicio de sesión, tiempo real y
+ * almacenamiento al JavaScript que descarga cada visitante (RNF-04). Las
+ * columnas se piden por nombre porque `anon` solo tiene permiso sobre las
+ * públicas; un `select=*` sería rechazado.
+ *
+ * @throws si faltan `VITE_SUPABASE_URL` o `VITE_SUPABASE_PUBLISHABLE_KEY`, o si
+ * la respuesta no es correcta; quien lee el contenido usa entonces el respaldo.
  */
 export const leerContenidoPrincipal: LectorContenido = async () => {
-	const { data, error } = await obtenerClientePublico()
-		.from("versiones_contenido")
-		.select("json")
-		.eq("estado", "publicada")
-		.single();
-	if (error) {
-		throw new Error(`No se pudo leer la versión publicada: ${error.message}`);
+	const url = import.meta.env.VITE_SUPABASE_URL;
+	const clavePublicable = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+	if (!url || !clavePublicable) {
+		throw new Error(
+			"Faltan VITE_SUPABASE_URL o VITE_SUPABASE_PUBLISHABLE_KEY en el entorno",
+		);
 	}
-	return data.json;
+	const respuesta = await fetch(
+		`${url}/rest/v1/versiones_contenido?select=json&estado=eq.publicada`,
+		{
+			headers: {
+				apikey: clavePublicable,
+				// Exactamente una fila, como `.single()` del cliente.
+				Accept: "application/vnd.pgrst.object+json",
+			},
+		},
+	);
+	if (!respuesta.ok) {
+		throw new Error(
+			`No se pudo leer la versión publicada: HTTP ${respuesta.status}`,
+		);
+	}
+	const fila: unknown = await respuesta.json();
+	if (typeof fila !== "object" || fila === null || !("json" in fila)) {
+		throw new Error("La versión publicada no trae su contenido");
+	}
+	return fila.json;
 };
 
 /** `contenido-respaldo.json` viene en los estáticos del sitio (DT-01, sección 22). */

@@ -24,7 +24,9 @@ export function ConContenido({
 
 	if (isPending) {
 		return (
-			<section className="seccion" aria-busy="true">
+			// Reserva la altura de la pantalla: sin ella el pie quedaba a la vista y
+			// saltaba al llegar el contenido (CLS de 0,74 a 0,92 en Lighthouse, 17 nov).
+			<section className="seccion cargando-contenido" aria-busy="true">
 				<div className="envoltura texto-largo">
 					<p>Cargando…</p>
 				</div>

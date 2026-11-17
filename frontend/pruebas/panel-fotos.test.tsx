@@ -56,7 +56,7 @@ describe("fotos del panel de demostración", () => {
 });
 
 describe("ruta /admin?demo (modo demostración)", () => {
-	it("pide entrar y, tras los dos pasos, muestra la sección de fotos", () => {
+	it("pide entrar y, tras los dos pasos, muestra la sección de fotos", async () => {
 		sessionStorage.clear();
 		const cliente = new QueryClient({
 			defaultOptions: { queries: { retry: false } },
@@ -69,7 +69,8 @@ describe("ruta /admin?demo (modo demostración)", () => {
 			</QueryClientProvider>,
 		);
 
-		expect(screen.getByText("Modo demostración")).toBeInTheDocument();
+		// El panel se descarga aparte del sitio (React.lazy).
+		expect(await screen.findByText("Modo demostración")).toBeInTheDocument();
 		fireEvent.change(screen.getByLabelText("Correo"), {
 			target: { value: "demo@fresura.co" },
 		});

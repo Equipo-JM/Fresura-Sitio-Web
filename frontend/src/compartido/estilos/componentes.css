@@ -1572,3 +1572,10 @@ button.paso-num {
 	line-height: 1.05;
 	margin-bottom: 8px;
 }
+
+/* Mientras llega el contenido, la página ocupa al menos la pantalla para que el
+   pie no aparezca y luego salte (RNF-04, CLS). */
+.cargando-contenido {
+	min-height: 100vh;
+	min-height: 100svh;
+}
