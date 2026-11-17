@@ -164,7 +164,15 @@ Exporta a JSON cada tabla de `public`, copia el bucket `fotos` y guarda el commi
 
 ## Despliegue
 
-`npm run deploy` publica `frontend/dist/` como archivos estáticos en Cloudflare. `frontend/public/_headers` aplica la política de seguridad de contenido (CSP), `nosniff`, `noindex` en `/admin` y caché larga en `/assets/`; `frontend/public/robots.txt` excluye `/admin`. El sitemap se agrega cuando haya dominio definitivo. Si se suma otro origen externo (por ejemplo, otro proveedor de imágenes), hay que añadirlo a la CSP.
+`npm run deploy` publica `frontend/dist/` como archivos estáticos en Cloudflare. Si Wrangler ve más de una cuenta (la de Fresura y la personal de quien inició sesión), hay que fijar la de Fresura para no publicar en otro subdominio:
+
+```bash
+CLOUDFLARE_ACCOUNT_ID=8d88688e68281875d3ed7a5906c0e5f3 npm run deploy
+```
+
+Las funciones se despliegan con `npm run functions:deploy -- <función>`. En un equipo sin Docker, o con podman, se agrega `--use-api` para empaquetar en los servidores de Supabase (por ejemplo, `npm run functions:deploy -- ia --use-api`).
+
+`frontend/public/_headers` aplica la política de seguridad de contenido (CSP), `nosniff`, `noindex` en `/admin` y caché larga en `/assets/`; `frontend/public/robots.txt` excluye `/admin`. El sitemap se agrega cuando haya dominio definitivo. Si se suma otro origen externo (por ejemplo, otro proveedor de imágenes), hay que añadirlo a la CSP.
 
 Cada pull request hacia `main` pasa por `.github/workflows/revision.yml`: `biome ci`, `npm run build` y `npm test`.
 
