@@ -12,11 +12,36 @@ export async function leerConversacion(cliente: SupabaseClient, id: string) {
 	return data;
 }
 
-/** Reconstruye mensajes completos del SDK, preservando llamadas y resultados de herramientas. */
+/**
+ * Reconstruye mensajes completos del SDK, preservando llamadas y resultados de
+ * herramientas. Descarta, sin romper la conversación, las filas que no son un
+ * mensaje válido, los mensajes `system` (las instrucciones solo las pone el
+ * servidor) y los resultados de herramienta sin una llamada previa del agente:
+ * una fila así bloqueaba el chat entero (revisión de seguridad del 17 nov).
+ */
 export function reconstruirMensajes(
 	filas: readonly { contenido: unknown }[],
 ): ModelMessage[] {
-	return filas.map((fila) => modelMessageSchema.parse(fila.contenido));
+	const llamadas = new Set<string>();
+	const mensajes: ModelMessage[] = [];
+	for (const fila of filas) {
+		const leido = modelMessageSchema.safeParse(fila.contenido);
+		if (!leido.success || leido.data.role === "system") continue;
+		const mensaje = leido.data;
+		if (mensaje.role === "assistant" && typeof mensaje.content !== "string")
+			for (const parte of mensaje.content)
+				if (parte.type === "tool-call") llamadas.add(parte.toolCallId);
+		if (
+			mensaje.role === "tool" &&
+			!mensaje.content.every(
+				(parte) =>
+					parte.type !== "tool-result" || llamadas.has(parte.toolCallId),
+			)
+		)
+			continue;
+		mensajes.push(mensaje);
+	}
+	return mensajes;
 }
 
 /** Carga en orden cronológico; las escrituras asignan fechas distintas dentro de cada turno. */
