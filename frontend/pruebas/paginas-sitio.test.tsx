@@ -132,13 +132,44 @@ describe("sitio de varias páginas (RF-02)", () => {
 			screen
 				.getAllByRole("region")
 				.map((r) => r.getAttribute("aria-labelledby")),
-		).toEqual(["titulo-portada", "titulo-explora", "titulo-reciente"]);
+		).toEqual([
+			"titulo-portada",
+			"titulo-destacados",
+			"titulo-explora",
+			"titulo-reciente",
+		]);
 		const explora = within(
 			screen.getByRole("region", { name: "Todo Fresura, a un toque" }),
 		);
 		expect(
 			explora.getAllByRole("link").map((a) => a.getAttribute("href")),
 		).toEqual(["/menu", "/promociones", "/nosotros", "/sedes", "/ayuda"]);
+	});
+
+	it("el inicio muestra los productos destacados y vigentes (RF-07)", () => {
+		const contenido = structuredClone(prueba);
+		// Un destacado que deja de estar vigente no debe aparecer.
+		contenido.productos[0].vigente = false;
+		mostrar("/", contenido);
+		const destacados = within(
+			screen.getByRole("region", { name: "Nuestros favoritos" }),
+		);
+		const esperados = contenido.productos
+			.filter((p) => p.destacado && p.vigente)
+			.map((p) => `/producto/${p.id}`);
+		expect(esperados.length).toBeGreaterThan(0);
+		expect(
+			destacados.getAllByRole("link").map((a) => a.getAttribute("href")),
+		).toEqual(esperados);
+	});
+
+	it("sin destacados vigentes, el inicio no muestra la franja", () => {
+		const contenido = structuredClone(prueba);
+		for (const p of contenido.productos) p.destacado = false;
+		mostrar("/", contenido);
+		expect(
+			screen.queryByRole("region", { name: "Nuestros favoritos" }),
+		).toBeNull();
 	});
 
 	it("/menu muestra todas las categorías con sus productos", () => {

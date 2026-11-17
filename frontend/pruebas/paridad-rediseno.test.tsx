@@ -485,6 +485,18 @@ describe("paridad de ficha y personalización", () => {
 			screen.getByText(/Elige hasta 1 \(opcional\)\. Las mermeladas como base/),
 		).toBeInTheDocument();
 	});
+	it("ofrece WhatsApp con el producto en el mensaje (RF-08)", () => {
+		mostrar("/personalizar/fresitas-caribena");
+		const enlace = screen.getByRole("link", {
+			name: "¿Tienes dudas? Pregúntanos por WhatsApp",
+		});
+		expect(enlace.getAttribute("href")).toMatch(
+			/^https:\/\/wa\.me\/\d+\?text=/,
+		);
+		expect(decodeURIComponent(enlace.getAttribute("href") ?? "")).toContain(
+			"Fresitas: Caribeña",
+		);
+	});
 	it("confirma en un diálogo con tres acciones y permite seguir personalizando", () => {
 		mostrar("/personalizar/fresitas-caribena");
 		fireEvent.click(screen.getByRole("button", { name: "Agregar al carrito" }));
