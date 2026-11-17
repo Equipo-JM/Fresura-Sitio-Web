@@ -67,7 +67,7 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 | `backend/supabase/functions/ia/agente/`        | Agente conversacional (ADR-002): herramientas de solo lectura, validadores contra lo publicado, memoria con RLS y definición con el AI SDK |
 | `backend/supabase/migrations/`                 | Tablas, permisos (RLS), bucket de fotos y semilla del contenido                                                                            |
 | `backend/pruebas/`                             | Pruebas de las funciones y de los esquemas; `datos/` tiene el ejemplo y los casos del contrato                                             |
-| `backend/pruebas/ia/`                          | Pruebas del agente: rutas, instrucciones, cadena de modelos y esquema del guion                                                            |
+| `backend/pruebas/ia/`                          | Pruebas del agente: rutas (también `/chat`), memoria, herramientas, validadores, instrucciones, cadena de modelos y esquema del guion      |
 | `prototipo/`                                   | Prototipo anterior, solo como referencia                                                                                                   |
 | `.github/workflows/`                           | Revisión automática de cada pull request: Biome, compilación y pruebas                                                                     |
 
@@ -142,7 +142,7 @@ Las dos validan el JWT en su código (`verify_jwt = false` en `backend/supabase/
 npm run supabase -- secrets set GEMINI_API_KEY=<clave> IA_MODELO=gemini-3.1-flash-lite IA_MODELO_RESPALDO=gemini-3.5-flash-lite ORIGENES_PERMITIDOS=http://localhost:5173
 ```
 
-En desarrollo, los dos modelos son Flash-Lite (3.1 el principal y 3.5 el respaldo) para no gastar el cupo de 3.8 Flash, que se reserva para la entrega, cuando `IA_MODELO=gemini-3.8-flash`. La función pasa una vez al respaldo si el principal agota su cupo diario o responde 503 por saturación; el registro guarda el tipo de fallo y el código HTTP de Gemini, nunca su mensaje. `ORIGENES_PERMITIDOS` lleva también la dirección del sitio desplegado, separada por comas. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEYS`, `SUPABASE_SECRET_KEYS` y `SUPABASE_JWKS` los pone Supabase; `panel` usa la clave `default` de `SUPABASE_SECRET_KEYS` para publicar y restaurar.
+En desarrollo, los dos modelos son Flash-Lite (3.1 el principal y 3.5 el respaldo) para no gastar el cupo de 3.8 Flash, que se reserva para la entrega, cuando `IA_MODELO=gemini-3.8-flash`. La función pasa una vez al respaldo si el principal agota su cupo diario o responde 503 por saturación; el registro guarda el tipo de fallo y el código HTTP de Gemini, nunca su mensaje. El chat del agente (`POST /chat`) usa `IA_MODELO_AGENTE` si existe; es opcional y en desarrollo no hace falta, porque `IA_MODELO` ya es Flash-Lite. En el chat el paso al respaldo vale para cada llamada del turno, no solo la primera: el agente encadena hasta 6 pasos y Gemini puede saturarse a mitad del turno. Cada turno tiene un límite de 100 s. `ORIGENES_PERMITIDOS` lleva también la dirección del sitio desplegado, separada por comas. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEYS`, `SUPABASE_SECRET_KEYS` y `SUPABASE_JWKS` los pone Supabase; `panel` usa la clave `default` de `SUPABASE_SECRET_KEYS` para publicar y restaurar.
 
 `panel/index.ts` conecta el acceso y el cliente; `panel/rutas.ts` recibe el cliente para probar las operaciones sin una base real. `POST /publicar` exige `{revision, contenido_real}`; `POST /restaurar`, `{}`. Ambas devuelven `{publicada_en}`. La publicación valida el contrato completo antes de llamar a `publicar_borrador`; si cambia la aprobación a `real`, guarda con control de revisión antes de publicar. Con `contenido_real: false` conserva el estado del borrador (hipótesis pendiente de confirmación por Miguel, DD-26).
 
@@ -179,7 +179,7 @@ Las funciones se despliegan con `npm run functions:deploy -- <función>`. En un 
 
 Cada pull request hacia `main` pasa por `.github/workflows/revision.yml`: `biome ci`, `npm run build` y `npm test`.
 
-Las pruebas de permisos y de la base (PU-01 a PU-06, PU-08 y PU-15) corren contra el proyecto enlazado y no dejan datos, porque todo ocurre en una transacción que no se confirma. Cada fila del resultado debe tener `pasa: true`:
+Las pruebas de permisos y de la base (PU-01 a PU-06, PU-08, PU-15 y la memoria del agente) corren contra el proyecto enlazado y no dejan datos, porque todo ocurre en una transacción que no se confirma. Cada fila del resultado debe tener `pasa: true`. PU-08 crea su propio borrador, así que el script se detiene si hay un borrador real guardado desde el panel: hay que publicarlo o descartarlo antes de correrlo.
 
 ```bash
 npm run supabase -- db query --linked -f pruebas/rls/permisos.sql
