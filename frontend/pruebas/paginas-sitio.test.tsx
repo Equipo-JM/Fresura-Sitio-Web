@@ -261,6 +261,28 @@ describe("sitio de varias páginas (RF-02)", () => {
 			expect(tarjetaPromociones()).not.toHaveTextContent("¡Hay");
 		});
 
+		it("/promociones muestra solo las vigentes hoy, como promete el panel", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [vigente("a"), vencida];
+			mostrar("/promociones", contenido);
+			const bloque = within(
+				screen.getByRole("region", { name: "Promociones" }),
+			);
+			expect(
+				bloque.getByRole("heading", { name: "Promo a" }),
+			).toBeInTheDocument();
+			expect(bloque.queryByRole("heading", { name: "Promo vieja" })).toBeNull();
+		});
+
+		it("/promociones con todas vencidas muestra el mensaje vacío", () => {
+			const contenido = structuredClone(prueba);
+			contenido.promociones = [vencida];
+			mostrar("/promociones", contenido);
+			expect(
+				screen.getByText("Por ahora no tenemos promociones publicadas"),
+			).toBeInTheDocument();
+		});
+
 		it("con el contenido de respaldo no ofrece Promociones", () => {
 			mostrar("/", structuredClone(prueba), "respaldo");
 			expect(region().queryByRole("link", { name: /Promociones/ })).toBeNull();
