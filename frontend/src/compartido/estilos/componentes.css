@@ -1480,3 +1480,73 @@ button.paso-num {
 .ficha-promos .promo-mini h3 {
 	font-size: 1.375rem;
 }
+
+/* Calcomanías: piezas decorativas pegadas junto al título, como un sticker
+   sobre el empaque. El título y su bajada ocupan la primera columna y la
+   calcomanía queda a su lado, centrada en el bloque, en vez de flotar contra
+   el borde de la página. `rotate` es independiente de `transform`. */
+.calcomania {
+	width: 96px;
+	height: auto;
+	pointer-events: none;
+	filter: drop-shadow(0 10px 14px rgba(91, 59, 36, 0.22));
+}
+.titulo-con-calcomania {
+	display: grid;
+	grid-template-columns: minmax(0, max-content) auto;
+	justify-content: start;
+	align-items: center;
+	column-gap: clamp(12px, 3vw, 40px);
+}
+.titulo-con-calcomania > :not(.calcomania) {
+	grid-column: 1;
+}
+/* El margen negativo deja que la calcomanía sobresalga un poco del bloque sin
+   abrir espacio entre el título y su bajada. */
+.titulo-con-calcomania > .calcomania {
+	grid-column: 2;
+	grid-row: 1 / span 2;
+	margin-block: -12px;
+}
+.calcomania-menu .calcomania {
+	rotate: -6deg;
+}
+.calcomania-sedes .calcomania {
+	rotate: 5deg;
+}
+.calcomania-promociones .calcomania {
+	rotate: 7deg;
+}
+.calcomania-explora {
+	margin-bottom: clamp(28px, 4vw, 48px);
+}
+.calcomania-explora > h2 {
+	margin-bottom: 0;
+}
+.calcomania-explora .calcomania {
+	rotate: -7deg;
+}
+/* Nosotros: la calcomanía se pega en el hombro del arco, en diagonal con el
+   sticker horizontal de abajo, para dejar limpia la columna de texto. */
+.calcomania-en-foto {
+	position: absolute;
+	top: 10%;
+	right: -28px;
+	width: 112px;
+	rotate: 8deg;
+}
+@media (min-width: 900px) {
+	.calcomania {
+		width: 132px;
+	}
+	.titulo-con-calcomania > .calcomania {
+		margin-block: -24px;
+	}
+	.calcomania-explora .calcomania {
+		width: 170px;
+	}
+	.calcomania-en-foto {
+		right: -56px;
+		width: 160px;
+	}
+}

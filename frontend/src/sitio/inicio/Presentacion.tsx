@@ -3,6 +3,7 @@ import type { Contenido } from "../../../../backend/supabase/functions/_shared/e
 import { nombreProducto } from "../../compartido/carrito/reglas";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { promocionesVigentes } from "../../compartido/contenido/vigencia";
+import { Calcomania } from "../Calcomania";
 import { MarcaPorValidar } from "../MarcaPorValidar";
 import { NOSOTROS } from "./copy";
 
@@ -33,13 +34,22 @@ export function Promociones({
 			/>
 			<div className="envoltura promo-grid">
 				<div>
-					<Titulo
-						id="titulo-promociones"
-						className="promo-titulo"
-						tabIndex={-1}
+					<div
+						className={
+							comoPagina
+								? "titulo-con-calcomania calcomania-promociones"
+								: undefined
+						}
 					>
-						Promociones
-					</Titulo>
+						<Titulo
+							id="titulo-promociones"
+							className="promo-titulo"
+							tabIndex={-1}
+						>
+							Promociones
+						</Titulo>
+						{comoPagina && <Calcomania nombre="ven-date-un-gusto-bonito" />}
+					</div>
 				</div>
 				{vigentes.length === 0 ? (
 					<Cupon>
@@ -126,6 +136,12 @@ export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 						height="50"
 						loading="lazy"
 					/>
+					{comoPagina && (
+						<Calcomania
+							nombre="dulce-pero-con-estilo-gafas"
+							className="calcomania-en-foto"
+						/>
+					)}
 				</div>
 				<div className="nosotros-texto">
 					<Titulo id="titulo-nosotros" tabIndex={-1}>

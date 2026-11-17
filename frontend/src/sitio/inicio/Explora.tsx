@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { Icono } from "../../compartido/componentes/Icono";
 import { promocionesVigentes } from "../../compartido/contenido/vigencia";
+import { Calcomania } from "../Calcomania";
 
 /** Páginas del sitio en el orden del menú; las comparten el encabezado y el pie (RF-02). */
 export const PAGINAS_SITIO = [
@@ -88,9 +89,12 @@ export function Explora({
 			aria-labelledby="titulo-explora"
 		>
 			<div className="envoltura">
-				<h2 id="titulo-explora">
-					Todo Fresura, <em>a un toque</em>
-				</h2>
+				<div className="titulo-con-calcomania calcomania-explora">
+					<h2 id="titulo-explora">
+						Todo Fresura, <em>a un toque</em>
+					</h2>
+					<Calcomania nombre="fresas-con-crema-chocolate-y-flow" />
+				</div>
 				<ul
 					className={
 						respaldo ? "explora-tarjetas sin-promos" : "explora-tarjetas"

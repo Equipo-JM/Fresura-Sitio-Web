@@ -1,4 +1,5 @@
 import { Icono } from "../compartido/componentes/Icono";
+import { Calcomania } from "./Calcomania";
 import { ConContenido } from "./ConContenido";
 import { Sedes } from "./inicio/Secciones";
 
@@ -8,11 +9,12 @@ export function PaginaSedes() {
 		<ConContenido>
 			{(contenido) => (
 				<section className="pagina pagina-sedes">
-					<div className="envoltura">
+					<div className="envoltura titulo-con-calcomania calcomania-sedes">
 						<h1>
 							Sedes y <em>contacto</em>
 						</h1>
 						<p>Mismos productos y precios en ambas.</p>
+						<Calcomania nombre="las-mejores-fresas-de-bogota" />
 					</div>
 					<Sedes contenido={contenido} pagina />
 					<div className="envoltura">
