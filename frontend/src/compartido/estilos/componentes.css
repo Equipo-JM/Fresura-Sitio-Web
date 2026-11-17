@@ -1576,6 +1576,10 @@ button.paso-num {
 /* Mientras llega el contenido, la página ocupa al menos la pantalla para que el
    pie no aparezca y luego salte (RNF-04, CLS). */
 .cargando-contenido {
-	min-height: 100vh;
 	min-height: 100svh;
+}
+
+/* Etiqueta «Por validar» junto a un enlace del pie: sin espacio parecían montados. */
+.pie li .pv {
+	margin-left: 8px;
 }

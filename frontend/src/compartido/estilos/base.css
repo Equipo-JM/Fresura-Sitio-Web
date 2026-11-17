@@ -865,6 +865,17 @@ h2:focus {
 	bottom: 16px;
 	z-index: 40;
 	box-shadow: 0 10px 24px rgba(91, 59, 36, 0.28);
+	/* Círculo de 56 px: deja ver el contenido que pasa por debajo. */
+	width: 56px;
+	height: 56px;
+	min-height: 56px;
+	padding: 0;
+	justify-content: center;
+	border-radius: 50%;
+}
+.wa-flotante svg {
+	width: 26px;
+	height: 26px;
 }
 .estados-boton {
 	position: fixed;
