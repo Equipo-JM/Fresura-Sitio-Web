@@ -1480,3 +1480,62 @@ button.paso-num {
 .ficha-promos .promo-mini h3 {
 	font-size: 1.375rem;
 }
+
+/* Calcomanías: decorativas, a la derecha del título y centradas en su bloque.
+   `rotate` se compone con el `transform` del centrado. */
+.titulo-con-calcomania {
+	position: relative;
+}
+.titulo-con-calcomania > :not(.calcomania) {
+	padding-right: 112px;
+}
+.calcomania {
+	position: absolute;
+	top: 50%;
+	right: 0;
+	width: 96px;
+	height: auto;
+	transform: translateY(-50%);
+	pointer-events: none;
+	filter: drop-shadow(0 10px 14px rgba(91, 59, 36, 0.22));
+}
+/* Encabezados de página cortos: alto mínimo para que la calcomanía no se salga del bloque. */
+.calcomania-menu,
+.calcomania-sedes {
+	min-height: 120px;
+}
+.calcomania-menu .calcomania {
+	rotate: -6deg;
+}
+.calcomania-nosotros .calcomania {
+	rotate: 5deg;
+}
+.calcomania-sedes .calcomania {
+	rotate: -4deg;
+}
+.calcomania-explora .calcomania {
+	rotate: -8deg;
+}
+/* En Promociones la columna del título es angosta: la calcomanía va debajo. */
+.calcomania-promociones > :not(.calcomania) {
+	padding-right: 0;
+}
+.calcomania-promociones .calcomania {
+	position: static;
+	display: block;
+	margin-top: 16px;
+	transform: none;
+	rotate: 7deg;
+}
+@media (min-width: 900px) {
+	.titulo-con-calcomania > :not(.calcomania) {
+		padding-right: 184px;
+	}
+	.calcomania {
+		width: 160px;
+	}
+	.calcomania-menu,
+	.calcomania-sedes {
+		min-height: 190px;
+	}
+}
