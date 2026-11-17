@@ -39,6 +39,62 @@ export type Database = {
 	};
 	public: {
 		Tables: {
+			agente_conversaciones: {
+				Row: {
+					actualizado_en: string;
+					creado_en: string;
+					creado_por: string;
+					id: string;
+					titulo: string;
+				};
+				Insert: {
+					actualizado_en?: string;
+					creado_en?: string;
+					creado_por?: string;
+					id?: string;
+					titulo: string;
+				};
+				Update: {
+					actualizado_en?: string;
+					creado_en?: string;
+					creado_por?: string;
+					id?: string;
+					titulo?: string;
+				};
+				Relationships: [];
+			};
+			agente_mensajes: {
+				Row: {
+					contenido: Json;
+					conversacion_id: string;
+					creado_en: string;
+					id: string;
+					rol: string;
+				};
+				Insert: {
+					contenido: Json;
+					conversacion_id: string;
+					creado_en?: string;
+					id?: string;
+					rol: string;
+				};
+				Update: {
+					contenido?: Json;
+					conversacion_id?: string;
+					creado_en?: string;
+					id?: string;
+					rol?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "agente_mensajes_conversacion_id_fkey";
+						columns: ["conversacion_id"];
+						isOneToOne: false;
+						referencedRelation: "agente_conversaciones";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			guiones: {
 				Row: {
 					actualizado_en: string;
