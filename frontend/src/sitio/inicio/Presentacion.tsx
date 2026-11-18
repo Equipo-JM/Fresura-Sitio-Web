@@ -4,7 +4,6 @@ import { nombreProducto } from "../../compartido/carrito/reglas";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { promocionesVigentes } from "../../compartido/contenido/vigencia";
 import { Calcomania } from "../Calcomania";
-import { MarcaPorValidar } from "../MarcaPorValidar";
 import { NOSOTROS } from "./copy";
 
 /**
@@ -20,6 +19,8 @@ export function Promociones({
 	comoPagina?: boolean;
 }) {
 	const Titulo = comoPagina ? "h1" : "h2";
+	// En la página propia los cupones cuelgan del h1: h2, sin saltar niveles.
+	const Subtitulo = comoPagina ? "h2" : "h3";
 	const vigentes = promocionesVigentes(contenido.promociones);
 	return (
 		<section
@@ -53,13 +54,12 @@ export function Promociones({
 				</div>
 				{vigentes.length === 0 ? (
 					<Cupon>
-						<h3>Por ahora no tenemos promociones publicadas</h3>
+						<Subtitulo>Por ahora no tenemos promociones publicadas</Subtitulo>
 					</Cupon>
 				) : (
 					vigentes.map((p) => (
 						<Cupon key={p.id}>
-							<h3>{p.titulo}</h3>
-							{contenido.estado === "ejemplo" && <MarcaPorValidar />}
+							<Subtitulo>{p.titulo}</Subtitulo>
 							<p>
 								<strong>Vigencia:</strong> {p.vigencia.desde} a{" "}
 								{p.vigencia.hasta}.
@@ -105,6 +105,7 @@ function Cupon({ children }: { children: React.ReactNode }) {
  */
 export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 	const Titulo = comoPagina ? "h1" : "h2";
+	const Subtitulo = comoPagina ? "h2" : "h3";
 	return (
 		<section
 			className="seccion fondo-peep"
@@ -118,7 +119,6 @@ export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 			/>
 			<div className="envoltura nosotros-grid">
 				<div className="nosotros-foto">
-					<span className="pv pv-foto">Por validar</span>
 					<div className="arco">
 						<FotoEjemplo
 							src="/ejemplos/nosotros-interior.webp"
@@ -151,7 +151,7 @@ export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 					<ul className="valores">
 						{NOSOTROS.valores.map((v) => (
 							<li key={v.titulo}>
-								<h3>{v.titulo}</h3>
+								<Subtitulo>{v.titulo}</Subtitulo>
 								<p>{v.texto}</p>
 							</li>
 						))}

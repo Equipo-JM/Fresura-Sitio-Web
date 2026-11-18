@@ -9,7 +9,6 @@ import { useDesplazamientoSuave } from "../compartido/movimiento/useDesplazamien
 import { AvisoRespaldo } from "./AvisoRespaldo";
 import { PAGINAS_SITIO } from "./inicio/Explora";
 import { useMomentosDesplazamiento } from "./inicio/useMomentosDesplazamiento";
-import { MarcaPorValidar } from "./MarcaPorValidar";
 import { useCierreNavegacion } from "./useCierreNavegacion";
 import { useTituloPagina } from "./useTituloPagina";
 
@@ -73,7 +72,7 @@ export function MarcoDelSitio() {
 									.find((s) => s.atiende_pedidos)
 									?.nombre.replace(/^Sede /, "")}
 							</strong>
-							, hasta 5 km <MarcaPorValidar />
+							, hasta 5 km
 						</p>
 						<a
 							className="anuncio-enlace"
@@ -221,9 +220,6 @@ export function MarcoDelSitio() {
 										>
 											WhatsApp
 										</a>
-										{contenido?.estado === "ejemplo" && (
-											<span className="pv">Número por definir</span>
-										)}
 									</li>
 									<li>
 										<Link to="/sedes">Sedes y contacto</Link>

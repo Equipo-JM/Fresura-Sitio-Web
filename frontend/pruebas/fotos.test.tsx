@@ -2,18 +2,19 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
 import { esquemaContenido } from "../../backend/supabase/functions/_shared/esquemas/contenido";
-import { tieneFoto } from "../src/compartido/contenido/fotos";
+import { fotoRappi, tieneFoto } from "../src/compartido/contenido/fotos";
 import { TarjetaProducto } from "../src/sitio/inicio/Categorias";
 import prueba from "./datos/contenido-prueba.json";
 
-const producto = esquemaContenido.parse(prueba).productos[0];
+const productos = esquemaContenido.parse(prueba).productos;
+const producto = productos[0];
 
-function mostrarTarjeta(ruta: string) {
+function mostrarTarjeta(ruta: string, base = producto) {
 	render(
 		<MemoryRouter>
 			<TarjetaProducto
 				producto={{
-					...producto,
+					...base,
 					imagen: { ...producto.imagen, ruta, alt: "Vaso de fresas" },
 				}}
 			/>
@@ -49,13 +50,28 @@ describe("fotos de producto", () => {
 		);
 	});
 
-	it("sin foto real Arma tu usa la textura de referencia de DD-43", () => {
+	it("sin foto publicada usa la provisional de Rappi, sin etiqueta", () => {
 		mostrarTarjeta("https://ejemplo.invalid/fresas.webp");
+		expect(
+			screen.getByRole("img", { name: "Arma tu Fresita, foto provisional" }),
+		).toHaveAttribute("src", "/ejemplos/productos/arma-tu-fresita-9oz.webp");
+		expect(screen.queryByText("Por validar")).toBeNull();
+		expect(screen.queryByRole("img", { name: "Vaso de fresas" })).toBeNull();
+	});
+
+	it("sin foto publicada ni de Rappi, Arma tu usa la textura de DD-43", () => {
+		mostrarTarjeta("https://ejemplo.invalid/fresas.webp", {
+			...producto,
+			id: "sin-foto-rappi",
+		});
 		expect(
 			screen.getByRole("img", { name: "Textura de crema, foto de referencia" }),
 		).toHaveAttribute("src", "/ejemplos/textura-crema.webp");
-		expect(screen.getAllByText("Por validar").length).toBeGreaterThan(0);
-		expect(screen.queryByRole("img", { name: "Vaso de fresas" })).toBeNull();
+	});
+
+	it("todos los productos del menú tienen foto de Rappi", () => {
+		const sinFoto = productos.filter((p) => !fotoRappi(p.id)).map((p) => p.id);
+		expect(sinFoto).toEqual([]);
 	});
 
 	it("con la foto que sube el panel al bucket, la muestra en la tarjeta", () => {

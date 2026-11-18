@@ -36,13 +36,13 @@ h3 {
 	text-wrap: balance;
 }
 h1 {
-	font-size: clamp(2.5rem, 2rem + 2.6vw, 4.5rem);
+	font-size: var(--titulo-1);
 }
 h2 {
-	font-size: clamp(2.1rem, 1.8rem + 1.5vw, 3.25rem);
+	font-size: var(--titulo-2);
 }
 h3 {
-	font-size: 1.5rem;
+	font-size: var(--titulo-4);
 }
 h1 em,
 h2 em {
@@ -171,7 +171,7 @@ h2:focus {
 	align-items: center;
 	min-height: 24px;
 	padding: 1px 9px;
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	font-weight: 700;
 	line-height: 1.2;
 	background: var(--color-platinum);
@@ -193,7 +193,7 @@ h2:focus {
 }
 .propuesta {
 	display: inline-block;
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	font-weight: 700;
 	border-bottom: 1px dashed currentColor;
 }
@@ -354,7 +354,7 @@ h2:focus {
 	background: none;
 	cursor: pointer;
 	text-decoration: none;
-	font-size: 0.9375rem;
+	font-size: var(--texto-base);
 	white-space: nowrap;
 }
 .nav a:hover,
@@ -391,7 +391,7 @@ h2:focus {
 	min-width: 44px;
 	padding: 8px 10px;
 	text-decoration: none;
-	font-size: 0.9375rem;
+	font-size: var(--texto-base);
 	flex: none;
 }
 .carrito-enlace[aria-disabled="true"] {
@@ -407,7 +407,7 @@ h2:focus {
 	border-radius: var(--radio-pildora);
 	background: var(--boton-fondo);
 	color: var(--boton-texto);
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	font-weight: 700;
 }
 .hamburguesa {
@@ -456,7 +456,7 @@ h2:focus {
 	justify-items: start;
 }
 .portada-texto p {
-	font-size: 1.0625rem;
+	font-size: var(--texto-destacado);
 	max-width: 34ch;
 }
 .arco {
@@ -500,7 +500,7 @@ h2:focus {
 	position: relative;
 }
 .promo-titulo {
-	font-size: clamp(2.25rem, 2rem + 1.5vw, 3.25rem);
+	font-size: var(--titulo-2);
 }
 .cupon {
 	position: relative;
@@ -591,7 +591,7 @@ h2:focus {
 }
 .tarjeta-nombre {
 	font-family: var(--fuente-titulos);
-	font-size: 1.5rem;
+	font-size: var(--titulo-4);
 	line-height: 1.15;
 }
 .tarjeta-precio {
@@ -657,7 +657,7 @@ h2:focus {
 	background: var(--boton-fondo);
 	color: var(--boton-texto);
 	cursor: pointer;
-	font-size: 1.125rem;
+	font-size: var(--texto-destacado);
 }
 .redondo[aria-disabled="true"] {
 	background: transparent;
@@ -692,8 +692,8 @@ h2:focus {
 	padding-top: 12px;
 	border-top: 1px solid var(--texto);
 }
-.valores h3 {
-	font-size: 1.5rem;
+.valores :is(h2, h3) {
+	font-size: var(--titulo-4);
 	font-style: italic;
 	margin-bottom: 4px;
 }
@@ -713,7 +713,7 @@ h2:focus {
 	padding: 4px;
 	border: 1px dashed var(--texto);
 	border-radius: var(--radio-chico);
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	line-height: 1.2;
 	background: var(--color-platinum);
 }
@@ -772,7 +772,7 @@ h2:focus {
 .horario {
 	width: 100%;
 	border-collapse: collapse;
-	font-size: 0.9375rem;
+	font-size: var(--texto-base);
 }
 .horario th,
 .horario td {
@@ -936,7 +936,7 @@ h2:focus {
 	min-width: 0;
 }
 .ficha-precio {
-	font-size: 1.25rem;
+	font-size: var(--texto-grande);
 	font-weight: 700;
 }
 .ficha-bloque {
@@ -944,7 +944,7 @@ h2:focus {
 	gap: 10px;
 }
 .ficha-bloque h2 {
-	font-size: 1.5rem;
+	font-size: var(--titulo-4);
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -1152,7 +1152,7 @@ legend {
 .total-fila strong {
 	font-family: var(--fuente-titulos);
 	font-weight: 400;
-	font-size: 1.875rem;
+	font-size: var(--titulo-3);
 }
 
 /* Carrito */
@@ -1184,7 +1184,7 @@ legend {
 }
 .linea-titulo {
 	font-family: var(--fuente-titulos);
-	font-size: 1.3125rem;
+	font-size: var(--titulo-4);
 	line-height: 1.15;
 }
 .linea-pie {
@@ -1310,7 +1310,7 @@ legend {
 	border-radius: var(--radio) var(--radio-chico) var(--radio-chico) var(--radio);
 	white-space: pre-wrap;
 	overflow-wrap: anywhere;
-	font-size: 0.9375rem;
+	font-size: var(--texto-base);
 }
 .crudo pre {
 	white-space: pre-wrap;
@@ -1398,7 +1398,7 @@ legend {
 	gap: 12px;
 }
 .producto-panel h3 {
-	font-size: 1.375rem;
+	font-size: var(--titulo-4);
 }
 .precios-fila {
 	display: grid;
@@ -1577,7 +1577,7 @@ dialog::backdrop {
 	}
 	.remate p {
 		font-family: var(--fuente-titulos);
-		font-size: 3rem;
+		font-size: var(--titulo-2);
 		line-height: 1.08;
 	}
 	.nosotros-grid {
@@ -1656,7 +1656,7 @@ dialog::backdrop {
 	}
 	.nav a {
 		min-height: 48px;
-		font-size: 1.0625rem;
+		font-size: var(--texto-destacado);
 	}
 	.menu-etiqueta {
 		display: block;
@@ -1828,7 +1828,7 @@ body {
 	padding-block: 28px 64px;
 }
 .portada h1 {
-	font-size: clamp(2.75rem, 1.7rem + 4.4vw, 5.5rem);
+	font-size: var(--titulo-portada);
 	line-height: 1.02;
 	letter-spacing: -0.01em;
 }
@@ -1848,7 +1848,7 @@ body {
 	gap: 20px;
 }
 .portada-bajada {
-	font-size: 1.0625rem;
+	font-size: var(--texto-destacado);
 	max-width: 38ch;
 }
 .portada-acciones {
@@ -1897,7 +1897,7 @@ body {
 	white-space: nowrap;
 	font-family: var(--fuente-titulos);
 	font-style: italic;
-	font-size: clamp(1.375rem, 1.1rem + 1vw, 2rem);
+	font-size: var(--titulo-3);
 	line-height: 1;
 	will-change: transform;
 }
@@ -1927,7 +1927,9 @@ body {
 	filter: drop-shadow(0 10px 14px rgba(91, 59, 36, 0.22));
 }
 .frase-antojo {
-	font-size: clamp(2.4rem, 1.5rem + 3.8vw, 4.75rem);
+	font-family: var(--fuente-titulos);
+	font-weight: var(--peso-normal);
+	font-size: var(--titulo-1);
 	line-height: 1.05;
 	max-width: 17ch;
 	padding-right: 72px;
@@ -1977,7 +1979,7 @@ body {
 }
 .antojo-nombre {
 	font-weight: 700;
-	font-size: 1.0625rem;
+	font-size: var(--texto-destacado);
 }
 .antojo-dato {
 	font-size: var(--texto-chico);
@@ -2017,12 +2019,12 @@ body {
 	margin-bottom: clamp(28px, 3.5vw, 44px);
 }
 .capa-encabezado h2 {
-	font-size: clamp(2.6rem, 1.9rem + 3vw, 4.5rem);
+	font-size: var(--titulo-1);
 }
 .capa-frase {
 	font-family: var(--fuente-titulos);
 	font-style: italic;
-	font-size: clamp(1.3rem, 1.05rem + 1vw, 1.875rem);
+	font-size: var(--titulo-4);
 	line-height: 1.2;
 }
 .capa-dato {
@@ -2307,13 +2309,13 @@ body {
 	object-fit: cover;
 }
 .polaroid .foto-pendiente .pv {
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 }
 .polaroid-pie {
 	margin-top: 10px;
 	font-family: var(--fuente-titulos);
 	font-style: italic;
-	font-size: 1.25rem;
+	font-size: var(--texto-grande);
 }
 .reciente-otras {
 	margin-top: clamp(28px, 3vw, 40px);
@@ -2373,7 +2375,7 @@ body {
 .precio-barra {
 	font-family: var(--fuente-titulos);
 	font-weight: 400;
-	font-size: 1.875rem;
+	font-size: var(--titulo-3);
 	line-height: 1.1;
 	font-variant-numeric: tabular-nums;
 }
@@ -2444,7 +2446,7 @@ body {
 	background: var(--color-platinum);
 	font-family: var(--fuente-titulos);
 	font-style: italic;
-	font-size: 1.375rem;
+	font-size: var(--titulo-4);
 	text-align: center;
 }
 .visual-foto {
@@ -2461,7 +2463,7 @@ body {
 	gap: 8px;
 }
 .pz-encabezado h1 {
-	font-size: clamp(2.5rem, 2rem + 2.4vw, 4rem);
+	font-size: var(--titulo-1);
 }
 .grupos {
 	display: grid;
@@ -2481,7 +2483,7 @@ body {
 	gap: 8px;
 }
 .grupo-cabeza h2 {
-	font-size: 1.75rem;
+	font-size: var(--titulo-3);
 }
 .cuenta {
 	display: inline-flex;
@@ -2490,7 +2492,7 @@ body {
 	padding: 2px 12px;
 	border-radius: var(--radio-pildora);
 	background: var(--color-platinum);
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	font-weight: 700;
 }
 .ayuda {
@@ -2511,7 +2513,7 @@ body {
 	background: var(--color-platinum);
 	color: var(--texto);
 	border: 1.5px solid var(--texto);
-	font-size: 0.9375rem;
+	font-size: var(--texto-base);
 	line-height: 1.2;
 	cursor: pointer;
 	transition:
@@ -2541,7 +2543,7 @@ body {
 	transform: none;
 }
 .costo {
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	font-weight: 700;
 }
 @media (hover: hover) and (pointer: fine) {
@@ -2558,13 +2560,13 @@ body {
 	box-shadow: inset 0 0 0 1.5px var(--texto);
 }
 .extra h2 {
-	font-size: 1.75rem;
+	font-size: var(--titulo-3);
 }
 .num {
 	min-width: 40px;
 	text-align: center;
 	font-weight: 700;
-	font-size: 1.125rem;
+	font-size: var(--texto-destacado);
 	font-variant-numeric: tabular-nums;
 }
 
@@ -2574,7 +2576,7 @@ body {
 	text-align: center;
 }
 .hoja h2 {
-	font-size: 1.875rem;
+	font-size: var(--titulo-3);
 }
 .hoja-acciones {
 	display: flex;
@@ -2593,7 +2595,7 @@ body {
 	border: 3px dashed var(--texto);
 	font-family: var(--fuente-titulos);
 	font-style: italic;
-	font-size: 1.375rem;
+	font-size: var(--titulo-4);
 	line-height: 1.1;
 	text-align: center;
 	transform: rotate(-10deg);
@@ -2678,7 +2680,7 @@ button.paso-num {
 	min-width: 0;
 }
 .etapa h1 {
-	font-size: clamp(2.25rem, 1.8rem + 2vw, 3.25rem);
+	font-size: var(--titulo-1);
 }
 .lineas-c {
 	display: grid;
@@ -2701,7 +2703,7 @@ button.paso-num {
 	align-content: start;
 }
 .linea-c .linea-titulo {
-	font-size: 1.375rem;
+	font-size: var(--titulo-4);
 }
 .linea-c .linea-pie {
 	grid-column: 1 / -1;
@@ -2712,7 +2714,7 @@ button.paso-num {
 	padding: 2px;
 }
 .linea-c .linea-precio {
-	font-size: 1.125rem;
+	font-size: var(--texto-destacado);
 	font-variant-numeric: tabular-nums;
 }
 .miniatura {
@@ -2745,7 +2747,7 @@ button.paso-num {
 	border-radius: var(--radio-pildora);
 	background: var(--color-peat-brown);
 	color: var(--color-platinum);
-	font-size: 0.75rem;
+	font-size: var(--texto-chico);
 	font-weight: 700;
 }
 .vacio-caja {
@@ -2756,7 +2758,7 @@ button.paso-num {
 	background: var(--color-we-peep);
 }
 .vacio-caja h1 {
-	font-size: 2rem;
+	font-size: var(--titulo-3);
 }
 .resumen {
 	overflow: hidden;
@@ -2823,7 +2825,7 @@ button.paso-num {
 .total strong {
 	font-family: var(--fuente-titulos);
 	font-weight: 400;
-	font-size: 2rem;
+	font-size: var(--titulo-3);
 	font-variant-numeric: tabular-nums;
 }
 .entregas {
@@ -2852,7 +2854,7 @@ button.paso-num {
 	accent-color: var(--color-peat-brown);
 }
 .entrega strong {
-	font-size: 1.0625rem;
+	font-size: var(--texto-destacado);
 }
 .entrega span {
 	grid-column: 2;
@@ -2906,7 +2908,7 @@ button.paso-num {
 	background: var(--color-dust-storm);
 }
 .dato h2 {
-	font-size: 1.375rem;
+	font-size: var(--titulo-4);
 }
 .dato .boton-texto {
 	padding-left: 0;
@@ -2924,7 +2926,7 @@ button.paso-num {
 	background: var(--color-platinum);
 }
 .exito h1 {
-	font-size: 2.25rem;
+	font-size: var(--titulo-3);
 }
 
 @keyframes pega {
@@ -3070,7 +3072,7 @@ button.paso-num {
 	}
 	.visual-pie {
 		margin-top: 18px;
-		font-size: 1.125rem;
+		font-size: var(--texto-destacado);
 	}
 	.compra-barra .envoltura {
 		flex-wrap: nowrap;
@@ -3079,7 +3081,7 @@ button.paso-num {
 		padding-inline: 16px;
 	}
 	.precio-barra {
-		font-size: 1.5rem;
+		font-size: var(--titulo-4);
 	}
 }
 .compra-barra .boton {
@@ -3120,7 +3122,7 @@ button.paso-num {
 	padding: 5px 12px;
 	border-radius: var(--radio-pildora);
 	background: var(--color-platinum);
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 	font-weight: 700;
 	white-space: nowrap;
 	transform: rotate(var(--giro, 0deg));
@@ -3140,7 +3142,7 @@ button.paso-num {
 }
 .sticker-grupo {
 	font-weight: 400;
-	font-size: 0.75rem;
+	font-size: var(--texto-chico);
 }
 
 /* Verde con cuidado (Court-Bouillon): solo donde el manual lo usa o donde significa «listo».
@@ -3161,7 +3163,7 @@ button.paso-num {
 	border-top: 1px solid var(--texto);
 }
 .bloque-form h2 {
-	font-size: 1.75rem;
+	font-size: var(--titulo-3);
 }
 .bloque-form fieldset {
 	display: grid;
@@ -3213,7 +3215,7 @@ button.paso-num {
 	top: 7px;
 	left: 15px;
 	z-index: 1;
-	font-size: 0.75rem;
+	font-size: var(--texto-chico);
 	line-height: 1.2;
 	pointer-events: none;
 }
@@ -3256,7 +3258,7 @@ button.paso-num {
 	gap: 10px;
 	min-height: 44px;
 	cursor: pointer;
-	font-size: 0.9375rem;
+	font-size: var(--texto-base);
 }
 .casilla input {
 	width: 20px;
@@ -3288,11 +3290,11 @@ button.paso-num {
 		box-shadow 160ms ease;
 }
 .segmento strong {
-	font-size: 0.9375rem;
+	font-size: var(--texto-base);
 	line-height: 1.25;
 }
 .segmento span {
-	font-size: 0.8125rem;
+	font-size: var(--texto-chico);
 }
 .segmento.elegido {
 	background: var(--color-platinum);

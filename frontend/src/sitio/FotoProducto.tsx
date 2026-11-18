@@ -1,18 +1,19 @@
 import type { Producto } from "../compartido/carrito/reglas";
 import { FotoEjemplo } from "../compartido/componentes/FotoEjemplo";
-import { tieneFoto } from "../compartido/contenido/fotos";
+import { fotoRappi, tieneFoto } from "../compartido/contenido/fotos";
 
-/** Foto publicada prioritaria; a falta de ella, referencias y fresas de DD-43. */
+/**
+ * Foto publicada prioritaria; a falta de ella, la provisional de Rappi y, si
+ * tampoco hay, referencias y fresas de DD-43.
+ */
 export function FotoProducto({
 	producto,
 	enBeige = false,
 	segunda = false,
-	marcada = true,
 }: {
 	producto: Producto;
 	enBeige?: boolean;
 	segunda?: boolean;
-	marcada?: boolean;
 }) {
 	if (tieneFoto(producto.imagen))
 		return (
@@ -24,11 +25,25 @@ export function FotoProducto({
 				loading="lazy"
 			/>
 		);
+	const provisional = fotoRappi(producto.id);
+	if (provisional)
+		return (
+			<>
+				<img
+					src={provisional}
+					alt={segunda ? "" : `${producto.nombre}, foto provisional`}
+					// Casi todas son cuadradas; el marco las recorta con `object-fit`,
+					// así que estas medidas solo reservan espacio mientras carga.
+					width="500"
+					height="500"
+					loading="lazy"
+				/>
+			</>
+		);
 	const chocolate = producto.categoria === "chocolate";
 	const textura = producto.nombre.startsWith("Arma tu");
 	return (
 		<>
-			{marcada && !segunda && <span className="pv pv-foto">Por validar</span>}
 			<div className={segunda ? "cara-contenido" : "cara a"}>
 				{textura && !segunda ? (
 					<img
@@ -60,9 +75,6 @@ export function FotoProducto({
 							width="72"
 							height="102"
 						/>
-						<span>
-							{segunda ? "Segunda foto por validar" : "Foto por validar"}
-						</span>
 					</div>
 				)}
 			</div>

@@ -1,10 +1,8 @@
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
-import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { Icono } from "../../compartido/componentes/Icono";
-import { MarcaPorValidar } from "../MarcaPorValidar";
-import { FOTOS_RECIENTE, TEXTO_RECIENTE } from "./copy";
+import { PUBLICACIONES_RECIENTE, TEXTO_RECIENTE } from "./copy";
 
-/** «Lo más reciente»: fotos tipo polaroid con enlace a Instagram. Son espacios por validar. */
+/** «Lo más reciente»: las últimas publicaciones de Instagram dentro de polaroids. */
 export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 	const instagram = contenido.negocio.redes.instagram;
 	const usuario = instagram
@@ -22,9 +20,7 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 						<h2 id="titulo-reciente">
 							Lo más reciente <span className="salto">de Fresura</span>
 						</h2>
-						<p>
-							{TEXTO_RECIENTE} <MarcaPorValidar />
-						</p>
+						<p>{TEXTO_RECIENTE}</p>
 					</div>
 					{instagram && (
 						<a
@@ -41,43 +37,34 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 					)}
 				</div>
 				<ul className="polaroids">
-					{FOTOS_RECIENTE.map((foto, i) => (
-						<li className={`polaroid p${i + 1}`} key={foto.src}>
+					{PUBLICACIONES_RECIENTE.map((publicacion, i) => (
+						<li className={`polaroid p${i + 1}`} key={publicacion.codigo}>
 							<span
-								className={`adhesivo cinta-${foto.cinta}`}
+								className={`adhesivo cinta-${publicacion.cinta}`}
 								aria-hidden="true"
 							/>
-							<div className="polaroid-foto">
-								{i === 1 ? (
-									<div className="foto-pendiente fondo-dust">
-										<img
-											src="/marca/fresa-flamingo.svg"
-											alt=""
-											width="72"
-											height="102"
-										/>
-										<span className="pv">Publicación por validar</span>
-									</div>
-								) : (
-									<>
-										<span className="pv pv-foto">Por validar</span>
-										<FotoEjemplo
-											src={
-												i === 2 ? "/ejemplos/reciente-interior.webp" : foto.src
-											}
-											alt={
-												i === 2
-													? "Interior de Fresura con dos sillones rosados, foto de referencia"
-													: foto.alt
-											}
-											ancho={600}
-											alto={600}
-											marcada={false}
-										/>
-									</>
-								)}
+							<div className="polaroid-foto polaroid-instagram">
+								{/* Inserción de Instagram sin su script: solo un iframe perezoso,
+								    así el sitio no carga código de terceros (CSP: frame-src). */}
+								<iframe
+									src={`https://www.instagram.com/reel/${publicacion.codigo}/embed/`}
+									title={`Publicación ${i + 1} de ${usuario} en Instagram`}
+									loading="lazy"
+									allowFullScreen
+								/>
 							</div>
-							<p className="polaroid-pie">{usuario}</p>
+							<p className="polaroid-pie">
+								<a
+									href={`https://www.instagram.com/reel/${publicacion.codigo}/`}
+									target="_blank"
+									rel="noopener noreferrer"
+								>
+									{usuario}
+									<span className="oculto">
+										, abre la publicación {i + 1} en Instagram en otra pestaña
+									</span>
+								</a>
+							</p>
 						</li>
 					))}
 				</ul>
@@ -110,10 +97,8 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 /** Calificación de Google, solo si el contrato la marca como mostrada (RF-12). */
 export function Calificacion({
 	opiniones,
-	estado,
 }: {
 	opiniones: Contenido["opiniones"];
-	estado: Contenido["estado"];
 }) {
 	if (!opiniones.mostrar || opiniones.calificacion === null) return null;
 	const fecha = opiniones.fecha_corte
@@ -146,7 +131,6 @@ export function Calificacion({
 							{opiniones.numero_opiniones} opiniones
 							{fecha ? `, al ${fecha}` : ""}
 						</span>
-						{estado === "ejemplo" && <MarcaPorValidar />}
 					</p>
 				</div>
 				{opiniones.url_ficha && (
@@ -203,7 +187,7 @@ export function Sedes({
 									{sede.atiende_pedidos ? (
 										<>
 											Recogida y domicilios hasta {sede.radio_domicilio_km} km
-											en línea recta <MarcaPorValidar />
+											en línea recta
 										</>
 									) : (
 										"Punto de venta"

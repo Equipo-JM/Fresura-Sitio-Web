@@ -17,7 +17,6 @@ import { CompraDesactivada } from "./CompraDesactivada";
 import { ConContenido } from "./ConContenido";
 import { FotoProducto } from "./FotoProducto";
 import { PERSONALIZACION } from "./inicio/copy";
-import { MarcaPorValidar } from "./MarcaPorValidar";
 import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
 import { useDialogoAgregado } from "./personalizar/useDialogoAgregado";
 import { VasoIlustrado } from "./personalizar/VasoIlustrado";
@@ -141,7 +140,7 @@ function Personalizador({
 							<VasoIlustrado producto={producto} seleccion={seleccion} />
 						) : (
 							<div className="visual-foto tarjeta-foto">
-								<FotoProducto producto={producto} marcada={false} />
+								<FotoProducto producto={producto} />
 							</div>
 						)}
 						{elegidos.length > 0 && (
@@ -182,8 +181,7 @@ function Personalizador({
 						<p>
 							{incluye
 								? `Ponle tu toque único: ${presentacion.nombre} con ${incluye}.`
-								: `${presentacion.nombre}. Elige la cantidad y déjanos tus indicaciones.`}{" "}
-							<MarcaPorValidar />
+								: `${presentacion.nombre}. Elige la cantidad y déjanos tus indicaciones.`}
 						</p>
 					</div>
 

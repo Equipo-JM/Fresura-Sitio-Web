@@ -7,7 +7,6 @@ import {
 } from "../../compartido/carrito/reglas";
 import { Icono } from "../../compartido/componentes/Icono";
 import { useCobertura } from "../../compartido/ubicacion/useCobertura";
-import { MarcaPorValidar } from "../MarcaPorValidar";
 
 /** Mensaje de la comprobación de cobertura; la sede sale del contenido. */
 function mensajeCobertura(
@@ -328,7 +327,7 @@ export function PasoEntrega({
 					<p>
 						<strong>Pagas al confirmar por WhatsApp.</strong> Allí te damos el
 						total con el domicilio y los medios de pago. Este sitio no recibe
-						pagos. <MarcaPorValidar />
+						pagos.
 					</p>
 				</div>
 			</section>

@@ -55,16 +55,16 @@ beforeEach(() => {
 });
 
 describe("paridad del inicio", () => {
-	it("marca las referencias arriba y una sola vez, sin segunda foto de chocolate", () => {
+	it("muestra las fotos sin etiquetas «Por validar» ni segunda foto de chocolate", () => {
 		const inicio = mostrar();
 		expect(screen.queryAllByText("Foto de ejemplo")).toHaveLength(0);
 		for (const foto of document.querySelectorAll(".polaroid-foto:has(> img)")) {
-			expect(foto.querySelectorAll(".pv-foto")).toHaveLength(1);
+			expect(foto.querySelectorAll(".pv-foto")).toHaveLength(0);
 		}
 		inicio.unmount();
 		const menu = mostrar("/menu");
 		for (const tarjeta of document.querySelectorAll(".tarjeta")) {
-			expect(tarjeta.querySelectorAll(".pv-foto")).toHaveLength(1);
+			expect(tarjeta.querySelectorAll(".pv-foto")).toHaveLength(0);
 		}
 		const chocolate = screen.getByRole("region", {
 			name: "Fresas con chocolate",
@@ -91,7 +91,7 @@ describe("paridad del inicio", () => {
 			mostrar(ruta);
 			expect(screen.getAllByRole("table", { name: "Horario" })).toHaveLength(2);
 			const pie = screen.getByRole("contentinfo");
-			expect(within(pie).getByText("Número por definir")).toBeInTheDocument();
+			expect(within(pie).queryByText("Número por definir")).toBeNull();
 			expect(pie).toHaveTextContent("U Nacional:");
 			expect(pie).toHaveTextContent("U Javeriana:");
 			expect(pie).not.toHaveTextContent("Sede U");
@@ -275,6 +275,8 @@ describe("paridad del inicio", () => {
 		const contenido = structuredClone(prueba);
 		contenido.productos[1].imagen.ruta =
 			"https://fotos.example.com/caribena.webp";
+		// Un id sin foto de Rappi deja a Fresuras Top con las caras de DD-43.
+		contenido.productos[12].id = "fresuras-sin-foto";
 		mostrar("/menu", contenido);
 		const tarjeta = screen.getByRole("link", {
 			name: /Fresitas: Caribeña, Desde/,
@@ -284,12 +286,10 @@ describe("paridad del inicio", () => {
 			"https://fotos.example.com/caribena.webp",
 		);
 		const pendiente = screen.getByRole("link", {
-			name: /Fresitas: Oscura, Desde/,
+			name: /Fresuras: Top, Desde/,
 		});
-		expect(within(pendiente).getByText("Foto por validar")).toBeInTheDocument();
-		expect(
-			within(pendiente).getByText("Segunda foto por validar"),
-		).toBeInTheDocument();
+		expect(pendiente.querySelectorAll(".foto-pendiente")).toHaveLength(2);
+		expect(pendiente).not.toHaveTextContent(/por validar/i);
 	});
 	it("ordena las categorías del menú e incluye Nosotros y sus valores", () => {
 		const menu = mostrar("/menu");
@@ -311,12 +311,12 @@ describe("paridad del inicio", () => {
 		for (const valor of ["Calidad", "Estética", "Cercanía"])
 			expect(screen.getByRole("heading", { name: valor })).toBeInTheDocument();
 	});
-	it("distingue la publicación pendiente y enlaza las otras redes", () => {
+	it("muestra la publicación pendiente sin etiqueta y enlaza las otras redes", () => {
 		mostrar();
 		const reciente = within(
 			screen.getByRole("region", { name: /Lo más reciente/ }),
 		);
-		expect(reciente.getByText("Publicación por validar")).toBeInTheDocument();
+		expect(reciente.queryByText(/por validar/i)).toBeNull();
 		expect(reciente.getByText(/También estamos en/)).toHaveTextContent(
 			"También estamos en TikTok y Facebook.",
 		);
@@ -343,7 +343,7 @@ describe("paridad del inicio", () => {
 });
 
 describe("paridad de ficha y personalización", () => {
-	it("vuelve con la flecha de texto y separa los sellos de los títulos", () => {
+	it("vuelve con la flecha de texto y deja los títulos sin sellos", () => {
 		mostrar("/producto/fresitas-caribena");
 		expect(
 			screen.getByRole("link", { name: "← Volver al menú" }),
@@ -351,7 +351,7 @@ describe("paridad de ficha y personalización", () => {
 		for (const nombre of ["Descripción", "Tamaños", "Toppings"]) {
 			const titulo = screen.getByRole("heading", { name: nombre });
 			expect(titulo.querySelector(".por-validar")).toBeNull();
-			expect(titulo.parentElement).toHaveTextContent("Por validar");
+			expect(titulo.parentElement).not.toHaveTextContent("Por validar");
 		}
 	});
 	it("en personalización la referencia tiene solo el sello Propuesta", () => {
@@ -418,8 +418,8 @@ describe("paridad de ficha y personalización", () => {
 			screen.getByText(/9 oz\. Elige la cantidad y déjanos tus indicaciones\./),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("img", { name: /Vaso transparente con fresas/ }),
-		).toBeInTheDocument();
+			screen.getByRole("img", { name: "Fresitas, foto provisional" }),
+		).toHaveAttribute("src", "/ejemplos/productos/fresitas-con-chocolate.webp");
 		expect(
 			screen.queryByRole("heading", { name: "Base" }),
 		).not.toBeInTheDocument();
@@ -452,17 +452,11 @@ describe("paridad de ficha y personalización", () => {
 				.map((h) => h.textContent?.trim()),
 		).toEqual(["Descripción", "Características", "Tamaños", "Toppings"]);
 	});
-	it.each(prueba.productos.map((p) => [p.id, p.grupos_opciones.length > 0]))(
+	it.each(prueba.productos.map((p) => [p.id, p.descripcion]))(
 		"lee la descripción y las características del contenido de %s",
-		(id, personalizable) => {
+		(id, descripcion) => {
 			mostrar(`/producto/${id}`);
-			expect(
-				screen.getByText(
-					personalizable
-						? "Elige tus opciones y déjanos tus indicaciones."
-						: "Déjanos tus indicaciones al hacer tu pedido.",
-				),
-			).toBeInTheDocument();
+			expect(screen.getByText(descripcion)).toBeInTheDocument();
 			expect(
 				screen.getByText("Disponible en las sedes U Nacional y U Javeriana"),
 			).toBeInTheDocument();
@@ -838,13 +832,10 @@ describe("estilos de paridad sin medición de geometría", () => {
 		document.head.append(estilos);
 	});
 	afterEach(() => estilos.remove());
-	it("sitúa las etiquetas de referencia arriba, sobre el marco", () => {
+	it("deja la foto de portada sin etiqueta encima", () => {
 		mostrar();
-		const etiqueta = document.querySelector(".portada-foto .pv-foto");
-		if (!etiqueta) throw new Error("Falta la etiqueta de portada");
-		expect(etiqueta.parentElement).toHaveClass("portada-foto");
-		expect(getComputedStyle(etiqueta).top).toBe("10px");
-		expect(getComputedStyle(etiqueta).bottom).toBe("auto");
+		expect(document.querySelector(".portada-foto")).toBeInTheDocument();
+		expect(document.querySelector(".portada-foto .pv-foto")).toBeNull();
 	});
 	it("conserva el marco de la ficha sin recortar el borde beige", () => {
 		mostrar("/producto/fresitas-caribena");
@@ -860,7 +851,10 @@ describe("estilos de paridad sin medición de geometría", () => {
 		if (!portada) throw new Error("Falta la foto de portada");
 		expect(getComputedStyle(portada).objectPosition).toBe("45% 72%");
 		inicio.unmount();
-		mostrar("/menu");
+		// Todos tienen foto de Rappi; un id sin ella muestra el espacio pendiente.
+		const contenido = structuredClone(prueba);
+		contenido.productos[12].id = "fresuras-sin-foto";
+		mostrar("/menu", contenido);
 		const pendiente = document.querySelector(".tarjeta .foto-pendiente");
 		if (!pendiente) throw new Error("Falta una foto pendiente del menú");
 		expect(getComputedStyle(pendiente).backgroundImage).toBe("none");
@@ -877,7 +871,8 @@ describe("estilos de paridad sin medición de geometría", () => {
 		mostrar("/carrito");
 		const titulo = document.querySelector(".linea-titulo");
 		if (!titulo) throw new Error("Falta el producto del carrito");
-		expect(getComputedStyle(titulo).fontSize).toBe("22px");
+		// jsdom no resuelve var(): se comprueba que use el paso de la escala.
+		expect(getComputedStyle(titulo).fontSize).toBe("var(--titulo-4)");
 		fireEvent.click(
 			screen.getByRole("button", { name: "Continuar a la entrega" }),
 		);
@@ -895,11 +890,11 @@ describe("estilos de paridad sin medición de geometría", () => {
 			getComputedStyle(
 				screen.getByRole("heading", { name: "Sedes y contacto" }),
 			).fontSize,
-		).toBe("52.48px");
+		).toBe("var(--titulo-1)");
 		expect(
 			getComputedStyle(document.querySelector("#titulo-contacto") as Element)
 				.fontSize,
-		).toBe("30px");
+		).toBe("var(--titulo-3)");
 		const red = document.querySelector(".contacto-sedes .chips li");
 		if (!red) throw new Error("Faltan las redes");
 		expect(getComputedStyle(red).padding).toBe("0px");
