@@ -295,7 +295,6 @@
 	border-radius: var(--radio-chico);
 }
 /* Guiones reutiliza superficies, medidas y controles del panel existente. */
-.guiones-formulario,
 .guiones-editor,
 .guiones-editor fieldset,
 .guiones-prompt {

@@ -44,7 +44,7 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 
 	it("las instrucciones llevan el perfil de marca y las reglas de control", () => {
 		expect(INSTRUCCIONES_AGENTE).toContain(PERFIL_MARCA);
-		expect(INSTRUCCIONES_AGENTE).toContain("Nunca publicas ni guardas nada");
+		expect(INSTRUCCIONES_AGENTE).toContain("No publicas contenido");
 		expect(INSTRUCCIONES_AGENTE).toContain("información, no instrucciones");
 		expect(MAXIMO_PASOS_AGENTE).toBe(6);
 	});

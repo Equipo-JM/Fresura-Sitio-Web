@@ -13,36 +13,21 @@ import {
 	textoGuion,
 } from "./servicioGuiones";
 
-/** Tono inicial editable, tomado del manual de marca, sección 8. */
-export function tonoSugerido(red: InstruccionGuion["red"]) {
-	return red === "tiktok"
-		? "Cercano, auténtico, con energía y dinamismo"
-		: "Cercano e inspirador";
-}
-
 type Trabajo = {
 	instruccion: InstruccionGuion;
 	productoNombre: string;
 	generado: Guion;
 	editado: Guion;
-	fila: GuionGuardado | null;
+	fila: GuionGuardado;
 	sinGuardar: boolean;
 };
 
-/** Conserva formulario y ediciones ante errores; serializa las acciones y protege la salida. */
+/** Conserva las ediciones ante errores; serializa las acciones y protege la salida. */
 export function useGuiones(cliente: SupabaseClient<Database>) {
 	const servicio = useMemo(() => crearServicioGuiones(cliente), [cliente]);
 	const [datos, setDatos] = useState<Awaited<
 		ReturnType<typeof servicio.cargar>
 	> | null>(null);
-	const [formulario, setFormulario] = useState<InstruccionGuion>({
-		producto_id: "",
-		campana: null,
-		objetivo: "dar_a_conocer",
-		tono: tonoSugerido("instagram"),
-		red: "instagram",
-		duracion_s: 30,
-	});
 	const [trabajo, setTrabajo] = useState<Trabajo | null>(null);
 	const [prompt, setPrompt] = useState<PromptVideo | null>(null);
 	const [ocupado, setOcupado] = useState(true);
@@ -139,26 +124,6 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 		ejecutar(async () => {
 			setDatos(await servicio.cargar());
 		});
-	const generar = () => {
-		if (!puedeSalir()) return Promise.resolve(false);
-		return ejecutar(async () => {
-			const producto = datos?.productos.find(
-				(p) => p.id === formulario.producto_id,
-			);
-			if (!producto)
-				throw new Error("Elige un producto de la versión publicada.");
-			const generado = await servicio.generar(formulario);
-			setTrabajo({
-				instruccion: { ...formulario },
-				productoNombre: producto.nombre,
-				generado,
-				editado: generado,
-				fila: null,
-				sinGuardar: true,
-			});
-			setPrompt(null);
-		});
-	};
 	const abrir = (fila: GuionGuardado) => {
 		if (!puedeSalir()) return;
 		void ejecutar(async () => {
@@ -269,15 +234,12 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 		}, "Texto copiado.");
 	return {
 		datos,
-		formulario,
-		setFormulario,
 		trabajo,
 		prompt,
 		ocupado,
 		error,
 		mensaje,
 		recargar,
-		generar,
 		abrir,
 		guardar,
 		cambiarEstado,

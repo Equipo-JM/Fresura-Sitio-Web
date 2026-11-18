@@ -1,10 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useRef } from "react";
 import { Link } from "react-router";
 import type { Database } from "../../tipos/database.types";
 import { ChatAgente } from "../agente/ChatAgente";
 import { EditorGuion } from "./EditorGuion";
-import { FormularioGuion } from "./FormularioGuion";
 import { PromptGuion } from "./PromptGuion";
 import type { GuionGuardado } from "./servicioGuiones";
 import { useGuiones } from "./useGuiones";
@@ -33,9 +31,8 @@ export function GuionesPanel({
 	irVersiones: () => void;
 }) {
 	const panel = useGuiones(cliente);
-	const formularioRef = useRef<HTMLDivElement>(null);
 	const { trabajo, ocupado, datos } = panel;
-	const estado = trabajo?.fila?.estado;
+	const estado = trabajo?.fila.estado;
 	return (
 		<div className="panel guiones-panel">
 			<a className="saltar" href="#guiones">
@@ -122,20 +119,7 @@ export function GuionesPanel({
 						abrirGuion={(fila) => {
 							panel.abrir(fila);
 						}}
-						usarFormulario={() => {
-							formularioRef.current?.scrollIntoView?.({ behavior: "smooth" });
-							formularioRef.current?.querySelector("select")?.focus();
-						}}
 					/>
-					<div ref={formularioRef}>
-						<FormularioGuion
-							valor={panel.formulario}
-							cambiar={panel.setFormulario}
-							productos={datos?.productos ?? []}
-							ocupado={ocupado}
-							generar={() => void panel.generar()}
-						/>
-					</div>
 					<section
 						className="panel-seccion"
 						aria-labelledby="lista-guiones-titulo"
@@ -181,15 +165,13 @@ export function GuionesPanel({
 							<p>
 								{trabajo.productoNombre} · {trabajo.instruccion.red} ·{" "}
 								{trabajo.instruccion.duracion_s} segundos ·{" "}
-								<strong>{estado ? ESTADOS[estado] : "Sin guardar"}</strong>
-								{trabajo.sinGuardar && estado && " · Cambios sin guardar"}
+								<strong>{ESTADOS[trabajo.fila.estado]}</strong>
+								{trabajo.sinGuardar && " · Cambios sin guardar"}
 							</p>
 							<EditorGuion
 								guion={trabajo.editado}
 								cambiar={panel.editar}
-								bloqueado={
-									ocupado || (estado !== undefined && estado !== "borrador")
-								}
+								bloqueado={ocupado || estado !== "borrador"}
 							/>
 							<div className="panel-versiones-acciones">
 								<button
@@ -200,7 +182,7 @@ export function GuionesPanel({
 								>
 									Copiar guion
 								</button>
-								{(!estado || estado === "borrador") && (
+								{estado === "borrador" && (
 									<button
 										type="button"
 										className="boton"
@@ -240,7 +222,7 @@ export function GuionesPanel({
 										Recuperar
 									</button>
 								)}
-								{estado && estado !== "descartado" && (
+								{estado !== "descartado" && (
 									<button
 										type="button"
 										className="boton-texto"

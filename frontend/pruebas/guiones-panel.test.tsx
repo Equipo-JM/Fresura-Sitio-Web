@@ -34,20 +34,8 @@ type Fila = Database["public"]["Tables"]["guiones"]["Row"];
 function simularCliente(iniciales: Fila[] = []) {
 	const filas = [...iniciales];
 	let prompt: Json | null = null;
-	let fallo: string | null = null;
 	let falloEscritura = false;
-	const invoke = vi.fn(async (ruta: string) => {
-		if (fallo)
-			return {
-				data: null,
-				error: {
-					context: new Response(
-						JSON.stringify({ error: "ia_limite_minuto", mensaje: fallo }),
-					),
-				},
-			};
-		if (ruta === "ia/guion")
-			return { data: { guion, modelo: "modelo-prueba" }, error: null };
+	const invoke = vi.fn(async () => {
 		prompt = {
 			herramienta: "avatar",
 			estilo_general: "Luz natural",
@@ -146,9 +134,6 @@ function simularCliente(iniciales: Fila[] = []) {
 		guardarPrompt: (valor: Json) => {
 			prompt = valor;
 		},
-		fallar: (mensaje: string) => {
-			fallo = mensaje;
-		},
 	};
 }
 
@@ -160,35 +145,60 @@ function montar(simulado = simularCliente(), irVersiones = vi.fn()) {
 	);
 	return simulado;
 }
-async function generar() {
-	await screen.findByRole("option", { name: contenido.productos[0].nombre });
-	fireEvent.change(screen.getByLabelText("Producto"), {
-		target: { value: contenido.productos[0].id },
-	});
-	fireEvent.change(screen.getByLabelText("Campaña (opcional)"), {
-		target: { value: "Semana del antojo" },
-	});
-	fireEvent.click(screen.getByRole("button", { name: "Generar guion" }));
+function borrador(id = "borrador"): Fila {
+	return {
+		id,
+		estado: "borrador",
+		creado_en: "2026-11-16T12:00:00Z",
+		actualizado_en: "2026-11-16T12:00:00Z",
+		creado_por: "admin",
+		generado: guion,
+		editado: guion,
+		instruccion: {
+			producto_id: null,
+			campana: "Semana del antojo",
+			objetivo: "dar_a_conocer",
+			tono: "Cercano",
+			red: "instagram",
+			duracion_s: 30,
+		},
+	};
 }
+
+async function abrirBorrador(nombre = "Un antojo Fresura") {
+	fireEvent.click(
+		await screen.findByRole("button", {
+			name: new RegExp(`^Abrir\\s*${nombre}$`),
+		}),
+	);
+	await screen.findByLabelText("Título");
+}
+
 afterEach(() => vi.restoreAllMocks());
 
 describe("guiones del panel", () => {
 	it("un rechazo de permisos al guardar conserva el guion y enfoca la explicación", async () => {
-		const simulado = montar();
-		await generar();
+		const simulado = montar(simularCliente([borrador()]));
+		await abrirBorrador();
 		await screen.findByLabelText("Título");
+		fireEvent.change(screen.getByLabelText("Título"), {
+			target: { value: "Título revisado" },
+		});
 		simulado.fallarEscritura();
 		fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
 		const aviso = await screen.findByRole("alert");
 		expect(aviso).toHaveTextContent("Vuelve a entrar al panel");
 		await waitFor(() => expect(aviso).toHaveFocus());
-		expect(screen.getByLabelText("Título")).toHaveValue("Un antojo Fresura");
-		expect(simulado.filas).toHaveLength(0);
+		expect(screen.getByLabelText("Título")).toHaveValue("Título revisado");
+		expect(simulado.filas[0].editado).toEqual(guion);
 	});
 	it("pide confirmación al salir sin guardar y permite cancelar para guardar", async () => {
 		const irVersiones = vi.fn();
-		montar(simularCliente(), irVersiones);
-		await generar();
+		montar(simularCliente([borrador()]), irVersiones);
+		await abrirBorrador();
+		fireEvent.change(screen.getByLabelText("Título"), {
+			target: { value: "Título revisado" },
+		});
 		await screen.findByLabelText("Título");
 		const confirmar = vi.spyOn(window, "confirm").mockReturnValue(false);
 		fireEvent.click(screen.getByRole("button", { name: "Versiones" }));
@@ -211,27 +221,32 @@ describe("guiones del panel", () => {
 		await waitFor(() => expect(irVersiones).toHaveBeenCalledOnce());
 	});
 	it("enfoca el editor al abrir otro guion y conserva el foco al guardar o reabrir el mismo", async () => {
-		montar();
-		await generar();
-		const campoTitulo = await screen.findByLabelText("Título");
+		const segundo = {
+			...borrador("otro"),
+			editado: { ...guion, titulo: "Otro guion" },
+		};
+		montar(simularCliente([borrador(), segundo]));
+		await abrirBorrador();
+		const campoTitulo = screen.getByLabelText("Título");
 		const encabezado = screen.getByRole("heading", { name: "Revisar guion" });
 		campoTitulo.focus();
+		fireEvent.change(campoTitulo, { target: { value: "Título revisado" } });
 		await act(async () => {
 			fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
 		});
 		expect(screen.getByText("Guion guardado como borrador.")).toBeVisible();
 		expect(campoTitulo).toHaveFocus();
-		const abrir = screen.getByRole("button", { name: /^Abrir/ });
+		const abrir = screen.getByRole("button", {
+			name: /^Abrir\s*Título revisado$/,
+		});
 		abrir.focus();
 		await act(async () => {
 			fireEvent.click(abrir);
 		});
 		expect(abrir).toHaveFocus();
-
-		await generar();
-		await waitFor(() => expect(abrir).toBeEnabled());
-		vi.spyOn(window, "confirm").mockReturnValue(true);
-		fireEvent.click(abrir);
+		fireEvent.click(
+			screen.getByRole("button", { name: /^Abrir\s*Otro guion$/ }),
+		);
 		await waitFor(() => expect(encabezado).toHaveFocus());
 	});
 	it("abre un aprobado con su prompt guardado y lo oculta después de confirmar la edición", async () => {
@@ -277,11 +292,8 @@ describe("guiones del panel", () => {
 		expect(screen.getByLabelText("Título")).toBeEnabled();
 	});
 	it("descarta y recupera; eliminar pide confirmación y retira el guion de la lista", async () => {
-		const simulado = montar();
-		await generar();
-		await screen.findByLabelText("Título");
-		fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-		await screen.findByText("Guion guardado como borrador.");
+		const simulado = montar(simularCliente([borrador()]));
+		await abrirBorrador();
 		const confirmar = vi.spyOn(window, "confirm").mockReturnValue(false);
 		fireEvent.click(screen.getByRole("button", { name: "Descartar" }));
 		expect(simulado.filas[0].estado).toBe("borrador");
@@ -303,33 +315,16 @@ describe("guiones del panel", () => {
 		).not.toBeInTheDocument();
 		expect(simulado.filas).toHaveLength(0);
 	});
-	it("genera con las instrucciones y permite editar todos los campos sin guardar automáticamente", async () => {
-		const simulado = montar();
-		await generar();
-		expect(await screen.findByLabelText("Título")).toHaveValue(
-			"Un antojo Fresura",
-		);
-		expect(screen.getByLabelText("Voz o diálogo · escena 1")).toHaveValue(
-			"Ven a probarlo",
-		);
-		expect(simulado.filas).toHaveLength(0);
-		expect(simulado.invoke).toHaveBeenCalledWith(
-			"ia/guion",
-			expect.objectContaining({
-				body: {
-					producto_id: contenido.productos[0].id,
-					campana: "Semana del antojo",
-					objetivo: "dar_a_conocer",
-					tono: "Cercano e inspirador",
-					red: "instagram",
-					duracion_s: 30,
-				},
-			}),
-		);
+	it("muestra el chat como único medio para generar guiones", async () => {
+		montar();
+		expect(
+			await screen.findByRole("heading", { name: "Conversar con el agente" }),
+		).toBeVisible();
+		expect(screen.queryByLabelText("Producto")).not.toBeInTheDocument();
 	});
 	it("avisa del campo inválido en español y conserva la edición sin escribir en la base", async () => {
-		const simulado = montar();
-		await generar();
+		const simulado = montar(simularCliente([borrador()]));
+		await abrirBorrador();
 		await screen.findByLabelText("Título");
 		fireEvent.change(screen.getByLabelText("Título"), {
 			target: { value: "" },
@@ -338,41 +333,23 @@ describe("guiones del panel", () => {
 		expect(await screen.findByRole("alert")).toHaveTextContent(
 			"Revisa Título: completa el campo y respeta su longitud máxima.",
 		);
-		expect(simulado.filas).toHaveLength(0);
+		expect(simulado.filas[0].editado).toEqual(guion);
 		expect(screen.getByLabelText("Título")).toHaveValue("");
 	});
-	it("muestra ia_limite_minuto y conserva el formulario para reintentar", async () => {
-		const simulado = simularCliente();
-		simulado.fallar(
-			"Hay muchas solicitudes. Espera un minuto e inténtalo de nuevo.",
-		);
-		montar(simulado);
-		await generar();
-		expect(await screen.findByRole("alert")).toHaveTextContent(
-			"Espera un minuto",
-		);
-		expect(screen.getByLabelText("Campaña (opcional)")).toHaveValue(
-			"Semana del antojo",
-		);
-		expect(screen.getByLabelText("Producto")).toHaveValue(
-			contenido.productos[0].id,
-		);
-		expect(simulado.invoke).toHaveBeenCalledTimes(1);
-	});
 	it("guarda generado y editado por separado, aprueba y devuelve a borrador al editar con confirmación", async () => {
-		const simulado = montar();
-		await generar();
+		const simulado = montar(simularCliente([borrador()]));
+		await abrirBorrador();
 		await screen.findByLabelText("Título");
 		fireEvent.change(screen.getByLabelText("Título"), {
 			target: { value: "Título revisado" },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-		await waitFor(() => expect(simulado.filas).toHaveLength(1));
+		await screen.findByText("Guion guardado como borrador.");
 		expect(simulado.filas[0]).toMatchObject({
 			estado: "borrador",
 			generado: { titulo: "Un antojo Fresura" },
 			editado: { titulo: "Título revisado" },
-			instruccion: { producto_nombre: contenido.productos[0].nombre },
+			instruccion: { producto_id: null },
 		});
 		fireEvent.click(screen.getByRole("button", { name: "Aprobar" }));
 		await waitFor(() =>
@@ -397,16 +374,12 @@ describe("guiones del panel", () => {
 			configurable: true,
 			value: { writeText: copiar },
 		});
-		montar();
-		await generar();
+		montar(simularCliente([borrador()]));
+		await abrirBorrador();
 		await screen.findByLabelText("Título");
 		expect(
 			screen.getByRole("button", { name: "Generar prompt de video" }),
 		).toBeDisabled();
-		fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
-		await waitFor(() =>
-			expect(screen.getByRole("button", { name: "Aprobar" })).toBeEnabled(),
-		);
 		fireEvent.click(screen.getByRole("button", { name: "Aprobar" }));
 		await waitFor(() =>
 			expect(

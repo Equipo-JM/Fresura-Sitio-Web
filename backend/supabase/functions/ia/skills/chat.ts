@@ -26,7 +26,6 @@ import {
 	cargarMensajes,
 	guardarMensajes,
 	leerConversacion,
-	productosConsultadosEnHistorial,
 } from "../agente/memoria.ts";
 import {
 	preciosPublicados,
@@ -120,7 +119,7 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			return responderError(
 				400,
 				"datos_no_validos",
-				"Revisa los campos del formulario.",
+				"Revisa el mensaje e inténtalo de nuevo.",
 				cors,
 			);
 		const { conversacion_id: id, mensaje } = entrada.data;
@@ -151,7 +150,7 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 		const nuevo: ModelMessage = { role: "user", content: mensaje };
 		await guardarMensajes(cliente, id, [nuevo]);
 		const estado: EstadoAgente = {
-			productosConsultados: productosConsultadosEnHistorial(historial),
+			productosConsultados: new Set(),
 		};
 		const herramientas = crearHerramientasAgente(
 			contenido.data,
@@ -173,7 +172,12 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 								JSON.stringify(datosRegistroFallo(tipo, estadoProveedor)),
 							),
 					),
-					system: INSTRUCCIONES_AGENTE,
+					system:
+						contenido.data.estado === "ejemplo"
+							? `${INSTRUCCIONES_AGENTE}
+
+La versión publicada es de ejemplo. Puedes usarla para la demo. Si el guion se apoya en estos datos, avisa a la persona administradora en el chat para que los verifique antes de usar el guion.`
+							: INSTRUCCIONES_AGENTE,
 					messages: [...historial, nuevo],
 					tools: herramientas,
 					stopWhen: isStepCount(MAXIMO_PASOS_AGENTE),

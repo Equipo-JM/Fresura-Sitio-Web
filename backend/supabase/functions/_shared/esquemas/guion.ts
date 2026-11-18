@@ -12,11 +12,11 @@ export const DURACIONES_VIDEO = [15, 30, 60] as const;
 export type DuracionVideo = (typeof DURACIONES_VIDEO)[number];
 
 /**
- * Entrada de `POST /guion`. Es estricta: un campo adicional se rechaza, así el
- * prompt solo lleva los campos definidos y nunca datos personales (PU-10, A-08).
+ * Instrucción de un guion guardado o entregado por el chat.
+ * Un producto nulo representa un tema general.
  */
 export const esquemaInstruccionGuion = z.strictObject({
-	producto_id: z.string().min(1).max(80),
+	producto_id: z.string().min(1).max(80).nullable(),
 	campana: z.string().trim().max(120).nullable(),
 	objetivo: z.enum([
 		"dar_a_conocer",
@@ -27,6 +27,11 @@ export const esquemaInstruccionGuion = z.strictObject({
 	tono: z.string().trim().min(1).max(80),
 	red: z.enum(["instagram", "tiktok", "facebook"]),
 	duracion_s: z.union([z.literal(15), z.literal(30), z.literal(60)]),
+});
+
+/** Contrato de la ruta anterior, que sigue exigiendo un producto. */
+export const esquemaInstruccionGuionProducto = esquemaInstruccionGuion.extend({
+	producto_id: esquemaInstruccionGuion.shape.producto_id.unwrap(),
 });
 
 /** Instrucción del administrador ya validada. */

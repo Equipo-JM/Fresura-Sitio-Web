@@ -80,7 +80,7 @@ export function leerGuionGuardado(fila: GuionGuardado) {
 		productoNombre:
 			typeof producto_nombre === "string"
 				? producto_nombre
-				: instruccion.producto_id,
+				: (instruccion.producto_id ?? "Guion general"),
 		generado: crearEsquemaGuion(instruccion.duracion_s).parse(fila.generado),
 		editado: crearEsquemaGuion(instruccion.duracion_s).parse(fila.editado),
 	};
@@ -123,15 +123,6 @@ export async function invocarFuncionIa(
 
 /** CRUD con RLS y llamadas a IA; nunca escribe prompts ni publica contenido desde el cliente. */
 export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
-	async function invocar(
-		ruta: "guion" | "prompt-video",
-		body:
-			| InstruccionGuion
-			| { guion_id: string; herramienta: "avatar" | "escenas" },
-	) {
-		const generico = `No se pudo generar ${ruta === "guion" ? "el guion" : "el prompt"}. Inténtalo de nuevo en unos minutos.`;
-		return objeto(await invocarFuncionIa(cliente, ruta, body, generico));
-	}
 	const conflicto =
 		"El guion cambió o ya no está disponible. Recarga la lista antes de continuar.";
 	async function actualizar(
@@ -173,21 +164,6 @@ export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
 						.productos.filter((p) => p.vigente)
 				: [];
 			return { productos, guiones: guiones.data ?? [] };
-		},
-		async generar(entrada: InstruccionGuion) {
-			const validacion = esquemaInstruccionGuion.safeParse(entrada);
-			if (!validacion.success)
-				throw new Error(
-					"Revisa las instrucciones: elige un producto, un objetivo, una red y una duración, y escribe un tono de 1 a 80 caracteres.",
-				);
-			const instruccion = validacion.data;
-			const datos = await invocar("guion", instruccion);
-			const resultado = crearEsquemaGuion(instruccion.duracion_s).safeParse(
-				datos.guion,
-			);
-			if (!resultado.success)
-				throw new Error("El guion salió incompleto. Inténtalo de nuevo.");
-			return resultado.data;
 		},
 		async guardar(
 			instruccion: InstruccionGuion,
@@ -286,8 +262,14 @@ export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
 					"Aprueba el guion antes de generar el prompt de video.",
 				);
 			return leerPrompt(
-				(await invocar("prompt-video", { guion_id: fila.id, herramienta }))
-					.prompt,
+				objeto(
+					await invocarFuncionIa(
+						cliente,
+						"prompt-video",
+						{ guion_id: fila.id, herramienta },
+						"No se pudo generar el prompt. Inténtalo de nuevo en unos minutos.",
+					),
+				).prompt,
 			);
 		},
 	};

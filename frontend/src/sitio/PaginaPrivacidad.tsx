@@ -3,7 +3,7 @@ import { Icono } from "../compartido/componentes/Icono";
 
 /**
  * Página `/privacidad`. Mientras la política no tenga revisión jurídica ni los
- * datos de Fresura, muestra solo el aviso breve y avisa que está en revisión
+ * datos de Fresura, muestra el aviso breve y avisa que está en revisión
  * (SRS 11.6). Los textos son los «Avisos del sitio» de esa sección.
  */
 export function PaginaPrivacidad() {
@@ -23,13 +23,21 @@ export function PaginaPrivacidad() {
 					</p>
 
 					<p>
-						Tus datos van solo en el mensaje que envías por WhatsApp, para
-						atender tu pedido. Este sitio no los guarda.
+						El sitio prepara un mensaje con tu nombre, teléfono y pedido. Si
+						pides domicilio, incluye tu dirección y barrio. Fresura recibe estos
+						datos cuando envías el mensaje por WhatsApp y los usa para confirmar
+						y atender el pedido. El sitio no guarda tus datos de contacto.
 					</p>
 
 					<p>
-						Usamos tu ubicación solo aquí, para ver si llegamos a tu zona. No se
-						envía ni se guarda.
+						Si das permiso, tu navegador usa tu ubicación para comprobar si
+						estás dentro de la zona de domicilios. La ubicación no se envía ni
+						se guarda.
+					</p>
+					<p>
+						Los mapas y las publicaciones insertadas pueden cargar contenido de
+						Google Maps e Instagram. Cada proveedor aplica su propia política de
+						datos.
 					</p>
 					<p>No creamos cuentas de clientes ni pedimos datos sensibles.</p>
 					<p>

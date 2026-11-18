@@ -7,16 +7,14 @@ import { leerTarjeta } from "./servicioConversaciones";
 import { useBorradoresAgente } from "./useBorradoresAgente";
 import { useChatAgente } from "./useChatAgente";
 
-/** Chat accesible con historial y guardado explícito; el formulario sigue disponible como respaldo. */
+/** Chat con historial y guardado explícito de los guiones. */
 export function ChatAgente({
 	cliente,
 	abrirGuion,
-	usarFormulario,
 	productos,
 }: {
 	cliente: SupabaseClient<Database>;
 	abrirGuion: (fila: GuionGuardado) => void;
-	usarFormulario: () => void;
 	productos: { id: string; nombre: string }[];
 }) {
 	const chat = useChatAgente(cliente);
@@ -179,25 +177,12 @@ export function ChatAgente({
 							>
 								Intentar de nuevo
 							</button>
-							<button
-								className="boton-texto"
-								type="button"
-								onClick={usarFormulario}
-							>
-								Usar el formulario
-							</button>
 						</div>
 					)}
 					{sinRespuesta && (
-						<p>
-							El agente no pudo completar la respuesta.{" "}
-							<button
-								className="boton-texto"
-								type="button"
-								onClick={usarFormulario}
-							>
-								Usar el formulario
-							</button>
+						<p role="status">
+							El agente no pudo completar la respuesta. Envía otro mensaje para
+							continuar.
 						</p>
 					)}
 					<form
@@ -206,7 +191,10 @@ export function ChatAgente({
 							enviar();
 						}}
 					>
-						<p id="chat-privacidad">No escribas datos personales de clientes</p>
+						<p id="chat-privacidad">
+							Pide un guion sobre un producto, una sede, una temporada o la
+							marca. Evita incluir datos personales.
+						</p>
 						<label htmlFor="chat-mensaje">Mensaje para el agente</label>
 						<textarea
 							id="chat-mensaje"

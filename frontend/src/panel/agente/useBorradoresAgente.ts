@@ -30,7 +30,9 @@ export function useBorradoresAgente(
 			try {
 				const nombre =
 					productos.find((p) => p.id === tarjeta.instruccion.producto_id)
-						?.nombre ?? tarjeta.instruccion.producto_id;
+						?.nombre ??
+					tarjeta.instruccion.producto_id ??
+					"Guion general";
 				const fila = await servicio.guardar(
 					tarjeta.instruccion,
 					nombre,

@@ -131,13 +131,11 @@ function simular(iniciales = false) {
 			>,
 	);
 	const abrir = vi.fn();
-	const formulario = vi.fn();
 	render(
 		<div className="panel guiones-panel">
 			<ChatAgente
 				cliente={cliente}
 				abrirGuion={abrir}
-				usarFormulario={formulario}
 				productos={[{ id: "fresas", nombre: "Fresas" }]}
 			/>
 		</div>,
@@ -145,7 +143,6 @@ function simular(iniciales = false) {
 	return {
 		peticiones,
 		abrir,
-		formulario,
 		guardados,
 		fetchSimulado,
 		cambiarToken: () => {
@@ -383,7 +380,32 @@ describe("chat del panel", () => {
 			expect.objectContaining({ id: "borrador", estado: "borrador" }),
 		);
 	});
-	it("muestra el mensaje JSON de un 503 y ofrece reintentar o usar el formulario", async () => {
+	it("guarda como borrador un guion general sin asociar un producto", async () => {
+		const simulado = simular();
+		const general = {
+			...tarjeta,
+			instruccion: { ...tarjeta.instruccion, producto_id: null },
+		};
+		simulado.responder(() => respuesta({ tarjetaGuion: general }));
+		enviar();
+		const guardar = await screen.findByRole("button", {
+			name: "Guardar como borrador",
+		});
+		await waitFor(() => expect(guardar).toBeEnabled());
+		expect(simulado.guardados).toHaveLength(0);
+		fireEvent.click(guardar);
+		await screen.findByText("Guardado como borrador");
+		expect(simulado.guardados).toEqual([
+			expect.objectContaining({
+				instruccion: {
+					...general.instruccion,
+					producto_nombre: "Guion general",
+				},
+				estado: "borrador",
+			}),
+		]);
+	});
+	it("muestra el mensaje JSON de un 503 y permite reintentar", async () => {
 		const simulado = simular();
 		simulado.responder(() =>
 			Response.json(
@@ -402,8 +424,6 @@ describe("chat del panel", () => {
 		expect(
 			screen.getByRole("button", { name: "Intentar de nuevo" }),
 		).toBeEnabled();
-		fireEvent.click(screen.getByRole("button", { name: "Usar el formulario" }));
-		expect(simulado.formulario).toHaveBeenCalledOnce();
 		simulado.responder(() => respuesta());
 		fireEvent.click(screen.getByRole("button", { name: "Intentar de nuevo" }));
 		expect(
@@ -438,7 +458,7 @@ describe("chat del panel", () => {
 		);
 		expect(confirmar).not.toHaveBeenCalled();
 	});
-	it("ofrece el formulario cuando termina sin texto ni tarjeta", async () => {
+	it("avisa cuando termina sin texto ni tarjeta", async () => {
 		const simulado = simular();
 		simulado.responder(() =>
 			flujo([
@@ -448,7 +468,7 @@ describe("chat del panel", () => {
 		);
 		enviar();
 		expect(
-			await screen.findByRole("button", { name: "Usar el formulario" }),
+			await screen.findByText(/El agente no pudo completar la respuesta/),
 		).toBeInTheDocument();
 	});
 });
