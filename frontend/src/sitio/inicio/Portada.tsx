@@ -80,7 +80,6 @@ export function Portada({
 						</p>
 					</div>
 					<div className="portada-foto">
-						{!fotoCambiada && <span className="pv pv-foto">Por validar</span>}
 						<div className="arco portada-arco">
 							{fotoCambiada ? (
 								<img

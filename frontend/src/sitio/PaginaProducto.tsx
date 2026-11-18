@@ -3,7 +3,6 @@ import { nombreProducto, pesos } from "../compartido/carrito/reglas";
 import { Icono } from "../compartido/componentes/Icono";
 import { ConContenido } from "./ConContenido";
 import { FotoProducto } from "./FotoProducto";
-import { MarcaPorValidar } from "./MarcaPorValidar";
 import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
 import { PromocionesFicha } from "./PromocionesFicha";
 
@@ -62,7 +61,6 @@ export function PaginaProducto() {
 									<div className="ficha-bloque">
 										<div className="ficha-bloque-titulo">
 											<h2>Descripción</h2>
-											{contenido.estado === "ejemplo" && <MarcaPorValidar />}
 										</div>
 										<p>{producto.descripcion}</p>
 									</div>
@@ -80,7 +78,6 @@ export function PaginaProducto() {
 										<div className="ficha-bloque">
 											<div className="ficha-bloque-titulo">
 												<h2>Tamaños</h2>
-												{contenido.estado === "ejemplo" && <MarcaPorValidar />}
 											</div>
 											<table className="tabla-precios">
 												<caption className="oculto">Tamaños y precios</caption>
@@ -105,9 +102,6 @@ export function PaginaProducto() {
 											<div className="ficha-bloque" key={g.id}>
 												<div className="ficha-bloque-titulo">
 													<h2>Toppings</h2>
-													{contenido.estado === "ejemplo" && (
-														<MarcaPorValidar />
-													)}
 												</div>
 												<ul className="chips">
 													{g.opciones.map((o) => (

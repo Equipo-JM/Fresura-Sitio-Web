@@ -1,7 +1,6 @@
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { Icono } from "../../compartido/componentes/Icono";
-import { MarcaPorValidar } from "../MarcaPorValidar";
 import { FOTOS_RECIENTE, TEXTO_RECIENTE } from "./copy";
 
 /** «Lo más reciente»: fotos tipo polaroid con enlace a Instagram. Son espacios por validar. */
@@ -22,9 +21,7 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 						<h2 id="titulo-reciente">
 							Lo más reciente <span className="salto">de Fresura</span>
 						</h2>
-						<p>
-							{TEXTO_RECIENTE} <MarcaPorValidar />
-						</p>
+						<p>{TEXTO_RECIENTE}</p>
 					</div>
 					{instagram && (
 						<a
@@ -56,11 +53,9 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 											width="72"
 											height="102"
 										/>
-										<span className="pv">Publicación por validar</span>
 									</div>
 								) : (
 									<>
-										<span className="pv pv-foto">Por validar</span>
 										<FotoEjemplo
 											src={
 												i === 2 ? "/ejemplos/reciente-interior.webp" : foto.src
@@ -146,7 +141,6 @@ export function Calificacion({
 							{opiniones.numero_opiniones} opiniones
 							{fecha ? `, al ${fecha}` : ""}
 						</span>
-						{estado === "ejemplo" && <MarcaPorValidar />}
 					</p>
 				</div>
 				{opiniones.url_ficha && (
@@ -203,7 +197,7 @@ export function Sedes({
 									{sede.atiende_pedidos ? (
 										<>
 											Recogida y domicilios hasta {sede.radio_domicilio_km} km
-											en línea recta <MarcaPorValidar />
+											en línea recta
 										</>
 									) : (
 										"Punto de venta"

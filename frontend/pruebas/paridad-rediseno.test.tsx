@@ -55,16 +55,16 @@ beforeEach(() => {
 });
 
 describe("paridad del inicio", () => {
-	it("marca las referencias arriba y una sola vez, sin segunda foto de chocolate", () => {
+	it("muestra las fotos sin etiquetas «Por validar» ni segunda foto de chocolate", () => {
 		const inicio = mostrar();
 		expect(screen.queryAllByText("Foto de ejemplo")).toHaveLength(0);
 		for (const foto of document.querySelectorAll(".polaroid-foto:has(> img)")) {
-			expect(foto.querySelectorAll(".pv-foto")).toHaveLength(1);
+			expect(foto.querySelectorAll(".pv-foto")).toHaveLength(0);
 		}
 		inicio.unmount();
 		const menu = mostrar("/menu");
 		for (const tarjeta of document.querySelectorAll(".tarjeta")) {
-			expect(tarjeta.querySelectorAll(".pv-foto")).toHaveLength(1);
+			expect(tarjeta.querySelectorAll(".pv-foto")).toHaveLength(0);
 		}
 		const chocolate = screen.getByRole("region", {
 			name: "Fresas con chocolate",
@@ -288,10 +288,8 @@ describe("paridad del inicio", () => {
 		const pendiente = screen.getByRole("link", {
 			name: /Fresuras: Top, Desde/,
 		});
-		expect(within(pendiente).getByText("Foto por validar")).toBeInTheDocument();
-		expect(
-			within(pendiente).getByText("Segunda foto por validar"),
-		).toBeInTheDocument();
+		expect(pendiente.querySelectorAll(".foto-pendiente")).toHaveLength(2);
+		expect(pendiente).not.toHaveTextContent(/por validar/i);
 	});
 	it("ordena las categorías del menú e incluye Nosotros y sus valores", () => {
 		const menu = mostrar("/menu");
@@ -313,12 +311,12 @@ describe("paridad del inicio", () => {
 		for (const valor of ["Calidad", "Estética", "Cercanía"])
 			expect(screen.getByRole("heading", { name: valor })).toBeInTheDocument();
 	});
-	it("distingue la publicación pendiente y enlaza las otras redes", () => {
+	it("muestra la publicación pendiente sin etiqueta y enlaza las otras redes", () => {
 		mostrar();
 		const reciente = within(
 			screen.getByRole("region", { name: /Lo más reciente/ }),
 		);
-		expect(reciente.getByText("Publicación por validar")).toBeInTheDocument();
+		expect(reciente.queryByText(/por validar/i)).toBeNull();
 		expect(reciente.getByText(/También estamos en/)).toHaveTextContent(
 			"También estamos en TikTok y Facebook.",
 		);
@@ -345,7 +343,7 @@ describe("paridad del inicio", () => {
 });
 
 describe("paridad de ficha y personalización", () => {
-	it("vuelve con la flecha de texto y separa los sellos de los títulos", () => {
+	it("vuelve con la flecha de texto y deja los títulos sin sellos", () => {
 		mostrar("/producto/fresitas-caribena");
 		expect(
 			screen.getByRole("link", { name: "← Volver al menú" }),
@@ -353,7 +351,7 @@ describe("paridad de ficha y personalización", () => {
 		for (const nombre of ["Descripción", "Tamaños", "Toppings"]) {
 			const titulo = screen.getByRole("heading", { name: nombre });
 			expect(titulo.querySelector(".por-validar")).toBeNull();
-			expect(titulo.parentElement).toHaveTextContent("Por validar");
+			expect(titulo.parentElement).not.toHaveTextContent("Por validar");
 		}
 	});
 	it("en personalización la referencia tiene solo el sello Propuesta", () => {
@@ -840,13 +838,10 @@ describe("estilos de paridad sin medición de geometría", () => {
 		document.head.append(estilos);
 	});
 	afterEach(() => estilos.remove());
-	it("sitúa las etiquetas de referencia arriba, sobre el marco", () => {
+	it("deja la foto de portada sin etiqueta encima", () => {
 		mostrar();
-		const etiqueta = document.querySelector(".portada-foto .pv-foto");
-		if (!etiqueta) throw new Error("Falta la etiqueta de portada");
-		expect(etiqueta.parentElement).toHaveClass("portada-foto");
-		expect(getComputedStyle(etiqueta).top).toBe("10px");
-		expect(getComputedStyle(etiqueta).bottom).toBe("auto");
+		expect(document.querySelector(".portada-foto")).toBeInTheDocument();
+		expect(document.querySelector(".portada-foto .pv-foto")).toBeNull();
 	});
 	it("conserva el marco de la ficha sin recortar el borde beige", () => {
 		mostrar("/producto/fresitas-caribena");

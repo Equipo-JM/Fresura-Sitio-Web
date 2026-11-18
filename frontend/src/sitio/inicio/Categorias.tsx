@@ -3,7 +3,6 @@ import type { Contenido } from "../../../../backend/supabase/functions/_shared/e
 import { nombreProducto, pesos } from "../../compartido/carrito/reglas";
 import { Icono } from "../../compartido/componentes/Icono";
 import { FotoProducto } from "../FotoProducto";
-import { MarcaPorValidar } from "../MarcaPorValidar";
 import { DATOS_CATEGORIAS, FRASES_CATEGORIAS } from "./copy";
 import { useCarrusel } from "./useCarrusel";
 
@@ -49,7 +48,6 @@ export function Categorias({
 								)}
 								<p className="capa-dato">
 									{DATOS_CATEGORIAS[categoria.id] ?? tamanos}
-									<MarcaPorValidar />
 								</p>
 							</div>
 							<Fila

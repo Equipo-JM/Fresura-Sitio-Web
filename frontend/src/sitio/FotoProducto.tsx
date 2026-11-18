@@ -10,12 +10,10 @@ export function FotoProducto({
 	producto,
 	enBeige = false,
 	segunda = false,
-	marcada = true,
 }: {
 	producto: Producto;
 	enBeige?: boolean;
 	segunda?: boolean;
-	marcada?: boolean;
 }) {
 	if (tieneFoto(producto.imagen))
 		return (
@@ -31,7 +29,6 @@ export function FotoProducto({
 	if (provisional)
 		return (
 			<>
-				{marcada && !segunda && <span className="pv pv-foto">Por validar</span>}
 				<img
 					src={provisional}
 					alt={segunda ? "" : `${producto.nombre}, foto provisional`}
@@ -47,7 +44,6 @@ export function FotoProducto({
 	const textura = producto.nombre.startsWith("Arma tu");
 	return (
 		<>
-			{marcada && !segunda && <span className="pv pv-foto">Por validar</span>}
 			<div className={segunda ? "cara-contenido" : "cara a"}>
 				{textura && !segunda ? (
 					<img
@@ -79,9 +75,6 @@ export function FotoProducto({
 							width="72"
 							height="102"
 						/>
-						<span>
-							{segunda ? "Segunda foto por validar" : "Foto por validar"}
-						</span>
 					</div>
 				)}
 			</div>

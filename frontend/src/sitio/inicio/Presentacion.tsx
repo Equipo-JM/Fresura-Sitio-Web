@@ -4,7 +4,6 @@ import { nombreProducto } from "../../compartido/carrito/reglas";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { promocionesVigentes } from "../../compartido/contenido/vigencia";
 import { Calcomania } from "../Calcomania";
-import { MarcaPorValidar } from "../MarcaPorValidar";
 import { NOSOTROS } from "./copy";
 
 /**
@@ -19,9 +18,9 @@ export function Promociones({
 	contenido: Contenido;
 	comoPagina?: boolean;
 }) {
+	const Titulo = comoPagina ? "h1" : "h2";
 	// En la página propia los cupones cuelgan del h1: h2, sin saltar niveles.
 	const Subtitulo = comoPagina ? "h2" : "h3";
-	const Titulo = comoPagina ? "h1" : "h2";
 	const vigentes = promocionesVigentes(contenido.promociones);
 	return (
 		<section
@@ -61,7 +60,6 @@ export function Promociones({
 					vigentes.map((p) => (
 						<Cupon key={p.id}>
 							<Subtitulo>{p.titulo}</Subtitulo>
-							{contenido.estado === "ejemplo" && <MarcaPorValidar />}
 							<p>
 								<strong>Vigencia:</strong> {p.vigencia.desde} a{" "}
 								{p.vigencia.hasta}.
@@ -121,7 +119,6 @@ export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 			/>
 			<div className="envoltura nosotros-grid">
 				<div className="nosotros-foto">
-					<span className="pv pv-foto">Por validar</span>
 					<div className="arco">
 						<FotoEjemplo
 							src="/ejemplos/nosotros-interior.webp"

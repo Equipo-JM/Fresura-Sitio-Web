@@ -7,7 +7,6 @@ import {
 	nombreCompleto,
 } from "../../compartido/carrito/reglas";
 import { Icono } from "../../compartido/componentes/Icono";
-import { MarcaPorValidar } from "../MarcaPorValidar";
 
 /**
  * Paso 3: revisión y envío. El mensaje se arma con lo que eligió la persona y
@@ -47,8 +46,7 @@ export function PasoRevision({
 					Abrimos WhatsApp con tu pedido
 				</h1>
 				<p>
-					Envía el mensaje y te confirmamos el total, el domicilio y el pago.{" "}
-					<MarcaPorValidar />
+					Envía el mensaje y te confirmamos el total, el domicilio y el pago.
 				</p>
 				<button type="button" className="boton" onClick={onNuevoPedido}>
 					Empezar otro pedido

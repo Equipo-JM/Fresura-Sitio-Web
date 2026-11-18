@@ -50,12 +50,12 @@ describe("fotos de producto", () => {
 		);
 	});
 
-	it("sin foto publicada usa la provisional de Rappi, marcada por validar", () => {
+	it("sin foto publicada usa la provisional de Rappi, sin etiqueta", () => {
 		mostrarTarjeta("https://ejemplo.invalid/fresas.webp");
 		expect(
 			screen.getByRole("img", { name: "Arma tu Fresita, foto provisional" }),
 		).toHaveAttribute("src", "/ejemplos/productos/arma-tu-fresita-9oz.webp");
-		expect(screen.getAllByText("Por validar").length).toBeGreaterThan(0);
+		expect(screen.queryByText("Por validar")).toBeNull();
 		expect(screen.queryByRole("img", { name: "Vaso de fresas" })).toBeNull();
 	});
 
