@@ -705,17 +705,61 @@ h2:focus {
 	justify-items: center;
 	text-align: center;
 }
-.google-espacio {
+/* Insignia con la «G» de Google: la «G» va sobre fondo claro, no sobre el verde de la sección */
+.google-logo {
 	display: grid;
 	place-items: center;
-	width: 136px;
-	height: 56px;
-	padding: 4px;
-	border: 1px dashed var(--texto);
-	border-radius: var(--radio-chico);
-	font-size: var(--texto-chico);
-	line-height: 1.2;
+	width: 84px;
+	height: 84px;
+	border-radius: 50%;
 	background: var(--color-platinum);
+	box-shadow: 0 8px 14px rgba(91, 59, 36, 0.16);
+}
+.google-logo img {
+	width: 44px;
+	height: 44px;
+}
+/* Reseñas de clientes bajo la calificación de Google: tarjetas Platinum con texto
+   Peat Brown (8,2:1). Las estrellas son informativas, por eso van en café y no en rosa. */
+.google-resenas {
+	display: grid;
+	gap: 16px;
+	margin-top: clamp(28px, 4vw, 48px);
+	padding: 0;
+	list-style: none;
+}
+.google-resena {
+	display: grid;
+	gap: 12px;
+	height: 100%;
+	margin: 0;
+	padding: clamp(18px, 2.5vw, 28px);
+	background: var(--color-platinum);
+	border-radius: var(--radio);
+}
+.google-resena blockquote {
+	margin: 0;
+	font-size: var(--texto-destacado);
+	line-height: 1.4;
+}
+.google-resena figcaption {
+	align-self: end;
+	font-size: var(--texto-chico);
+}
+.google-resena-estrellas {
+	display: inline-flex;
+	gap: 2px;
+}
+.google-resena-estrellas .icono {
+	width: 18px;
+	height: 18px;
+	fill: currentColor;
+	stroke-width: 1.2;
+}
+@media (min-width: 900px) {
+	.google-resenas {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 .google-nota {
 	display: flex;

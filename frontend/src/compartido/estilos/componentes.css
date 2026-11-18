@@ -61,12 +61,63 @@ dialog {
 .contacto-sedes h2 {
 	font-size: var(--titulo-3);
 }
-.contacto-sedes .chips {
-	margin-top: 6px;
-}
 .contacto-sedes .chips li {
 	background: none;
 	padding: 0;
+}
+/* Caja de contacto: el texto y el botón a un lado y las redes al otro, para no dejar
+   la mitad de la caja vacía en pantallas anchas. Las redes son botones (objetivo
+   táctil de 44 px) en lugar de enlaces sueltos. */
+.contacto-sedes {
+	gap: 28px;
+}
+.contacto-sedes-texto,
+.contacto-sedes-redes {
+	display: grid;
+	gap: 8px;
+	justify-items: start;
+	align-content: center;
+}
+.contacto-sedes-etiqueta {
+	font-weight: 700;
+}
+/* La calcomanía vive dentro de la caja y asoma un poco por el borde. En pantallas
+   angostas va arriba a la derecha, junto al título: ahí no choca con los botones
+   de las redes, que cambian de línea según el ancho. Por eso el texto se acorta
+   para dejarle su espacio. En escritorio es la tercera columna. */
+.contacto-sedes {
+	position: relative;
+}
+.contacto-sedes .contacto-sedes-sticker {
+	position: absolute;
+	top: -22px;
+	right: 14px;
+	width: 88px;
+	rotate: 5deg;
+}
+.contacto-sedes-texto p {
+	max-width: calc(100% - 100px);
+}
+@media (min-width: 900px) {
+	.contacto-sedes {
+		grid-template-columns: 1.2fr 1fr auto;
+		align-items: center;
+		column-gap: clamp(32px, 5vw, 64px);
+	}
+	.contacto-sedes .contacto-sedes-sticker {
+		position: static;
+		justify-self: end;
+		width: 168px;
+		margin-block: -36px;
+	}
+	.contacto-sedes-texto p {
+		max-width: none;
+	}
+	.contacto-sedes-redes {
+		align-self: stretch;
+		padding-inline-start: clamp(32px, 5vw, 64px);
+		border-inline-start: 1px dashed var(--color-porcini);
+	}
 }
 .sede-cuerpo h2,
 .sede-cuerpo h3 {
@@ -905,7 +956,11 @@ button.paso-num {
 	min-height: 440px;
 	padding: 56px 24px 28px;
 	overflow: hidden;
-	border-radius: 999px 999px 28px 28px;
+	/* Arco arriba y esquinas redondas abajo. Con «999px» arriba el navegador
+	   reducía todos los radios en la misma proporción y las esquinas de abajo
+	   quedaban casi rectas (unos 6 px). Con porcentajes los radios caben en la
+	   caja y los de abajo se respetan; el 38 % vertical deja el arco casi circular. */
+	border-radius: 50% 50% 40px 40px / 38% 38% 40px 40px;
 	background: var(--color-flamingo);
 }
 .visual::before {
@@ -1038,35 +1093,121 @@ button.paso-num {
 	flex-wrap: wrap;
 	gap: 8px;
 }
+/* Opciones de personalizar (rediseño): botón con relieve, marcador redondo que se
+   llena al elegir y el costo como etiqueta aparte. El relieve (sombra sólida
+   Peat Brown) hace que se sientan como botones y que se hundan al tocarlos.
+   Elegido: fondo Peat Brown con texto Platinum (8,2:1); el marcador Flamingo es
+   decorativo, el estado también lo da `aria-pressed` y el check. */
 .op {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
-	gap: 6px;
+	gap: 8px;
 	min-height: 44px;
-	padding: 8px 16px;
+	padding: 8px 16px 8px 10px;
 	border-radius: var(--radio-pildora);
 	background: var(--color-platinum);
 	color: var(--texto);
 	border: 1.5px solid var(--texto);
+	box-shadow: 0 3px 0 var(--texto);
 	font-size: var(--texto-base);
 	line-height: 1.2;
 	cursor: pointer;
+	transition:
+		transform 180ms var(--curva-salida),
+		box-shadow 180ms var(--curva-salida),
+		background-color 160ms ease,
+		color 160ms ease;
 }
-.op .icono {
-	width: 18px;
-	height: 18px;
+/* Variedad por forma (propuesta aprobada por el equipo): los botones alternan entre
+   píldora, gota con una esquina recortada y arco como el de las fotos del menú.
+   Se logra solo con el radio de las esquinas, así el borde y el relieve siguen
+   iguales y el color no cambia. */
+.opciones-chips > .op:nth-child(4n + 2) {
+	border-radius: 22px 22px 22px 4px;
 }
-.op[aria-pressed="true"] {
+.opciones-chips > .op:nth-child(4n + 3) {
+	border-radius: 22px 22px 8px 8px;
+}
+.opciones-chips > .op:nth-child(4n + 4) {
+	border-radius: 4px 22px 22px 22px;
+}
+.op-marca {
+	display: grid;
+	place-items: center;
+	flex: none;
+	width: 22px;
+	height: 22px;
+	border: 1.5px solid currentColor;
+	border-radius: 50%;
+	background: transparent;
+	transition:
+		background-color 160ms ease,
+		border-color 160ms ease;
+}
+.op .op-marca .icono {
+	display: block;
+	width: 14px;
+	height: 14px;
+	stroke-width: 2.4;
+	opacity: 0;
+	transform: scale(0.4) rotate(-25deg);
+	transition:
+		opacity 140ms ease,
+		transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.op[aria-pressed="true"],
+.op:has(input:checked) {
 	background: var(--color-peat-brown);
 	color: var(--color-platinum);
 	font-weight: 700;
+	/* Hundido: el relieve baja y cambia a Flamingo, que aquí es solo adorno */
+	box-shadow: 0 1px 0 var(--color-flamingo);
+	transform: translateY(2px);
+}
+.op[aria-pressed="true"] .op-marca,
+.op:has(input:checked) .op-marca {
+	background: var(--color-flamingo);
+	border-color: var(--color-flamingo);
+	color: var(--color-peat-brown);
+}
+.op[aria-pressed="true"] .op-marca .icono,
+.op:has(input:checked) .op-marca .icono {
+	opacity: 1;
+	transform: none;
 }
 .op[aria-disabled="true"] {
 	border-style: dashed;
+	box-shadow: none;
 	cursor: not-allowed;
-	opacity: 0.7;
+	opacity: 0.65;
+	transform: none;
+}
+.op:active:not([aria-disabled="true"]) {
+	transform: translateY(3px);
+	box-shadow: 0 0 0 var(--texto);
+}
+@media (hover: hover) and (pointer: fine) {
+	.op:not([aria-disabled="true"], [aria-pressed="true"]):hover {
+		transform: translateY(-2px) rotate(-1.2deg);
+		box-shadow: 0 5px 0 var(--texto);
+	}
+	.opciones-chips
+		> .op:nth-child(even):not(
+			[aria-disabled="true"],
+			[aria-pressed="true"]
+		):hover {
+		transform: translateY(-2px) rotate(1.2deg);
+	}
+}
+.opciones-chips {
+	row-gap: 14px;
 }
 .costo {
+	padding: 2px 8px;
+	border-radius: var(--radio-pildora);
+	background: var(--color-dust-storm);
+	color: var(--texto);
 	font-size: var(--texto-chico);
 	font-weight: 700;
 }
@@ -1261,6 +1402,11 @@ button.paso-num {
 .pagina-encabezado h1 {
 	font-size: var(--titulo-1);
 	margin-bottom: 8px;
+}
+/* Título de /menu: cursiva en negrilla (peso 600), como «a un toque» del inicio */
+.calcomania-menu h1 {
+	font-style: italic;
+	font-weight: 600;
 }
 
 /* Franja «Explora» del inicio (RF-02): el menú como tarjeta principal y las
@@ -1536,14 +1682,14 @@ button.paso-num {
 .calcomania-explora .calcomania {
 	rotate: -7deg;
 }
-/* Nosotros: la calcomanía se pega en el hombro del arco, en diagonal con el
-   sticker horizontal de abajo, para dejar limpia la columna de texto. */
+/* Nosotros: la calcomanía va a la izquierda de la foto, en el lado vacío, para dejar
+   limpia la columna de texto. */
 .calcomania-en-foto {
 	position: absolute;
 	top: 10%;
-	right: -28px;
+	left: -28px;
 	width: 112px;
-	rotate: 8deg;
+	rotate: -8deg;
 }
 @media (min-width: 900px) {
 	.calcomania {
@@ -1555,8 +1701,14 @@ button.paso-num {
 	.calcomania-explora .calcomania {
 		width: 170px;
 	}
+	/* En pantallas anchas se va al margen vacío a la izquierda de la foto; si el
+	   margen es angosto, se queda montada en el hombro del arco. */
 	.calcomania-en-foto {
-		right: -56px;
+		top: 28%;
+		left: calc(
+			-1 *
+			clamp(56px, (100vw - var(--ancho-maximo)) / 2 - 40px, 200px)
+		);
 		width: 160px;
 	}
 }
@@ -1674,7 +1826,6 @@ button.paso-num {
 }
 .seccion:has(.calcomania-explora)::before,
 .destacados::before,
-.pagina:has(.calcomania-sedes)::before,
 .antojos-sec::before {
 	content: "";
 	position: absolute;
@@ -1694,10 +1845,6 @@ button.paso-num {
 	background-image: url("/calcomanias/ven-date-un-gusto-bonito.webp");
 	rotate: -6deg;
 }
-.pagina:has(.calcomania-sedes)::before {
-	background-image: url("/calcomanias/las-mejores-fresas-de-bogota.webp");
-	rotate: 5deg;
-}
 .antojos-sec::before {
 	background-image: url("/calcomanias/fresitas-fresotas-fresuras.webp");
 	rotate: -6deg;
@@ -1705,7 +1852,6 @@ button.paso-num {
 @media (min-width: 900px) {
 	.seccion:has(.calcomania-explora)::before,
 	.destacados::before,
-	.pagina:has(.calcomania-sedes)::before,
 	.antojos-sec::before {
 		bottom: -100px;
 		width: 200px;
@@ -1722,8 +1868,7 @@ main > :last-child > .seccion:last-child::after {
 }
 @media (min-width: 900px) {
 	/* Sobre el pie la calcomanía entra poco, para no tapar la columna de sedes */
-	main > .seccion:last-child::before,
-	main > .pagina:last-child::before {
+	main > .seccion:last-child::before {
 		bottom: -24px;
 	}
 }
@@ -1785,4 +1930,33 @@ main > :last-child > .seccion:last-child::after {
 	.mapa-entrega {
 		display: block;
 	}
+}
+
+/* Letra calcomanía (aprobada por el equipo): la palabra destacada de un título con
+   el aspecto del logotipo en sticker. Contorno grueso por fuera de la letra y sombra
+   suave debajo. Tres versiones, según el fondo de la sección:
+   - .letra-calcomania: letra Flamingo y contorno Platinum (fondos We Peep).
+   - .letra-calcomania-porcini: letra Platinum y contorno Court-Bouillon (fondo Porcini).
+   - .letra-calcomania-court-bouillon: letra Platinum y contorno Porcini (fondo Court-Bouillon).
+   Solo en títulos de 40 px o más: el contraste entre letra y contorno es bajo
+   (1,4:1 a 2,3:1), así que funciona como texto muy grande y decorativo.   Uso: <em class="letra-calcomania letra-calcomania-porcini">favoritos</em> */
+.letra-calcomania {
+	--letra-calcomania: var(--color-flamingo);
+	--contorno-calcomania: var(--color-platinum);
+	font-family: var(--fuente-titulos);
+	font-style: italic;
+	color: var(--letra-calcomania);
+	-webkit-text-stroke: 0.24em var(--contorno-calcomania);
+	/* El trazo se pinta detrás del relleno: queda por fuera y no adelgaza la letra */
+	paint-order: stroke fill;
+	filter: drop-shadow(0 0.06em 0.08em rgba(91, 59, 36, 0.28));
+	padding-inline: 0.12em;
+}
+.letra-calcomania-porcini {
+	--letra-calcomania: var(--color-platinum);
+	--contorno-calcomania: var(--color-court-bouillon);
+}
+.letra-calcomania-court-bouillon {
+	--letra-calcomania: var(--color-platinum);
+	--contorno-calcomania: var(--color-porcini);
 }

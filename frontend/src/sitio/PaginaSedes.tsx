@@ -22,35 +22,46 @@ export function PaginaSedes() {
 							className="promo-mini contacto-sedes"
 							aria-labelledby="titulo-contacto"
 						>
-							<h2 id="titulo-contacto">Contacto</h2>
-							<p>Escríbenos y te atendemos con gusto.</p>
-							<a
-								className="boton"
-								href={`https://wa.me/${contenido.negocio.whatsapp}`}
-							>
-								<Icono nombre="chat" />
-								Escríbenos por WhatsApp
-							</a>
-							<ul className="chips">
-								{Object.entries(contenido.negocio.redes)
-									.filter(([, url]) => url)
-									.map(([nombre, url]) => (
-										<li key={nombre}>
-											<a
-												className="enlace"
-												href={url ?? undefined}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												{nombre === "instagram"
-													? "Instagram"
-													: nombre === "tiktok"
-														? "TikTok"
-														: "Facebook"}
-											</a>
-										</li>
-									))}
-							</ul>
+							<div className="contacto-sedes-texto">
+								<h2 id="titulo-contacto">Contacto</h2>
+								<p>Escríbenos y te atendemos con gusto.</p>
+								<a
+									className="boton"
+									href={`https://wa.me/${contenido.negocio.whatsapp}`}
+								>
+									<Icono nombre="chat" />
+									Escríbenos por WhatsApp
+								</a>
+							</div>
+							<div className="contacto-sedes-redes">
+								<p className="contacto-sedes-etiqueta">
+									También nos encuentras en
+								</p>
+								<ul className="chips">
+									{Object.entries(contenido.negocio.redes)
+										.filter(([, url]) => url)
+										.map(([nombre, url]) => (
+											<li key={nombre}>
+												<a
+													className="boton secundario compacto"
+													href={url ?? undefined}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													{nombre === "instagram"
+														? "Instagram"
+														: nombre === "tiktok"
+															? "TikTok"
+															: "Facebook"}
+												</a>
+											</li>
+										))}
+								</ul>
+							</div>
+							<Calcomania
+								nombre="las-mejores-fresas-de-bogota"
+								className="contacto-sedes-sticker"
+							/>
 						</section>
 					</div>
 				</section>
