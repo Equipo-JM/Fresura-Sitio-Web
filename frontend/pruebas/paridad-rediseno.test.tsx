@@ -170,9 +170,9 @@ describe("paridad del inicio", () => {
 			mostrar("/", contenido);
 			const titulo = screen.getByRole("heading", {
 				level: 1,
-				name: "Ven, date un gusto bonito… como tú",
+				name: "Fresas jugosas, crema esponjosa y tu toque favorito",
 			});
-			expect(titulo.querySelector("em")).toHaveTextContent("como tú");
+			expect(titulo.querySelector("em")).toHaveTextContent("tu toque favorito");
 			expect(
 				screen.getByText(
 					"Fresas con crema a tu manera: eliges el tamaño, le pones tu toque y terminamos el pedido por WhatsApp.",

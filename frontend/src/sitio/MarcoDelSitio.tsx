@@ -8,9 +8,9 @@ import {
 	useAperturaAnimada,
 	useDesplegablesSuaves,
 } from "../compartido/movimiento/useAperturaAnimada";
-import { useCortinaEntrePaginas } from "../compartido/movimiento/useCortinaEntrePaginas";
 import { useDesplazamientoAlNavegar } from "../compartido/movimiento/useDesplazamientoAlNavegar";
 import { useDesplazamientoSuave } from "../compartido/movimiento/useDesplazamientoSuave";
+import { useEntradaDePagina } from "../compartido/movimiento/useEntradaDePagina";
 import { useRevelarAlDesplazar } from "../compartido/movimiento/useRevelarAlDesplazar";
 import { AvisoRespaldo } from "./AvisoRespaldo";
 import { PAGINAS_SITIO } from "./inicio/Explora";
@@ -55,13 +55,12 @@ export function MarcoDelSitio() {
 	const contenido = data?.contenido;
 	const respaldo = data?.origen === "respaldo";
 	const principal = useRef<HTMLElement>(null);
+	useEntradaDePagina(principal, pathname);
 	useMomentosDesplazamiento(principal, pathname, Boolean(contenido));
 	useRevelarAlDesplazar(pathname, Boolean(contenido));
 	useDesplegablesSuaves();
 	useAperturaAnimada(menuAbierto, "#nav-principal .raiz > li");
 	useAperturaAnimada(categoriasAbiertas, "#desplegable > li");
-	const cortina = useRef<HTMLDivElement>(null);
-	useCortinaEntrePaginas(cortina, pathname);
 	const compra =
 		!respaldo &&
 		(pathname === "/carrito" || pathname.startsWith("/personalizar/"));
@@ -291,9 +290,6 @@ export function MarcoDelSitio() {
 					</div>
 				</footer>
 			)}
-			<div className="cortina-pagina" ref={cortina} aria-hidden="true">
-				<img src="/marca/fresa-we-peep.svg" alt="" width="84" height="119" />
-			</div>
 			{!compra && contenido && (
 				// En celular es un círculo con el ícono: la píldora con texto tapaba
 				// precios, horarios y botones (revisión en 360 px, 17 nov).

@@ -81,16 +81,14 @@ dialog {
 .contacto-sedes-etiqueta {
 	font-weight: 700;
 }
-/* La calcomanía vive dentro de la caja y asoma un poco por el borde. En pantallas
-   angostas va arriba a la derecha, junto al título: ahí no choca con los botones
-   de las redes, que cambian de línea según el ancho. Por eso el texto se acorta
-   para dejarle su espacio. En escritorio es la tercera columna. */
+/* El sticker cruza el borde superior de Contacto. La última columna reserva
+   su espacio para que los botones de redes queden a su izquierda. */
 .contacto-sedes {
 	position: relative;
 }
 .contacto-sedes .contacto-sedes-sticker {
 	position: absolute;
-	top: -22px;
+	top: -50px;
 	right: 14px;
 	width: 88px;
 	rotate: 5deg;
@@ -100,15 +98,14 @@ dialog {
 }
 @media (min-width: 900px) {
 	.contacto-sedes {
-		grid-template-columns: 1.2fr 1fr auto;
+		grid-template-columns: 1.2fr 1fr 168px;
 		align-items: center;
 		column-gap: clamp(32px, 5vw, 64px);
 	}
 	.contacto-sedes .contacto-sedes-sticker {
-		position: static;
-		justify-self: end;
+		top: -100px;
+		right: 6.5%;
 		width: 168px;
-		margin-block: -36px;
 	}
 	.contacto-sedes-texto p {
 		max-width: none;
@@ -385,21 +382,6 @@ dialog {
 }
 .portada-foto {
 	position: relative;
-}
-
-/* Cinta: la pista se mueve con el desplazamiento */
-.cinta-pista {
-	display: flex;
-	align-items: center;
-	gap: 24px;
-	width: max-content;
-	will-change: transform;
-}
-.cinta-trozo {
-	display: inline-flex;
-	align-items: center;
-	gap: 24px;
-	white-space: nowrap;
 }
 
 /* Lo más reciente */
@@ -1776,6 +1758,23 @@ button.paso-num {
 	overflow-x: clip;
 	overflow-y: visible;
 }
+.portada-borde {
+	--alto-onda: 20px;
+	--ancho-onda: 120px;
+	position: relative;
+	z-index: 1;
+	margin-bottom: calc(-1 * var(--alto-onda));
+	background-color: var(--color-platinum);
+	/* Recorta el fondo y el trazo rosado juntos en el encuentro con destacados. */
+	mask-image: linear-gradient(#000 0 0), url("/marca/borde-ondas.svg");
+	mask-position: top, bottom;
+	mask-size:
+		100% calc(100% - var(--alto-onda) + 1px),
+		var(--ancho-onda) var(--alto-onda);
+	mask-repeat:
+		no-repeat,
+		round no-repeat;
+}
 /* Sin fondo propio, la sección toma el Platinum de la página para que el borde se vea */
 .seccion:not([class*="fondo-"], .antojos-sec),
 .pagina {
@@ -1804,6 +1803,14 @@ button.paso-num {
 	pointer-events: none;
 }
 @media (max-width: 599.98px) {
+	.portada-borde {
+		--alto-onda: 14px;
+		--ancho-onda: 84px;
+	}
+	/* Desvanece el trazo antes de la onda para que ambas curvas no se rocen. */
+	.portada-trazo {
+		mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent calc(100% - 16px));
+	}
 	.seccion::after,
 	.pagina::after {
 		height: 14px;
@@ -2029,31 +2036,6 @@ main > :last-child > .seccion:last-child::after {
 	cursor: grabbing;
 }
 
-/* Cortina de toldo entre páginas */
-.cortina-pagina {
-	position: fixed;
-	inset: 0;
-	z-index: 100;
-	display: grid;
-	place-items: center;
-	background: var(--color-flamingo);
-	pointer-events: none;
-	visibility: hidden;
-	overflow: hidden;
-}
-.cortina-pagina::before {
-	content: "";
-	position: absolute;
-	inset: 0 0 auto;
-	height: 32px;
-	background: url(/marca/rayas-toldo.svg) 0 0 / 32px 32px repeat-x;
-}
-.cortina-pagina img {
-	position: relative;
-	width: 84px;
-	height: auto;
-}
-
 /* Fresa que vuela al carrito */
 .vuelo-fresa {
 	position: fixed;
@@ -2093,6 +2075,12 @@ main > :last-child > .seccion:last-child::after {
 }
 
 /* Menú: barra de categorías fija bajo el encabezado */
+#menu > .capa:first-child {
+	padding-block-start: clamp(12px, 2vw, 24px);
+}
+#menu > .capa:first-child .vitrina-texto {
+	align-self: start;
+}
 .nav-categorias {
 	/* Sin esto, el ancho de todos los botones en fila ensancha la página en celular. */
 	contain: inline-size;
@@ -2697,4 +2685,419 @@ main > :last-child > .seccion:last-child::after {
 	.tarjeta:focus-visible .tarjeta-foto .cara img {
 		scale: 1.04;
 	}
+}
+
+/* Ficha de producto (rediseño): escena rosa con la foto en arco y dos
+   calcomanías que cambian por producto, precio y tamaños en boletos, lo que
+   incluye en estampas y toppings con formas surtidas. Sin verde de la paleta.
+   Las formas, fondos y giros de toppings y estampas salen de `nth-child` con
+   ciclos de distinto largo, para que dos vecinos nunca coincidan. */
+.pagina-producto .volver {
+	gap: 8px;
+	text-decoration: none;
+}
+.volver-flecha {
+	display: inline-block;
+	transition: transform 200ms var(--curva-salida);
+}
+.volver:hover .volver-flecha {
+	transform: translateX(-4px);
+}
+.ficha-foto {
+	width: 100%;
+	max-width: 540px;
+}
+.ficha-escena {
+	position: relative;
+	display: grid;
+	place-items: center;
+	aspect-ratio: 5 / 6;
+	border-radius: 40px;
+	background: var(--color-we-peep);
+}
+.ficha-trazo {
+	position: absolute;
+	left: 4%;
+	top: 8%;
+	width: 92%;
+	opacity: 0.55;
+	pointer-events: none;
+}
+.ficha-escena .tarjeta-foto {
+	width: 74%;
+	aspect-ratio: 3 / 4;
+	border-radius: 999px 999px 28px 28px;
+	border: 8px solid var(--color-platinum);
+	box-shadow: 0 30px 60px -30px rgba(91, 59, 36, 0.55);
+}
+.ficha-foto .ficha-escena .tarjeta-foto {
+	box-shadow: 0 30px 60px -30px rgba(91, 59, 36, 0.55);
+}
+.ficha-escena .tarjeta-foto > img {
+	transition: scale 500ms var(--curva-salida);
+}
+@media (hover: hover) and (pointer: fine) {
+	.ficha-escena:hover .tarjeta-foto > img {
+		scale: 1.03;
+	}
+}
+.ficha-calcomania {
+	position: absolute;
+	width: 30%;
+	z-index: 1;
+}
+.ficha-calcomania-a {
+	top: 2%;
+	right: 2%;
+	rotate: 8deg;
+}
+.ficha-calcomania-b {
+	bottom: 4%;
+	left: 2%;
+	rotate: -8deg;
+}
+.ficha-tamano {
+	position: absolute;
+	right: 6%;
+	bottom: 10%;
+	z-index: 1;
+	rotate: 6deg;
+	padding: 8px 16px;
+	border: 5px solid var(--color-platinum);
+	border-radius: var(--radio-pildora);
+	background: var(--color-peat-brown);
+	color: var(--color-platinum);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+@media (min-width: 900px) {
+	.ficha-calcomania {
+		width: 32%;
+	}
+	.ficha-calcomania-a {
+		top: -2%;
+		right: -4%;
+	}
+	.ficha-calcomania-b {
+		left: -4%;
+	}
+}
+
+.ficha-titulo {
+	gap: 16px;
+}
+.ficha-titulo h1 {
+	font-size: clamp(2.75rem, 2rem + 3vw, 5rem);
+	line-height: 1;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+.ficha-categoria {
+	display: block;
+	margin-bottom: 10px;
+	font-family: var(--fuente-texto);
+	font-size: var(--texto-chico);
+	font-weight: 700;
+	letter-spacing: 0;
+}
+.ficha-nombre {
+	display: block;
+}
+.ficha-descripcion {
+	max-width: 46ch;
+	font-size: 1.125rem;
+	line-height: 1.6;
+	text-wrap: pretty;
+}
+
+/* Boleto: muescas laterales recortadas con máscara, como un ticket de vitrina. */
+.boleto {
+	background: var(--color-dust-storm);
+	-webkit-mask:
+		radial-gradient(circle 14px at 0 50%, transparent 97%, #000) left / 51% 100%
+		no-repeat,
+		radial-gradient(circle 14px at 100% 50%, transparent 97%, #000) right / 51%
+		100% no-repeat;
+	mask:
+		radial-gradient(circle 14px at 0 50%, transparent 97%, #000) left / 51% 100%
+		no-repeat,
+		radial-gradient(circle 14px at 100% 50%, transparent 97%, #000) right / 51%
+		100% no-repeat;
+}
+.ficha-precio.boleto {
+	justify-self: start;
+	padding: 14px 34px;
+	font-size: var(--texto-grande);
+	font-weight: 700;
+}
+.boleto-precio {
+	display: grid;
+	line-height: 1.1;
+}
+.boleto-etiqueta {
+	font-size: var(--texto-chico);
+	font-weight: 400;
+}
+.ficha-precio .precio-cuenta {
+	font-family: var(--fuente-titulos);
+	font-size: clamp(2.25rem, 1.8rem + 1.5vw, 2.75rem);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums lining-nums;
+}
+
+.pagina-producto .ficha-bloque > h2,
+.pagina-producto .ficha-bloque-titulo h2 {
+	font-size: var(--titulo-3);
+	font-weight: 400;
+}
+
+/* Estampas de lo que incluye */
+.estampas {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+	gap: 14px;
+	padding-top: 4px;
+}
+.estampa {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	aspect-ratio: 1;
+	padding: 12px;
+	border-radius: 24px;
+	background: var(--color-we-peep);
+	text-align: center;
+	box-shadow: 0 10px 18px -12px rgba(91, 59, 36, 0.5);
+	animation: estampa-sella 460ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.estampa::before {
+	content: "";
+	position: absolute;
+	inset: 7px;
+	border: 2px dashed var(--color-peat-brown);
+	border-radius: 18px;
+	opacity: 0.45;
+}
+.estampa:nth-child(2n) {
+	background: var(--color-dust-storm);
+}
+.estampa:nth-child(5n + 1) {
+	rotate: -3deg;
+}
+.estampa:nth-child(5n + 2) {
+	rotate: 2deg;
+}
+.estampa:nth-child(5n + 3) {
+	rotate: -2deg;
+}
+.estampa:nth-child(5n + 4) {
+	rotate: 3deg;
+}
+.estampa:nth-child(5n) {
+	rotate: -1deg;
+}
+.estampa:nth-child(2) {
+	animation-delay: 110ms;
+}
+.estampa:nth-child(3) {
+	animation-delay: 220ms;
+}
+.estampa:nth-child(4) {
+	animation-delay: 330ms;
+}
+.estampa:nth-child(n + 5) {
+	animation-delay: 440ms;
+}
+.estampa-cantidad {
+	font-family: var(--fuente-titulos);
+	font-size: 3rem;
+	line-height: 1;
+	font-variant-numeric: lining-nums;
+}
+.estampa-nombre {
+	font-size: var(--texto-chico);
+	font-weight: 700;
+	line-height: 1.2;
+	text-wrap: balance;
+}
+.estampa-nombre:only-child {
+	font-family: var(--fuente-titulos);
+	font-size: 1.5rem;
+	font-weight: 400;
+}
+@keyframes estampa-sella {
+	from {
+		opacity: 0;
+		transform: scale(1.35);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Tamaños en boletos: la tabla sigue siendo tabla para lectores de pantalla. */
+.tabla-precios tbody {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+.tabla-precios tr.boleto {
+	display: flex;
+	align-items: baseline;
+	gap: 18px;
+	padding: 12px 30px;
+}
+.tabla-precios tr.boleto :is(th, td) {
+	padding: 0;
+	border: 0;
+}
+.tabla-precios tr.boleto td {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Toppings con formas surtidas */
+.ficha-toppings-titulo {
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px 16px;
+}
+.ficha-toppings-titulo p {
+	font-size: var(--texto-chico);
+}
+.toppings-ficha {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	padding: 18px;
+	border: 2px dashed var(--color-porcini);
+	border-radius: 24px;
+}
+.topping-ficha {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 18px;
+	border: 2px solid var(--color-peat-brown);
+	border-radius: var(--radio-pildora);
+	background: var(--color-platinum);
+	box-shadow: 0 3px 0 var(--color-peat-brown);
+	transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.topping-ficha:nth-child(3n + 2) {
+	background: var(--color-we-peep);
+}
+.topping-ficha:nth-child(3n) {
+	background: var(--color-dust-storm);
+}
+.topping-ficha:nth-child(8n + 2) {
+	border-radius: 18px 18px 18px 4px;
+}
+.topping-ficha:nth-child(8n + 3) {
+	border-radius: 999px 999px 999px 8px;
+}
+.topping-ficha:nth-child(8n + 4) {
+	border-radius: 14px;
+}
+.topping-ficha:nth-child(8n + 5) {
+	border-radius: 8px 999px 999px 999px;
+}
+.topping-ficha:nth-child(8n + 6) {
+	border-radius: 20px 20px 6px 20px;
+}
+.topping-ficha:nth-child(8n) {
+	border-radius: 16px 4px 16px 16px;
+}
+.topping-ficha:nth-child(5n + 1) {
+	rotate: -1.5deg;
+}
+.topping-ficha:nth-child(5n + 2) {
+	rotate: 1deg;
+}
+.topping-ficha:nth-child(5n + 4) {
+	rotate: 2deg;
+}
+.topping-ficha:nth-child(5n) {
+	rotate: -1deg;
+}
+@media (hover: hover) and (pointer: fine) {
+	.topping-ficha:hover {
+		transform: translateY(-2px) rotate(-2deg);
+	}
+}
+.pagina-producto .acciones {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.estampa {
+		animation: none;
+	}
+	.volver-flecha,
+	.ficha-escena .tarjeta-foto > img,
+	.topping-ficha {
+		transition: none;
+	}
+}
+
+.mapa-gesto,
+.mapa-plano {
+	position: absolute;
+	inset: 0;
+}
+.mapa-gesto {
+	touch-action: none;
+	cursor: grab;
+	user-select: none;
+}
+.mapa-gesto:active {
+	cursor: grabbing;
+}
+.mapa-plano iframe {
+	position: absolute;
+	inset: 0;
+}
+.mapa-plano iframe,
+.mapa-coordenada {
+	pointer-events: none;
+}
+.mapa-coordenada {
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+.mapa-coordenada .mapa-fresa {
+	max-width: none;
+}
+.mapa-controles {
+	position: absolute;
+	inset: 8px auto auto 8px;
+	display: flex;
+	gap: 4px;
+}
+.mapa-controles > * {
+	background: var(--color-platinum);
+	color: var(--texto);
+	border: 1px solid currentColor;
+	border-radius: 6px;
+	padding: 4px 8px;
+	font: inherit;
+	font-size: var(--texto-chico);
+}
+
+/* Conserva la vista anterior detrás mientras entra la cartografía recién cargada. */
+.mapa-vista-lista {
+	animation: revelar-mapa 320ms ease-out both;
+}
+@keyframes revelar-mapa {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.mapa-vista-lista { animation-duration: 1ms; }
 }

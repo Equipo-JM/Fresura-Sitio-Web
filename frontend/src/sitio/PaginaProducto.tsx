@@ -3,12 +3,19 @@ import { Link, useParams } from "react-router";
 import { nombreProducto, pesos } from "../compartido/carrito/reglas";
 import { Icono } from "../compartido/componentes/Icono";
 import { useConteoPrecio } from "../compartido/movimiento/useConteoPrecio";
+import { Calcomania } from "./Calcomania";
 import { ConContenido } from "./ConContenido";
+import { calcomaniasDeProducto } from "./calcomanias";
 import { FotoProducto } from "./FotoProducto";
 import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
 import { PromocionesFicha } from "./PromocionesFicha";
+import { piezasIncluidas } from "./piezasIncluidas";
 
-/** Ficha de un producto: foto, promociones vigentes, tamaños, lo que incluye y las dos acciones. */
+/**
+ * Ficha de un producto: foto en arco con dos calcomanías que cambian según el
+ * producto, precio en boleto, lo que incluye en estampas, tamaños, toppings y las
+ * dos acciones.
+ */
 export function PaginaProducto() {
 	const { idProducto } = useParams();
 	return (
@@ -29,24 +36,66 @@ export function PaginaProducto() {
 				const mensajeWhatsapp = encodeURIComponent(
 					`Hola, Fresura. Quiero preguntar por ${nombreProducto(producto, contenido.categorias)}.`,
 				);
+				const [calcomaniaA, calcomaniaB] = calcomaniasDeProducto(producto.id);
+				const tamanoUnico =
+					producto.presentaciones.length === 1
+						? producto.presentaciones[0].nombre
+						: null;
+				const incluidas = producto.caracteristicas
+					.map((texto) => ({ texto, piezas: piezasIncluidas(texto) }))
+					.filter((c) => c.piezas !== null);
+				const otras = producto.caracteristicas.filter(
+					(texto) => piezasIncluidas(texto) === null,
+				);
 				return (
-					<section className="pagina">
+					<section className="pagina pagina-producto">
 						<div className="envoltura">
 							<Link className="volver" to="/menu">
-								← Volver al menú
+								<span className="volver-flecha">←</span> Volver al menú
 							</Link>
 							<div className="ficha">
 								<div className="ficha-foto">
-									<div className="tarjeta-foto">
-										<FotoProducto producto={producto} />
+									<div className="ficha-escena">
+										<img
+											className="deco ficha-trazo"
+											src="/marca/trazo-3-flamingo.svg"
+											alt=""
+										/>
+										<div className="tarjeta-foto">
+											<FotoProducto producto={producto} />
+										</div>
+										<Calcomania
+											nombre={calcomaniaA}
+											className="ficha-calcomania ficha-calcomania-a"
+										/>
+										<Calcomania
+											nombre={calcomaniaB}
+											className="ficha-calcomania ficha-calcomania-b"
+										/>
+										{tamanoUnico ? (
+											<span className="ficha-tamano">{tamanoUnico}</span>
+										) : null}
 									</div>
 								</div>
 								<div className="ficha-datos">
 									<div className="ficha-titulo">
 										<h1>
-											{nombreProducto(producto, categoria ? [categoria] : [])}
+											{categoria ? (
+												<>
+													<span className="ficha-categoria">
+														{categoria.nombre}:
+													</span>{" "}
+												</>
+											) : null}
+											<span className="ficha-nombre">{producto.nombre}</span>
 										</h1>
-										<p className="ficha-precio">
+										<div className="ficha-bloque">
+											<h2 className="oculto">Descripción</h2>
+											<p className="ficha-descripcion">
+												{producto.descripcion}
+											</p>
+										</div>
+										<p className="ficha-precio boleto">
 											{sinPrecio ? (
 												origen === "respaldo" ? (
 													"Consulta precios por WhatsApp"
@@ -64,20 +113,35 @@ export function PaginaProducto() {
 											idProducto={producto.id}
 										/>
 									)}
-									<div className="ficha-bloque">
-										<div className="ficha-bloque-titulo">
-											<h2>Descripción</h2>
-										</div>
-										<p>{producto.descripcion}</p>
-									</div>
 									{producto.caracteristicas.length > 0 && (
 										<div className="ficha-bloque">
 											<h2>Características</h2>
-											<ul className="lista-marcada">
-												{producto.caracteristicas.map((c) => (
-													<li key={c}>{c}</li>
-												))}
-											</ul>
+											{incluidas.map(({ texto, piezas }) => (
+												<div className="ficha-incluye" key={texto}>
+													<p className="oculto">{texto}</p>
+													<ul className="estampas" aria-hidden="true">
+														{piezas?.map((pieza) => (
+															<li className="estampa" key={pieza.nombre}>
+																{pieza.cantidad !== null && (
+																	<span className="estampa-cantidad">
+																		{pieza.cantidad}
+																	</span>
+																)}
+																<span className="estampa-nombre">
+																	{pieza.nombre}
+																</span>
+															</li>
+														))}
+													</ul>
+												</div>
+											))}
+											{otras.length > 0 && (
+												<ul className="lista-marcada">
+													{otras.map((c) => (
+														<li key={c}>{c}</li>
+													))}
+												</ul>
+											)}
 										</div>
 									)}
 									{origen === "principal" && (
@@ -89,7 +153,7 @@ export function PaginaProducto() {
 												<caption className="oculto">Tamaños y precios</caption>
 												<tbody>
 													{producto.presentaciones.map((p) => (
-														<tr key={p.id}>
+														<tr key={p.id} className="boleto">
 															<th scope="row">{p.nombre}</th>
 															<td>
 																{p.precio === null
@@ -106,12 +170,17 @@ export function PaginaProducto() {
 										.filter((g) => g.id === "toppings")
 										.map((g) => (
 											<div className="ficha-bloque" key={g.id}>
-												<div className="ficha-bloque-titulo">
+												<div className="ficha-bloque-titulo ficha-toppings-titulo">
 													<h2>Toppings</h2>
+													{origen === "principal" && (
+														<p>Los eliges al agregarlo al carrito</p>
+													)}
 												</div>
-												<ul className="chips">
+												<ul className="toppings-ficha">
 													{g.opciones.map((o) => (
-														<li key={o.id}>{o.nombre}</li>
+														<li className="topping-ficha" key={o.id}>
+															{o.nombre}
+														</li>
 													))}
 												</ul>
 											</div>
@@ -154,8 +223,8 @@ function PrecioDesde({ valor }: { valor: number }) {
 	useConteoPrecio(numero, valor, pesos);
 	return (
 		<>
-			<span aria-hidden="true">
-				Desde{" "}
+			<span aria-hidden="true" className="boleto-precio">
+				<span className="boleto-etiqueta">Desde</span>
 				<span className="precio-cuenta" ref={numero}>
 					{pesos(valor)}
 				</span>

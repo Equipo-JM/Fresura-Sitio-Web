@@ -1,10 +1,7 @@
 import { gsap } from "gsap";
 import { type RefObject, useEffect } from "react";
 
-/**
- * Entrada de la portada: las palabras del título suben una a una y la foto se
- * abre desde abajo. El sello cae aparte, como las demás calcomanías. Se ejecuta una sola vez al cargar, nunca en bucle.
- */
+/** Entrada breve y simultánea del texto y la foto de portada. */
 export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 	useEffect(() => {
 		const raiz = portada.current;
@@ -12,34 +9,12 @@ export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
 		const contexto = gsap.context(() => {
-			gsap
-				.timeline({ defaults: { ease: "expo.out" } })
-				.from(".portada-palabra", {
-					yPercent: 105,
-					opacity: 0,
-					filter: "blur(6px)",
-					duration: 1,
-					stagger: 0.055,
-				})
-				.from(
-					".portada-entrada",
-					{ y: 14, opacity: 0, duration: 0.8, stagger: 0.07 },
-					0.35,
-				)
-				.from(
-					".portada-arco",
-					{
-						clipPath: "inset(100% 0% 0% 0% round 999px 999px 18px 18px)",
-						duration: 1.2,
-						ease: "expo.inOut",
-					},
-					0.05,
-				)
-				.from(".portada-arco img", { scale: 1.18, duration: 1.6 }, 0.05)
-				.from(".portada-trazo", { opacity: 0, x: -40, duration: 1.4 }, 0.1)
-				.add(() => {
-					gsap.set(".portada-palabra", { clearProps: "filter" });
-				});
+			gsap.from(".portada-texto, .portada-arco", {
+				y: 4,
+				opacity: 0.94,
+				duration: 0.16,
+				ease: "power2.out",
+			});
 		}, raiz);
 
 		return () => contexto.revert();

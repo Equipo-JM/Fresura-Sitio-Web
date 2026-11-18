@@ -48,63 +48,30 @@ export function useRevelarAlDesplazar(ruta: string, cargado: boolean) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: ruta no se lee, pero cada página nueva trae otros elementos que revelar
 	useEffect(() => {
 		if (!cargado || prefiereMenosMovimiento()) return;
+		// Solo animamos elementos que llegan desde debajo de la primera pantalla.
+		const entradas = new Set<Animation>();
+		const observador = new IntersectionObserver((cambios) => {
+			for (const cambio of cambios) {
+				if (!cambio.isIntersecting) continue;
+				observador.unobserve(cambio.target);
+				const entrada = cambio.target.animate(
+					[
+						{ opacity: 0.9, transform: "translateY(4px)" },
+						{ opacity: 1, transform: "none" },
+					],
+					{ duration: 140, easing: "ease-out" },
+				);
+				entradas.add(entrada);
+				entrada.onfinish = () => entradas.delete(entrada);
+			}
+		});
+		for (const elemento of document.querySelectorAll(
+			`main :is(${GRUPOS}, ${TITULOS})`,
+		)) {
+			if (elemento.getBoundingClientRect().top >= window.innerHeight)
+				observador.observe(elemento);
+		}
 		const contexto = gsap.context(() => {
-			const grupos = gsap.utils.toArray<HTMLElement>(`main :is(${GRUPOS})`);
-			if (grupos.length) {
-				gsap.set(grupos, { opacity: 0, y: MOVIMIENTO.distancia });
-				// Las tarjetas de producto entran apenas giradas y se enderezan.
-				const giro = (el: Element) =>
-					el.matches(".fila-productos > li")
-						? Array.from(el.parentElement?.children ?? []).indexOf(el) % 2
-							? 3
-							: -3
-						: 0;
-				for (const g of grupos) gsap.set(g, { rotation: giro(g) });
-				ScrollTrigger.batch(grupos, {
-					start: "top 92%",
-					// Sin `once`: si al montar la página aún no tiene su altura final, el
-					// disparador puede creer que el grupo ya se ve. Al recalcular, el grupo
-					// vuelve a su estado inicial y entra cuando de verdad aparece.
-					onLeaveBack: (lote) =>
-						gsap.set(lote, {
-							opacity: 0,
-							y: MOVIMIENTO.distancia,
-							rotation: (_: number, el: Element) => giro(el),
-							overwrite: true,
-						}),
-					onEnter: (lote) =>
-						gsap.to(lote, {
-							opacity: 1,
-							y: 0,
-							rotation: 0,
-							duration: MOVIMIENTO.duracion.revelar,
-							ease: MOVIMIENTO.curva.entrada,
-							stagger: MOVIMIENTO.escalonado.tarjetas,
-							overwrite: true,
-						}),
-				});
-			}
-
-			for (const titulo of gsap.utils.toArray<HTMLElement>(
-				`main :is(${TITULOS})`,
-			)) {
-				const partes = SplitText.create(titulo, {
-					type: "words",
-					mask: "words",
-				});
-				gsap.from(partes.words, {
-					yPercent: 115,
-					duration: 0.95,
-					stagger: MOVIMIENTO.escalonado.texto,
-					ease: MOVIMIENTO.curva.entrada,
-					scrollTrigger: {
-						trigger: titulo,
-						start: "top 90%",
-						toggleActions: REPETIR_AL_VOLVER,
-					},
-				});
-			}
-
 			// Nosotros: el relato pasa de tenue a pleno según se baja. Nunca baja
 			// de 0,45 de opacidad, para que se pueda leer sin desplazar.
 			const relato = document.querySelector<HTMLElement>(
@@ -194,8 +161,8 @@ export function useRevelarAlDesplazar(ruta: string, cargado: boolean) {
 				gsap.from(valores, {
 					y: 60,
 					opacity: 0,
-					duration: MOVIMIENTO.duracion.revelar,
-					stagger: MOVIMIENTO.escalonado.tarjetas,
+					duration: 0.22,
+					stagger: { amount: 0.06 },
 					ease: MOVIMIENTO.curva.entrada,
 					scrollTrigger: {
 						trigger: ".valores",
@@ -214,8 +181,8 @@ export function useRevelarAlDesplazar(ruta: string, cargado: boolean) {
 					y: 60,
 					rotation: lado * 4,
 					opacity: 0,
-					duration: 1,
-					delay: i * 0.12,
+					duration: 0.22,
+					delay: i * 0.03,
 					ease: MOVIMIENTO.curva.entrada,
 					scrollTrigger: {
 						trigger: ".google-resenas",
@@ -247,7 +214,7 @@ export function useRevelarAlDesplazar(ruta: string, cargado: boolean) {
 									y: alto + 20,
 									rotation: `+=${gsap.utils.random(-90, 90)}`,
 									duration: gsap.utils.random(2.2, 3.6),
-									delay: i * 0.12,
+									delay: i * 0.03,
 									ease: "power1.in",
 									onComplete: () => {
 										gsap.set(fresa, { opacity: 0 });
@@ -265,6 +232,8 @@ export function useRevelarAlDesplazar(ruta: string, cargado: boolean) {
 		return () => {
 			window.clearTimeout(espera);
 			window.removeEventListener("load", refrescar);
+			observador.disconnect();
+			for (const entrada of entradas) entrada.cancel();
 			contexto.revert();
 		};
 	}, [ruta, cargado]);
