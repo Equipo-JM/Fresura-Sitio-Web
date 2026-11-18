@@ -882,7 +882,8 @@ describe("estilos de paridad sin medición de geometría", () => {
 		mostrar("/carrito");
 		const titulo = document.querySelector(".linea-titulo");
 		if (!titulo) throw new Error("Falta el producto del carrito");
-		expect(getComputedStyle(titulo).fontSize).toBe("22px");
+		// jsdom no resuelve var(): se comprueba que use el paso de la escala.
+		expect(getComputedStyle(titulo).fontSize).toBe("var(--titulo-4)");
 		fireEvent.click(
 			screen.getByRole("button", { name: "Continuar a la entrega" }),
 		);
@@ -900,11 +901,11 @@ describe("estilos de paridad sin medición de geometría", () => {
 			getComputedStyle(
 				screen.getByRole("heading", { name: "Sedes y contacto" }),
 			).fontSize,
-		).toBe("52.48px");
+		).toBe("var(--titulo-1)");
 		expect(
 			getComputedStyle(document.querySelector("#titulo-contacto") as Element)
 				.fontSize,
-		).toBe("30px");
+		).toBe("var(--titulo-3)");
 		const red = document.querySelector(".contacto-sedes .chips li");
 		if (!red) throw new Error("Faltan las redes");
 		expect(getComputedStyle(red).padding).toBe("0px");

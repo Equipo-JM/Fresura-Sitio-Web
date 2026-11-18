@@ -34,14 +34,16 @@ export function Antojos() {
 					width="132"
 					height="115"
 				/>
-				<h2 id="titulo-antojos" className="frase-antojo" tabIndex={-1}>
+				{/* Párrafo y no título: el selector va antes del h1 de /menu y un h2 ahí
+				    rompería el orden de encabezados. La sección sigue nombrada por él. */}
+				<p id="titulo-antojos" className="frase-antojo" tabIndex={-1}>
 					Hoy se me antoja{" "}
 					<span className="hueco" aria-live="polite">
 						<span className="hueco-texto" key={elegido ?? "vacio"}>
 							{elegido ?? "…"}
 						</span>
 					</span>
-				</h2>
+				</p>
 				<ul className="lista-antojos">
 					{ANTOJOS.map((antojo) => (
 						<li key={antojo.texto}>
