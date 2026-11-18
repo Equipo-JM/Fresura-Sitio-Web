@@ -30,14 +30,16 @@ describe("rutas del sitio", () => {
 
 	it("muestra en el inicio la presentación leída del contenido", async () => {
 		// La versión publicada llega como la fila `{ json }` de Supabase.
+		const publicado = structuredClone(ejemplo);
+		publicado.negocio.presentacion.titulo = "Un titular editado desde el panel";
 		vi.spyOn(globalThis, "fetch").mockImplementation(async () =>
-			Response.json({ json: structuredClone(ejemplo) }),
+			Response.json({ json: publicado }),
 		);
 		mostrarRuta("/");
 		expect(
 			await screen.findByRole("heading", {
 				level: 1,
-				name: ejemplo.negocio.presentacion.titulo,
+				name: publicado.negocio.presentacion.titulo,
 			}),
 		).toBeInTheDocument();
 		expect(screen.queryByText("Por validar")).toBeNull();

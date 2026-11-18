@@ -1,17 +1,16 @@
-import { Fragment, type RefObject, useRef } from "react";
+import { useRef } from "react";
 import { Link } from "react-router";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { Icono } from "../../compartido/componentes/Icono";
 import { CLAVE_PORTADA } from "../../compartido/fotos/almacenFotosDemo";
 import { useFotosDemo } from "../../compartido/fotos/useFotosDemo";
 import { useCalcomaniaViva } from "../../compartido/movimiento/useCalcomaniaViva";
-import { useCintaDesplazamiento } from "../../compartido/movimiento/useCintaDesplazamiento";
 import { useEntradaPortada } from "../../compartido/movimiento/useEntradaPortada";
 import { FOTO_PORTADA } from "./copy";
 
 /**
  * Portada del inicio: el título del contrato, dos acciones y la foto en arco.
- * Las palabras entran una vez al cargar; la cinta se mueve con el desplazamiento.
+ * Las palabras entran una vez al cargar.
  */
 export function Portada({
 	titulo,
@@ -28,9 +27,21 @@ export function Portada({
 	useCalcomaniaViva(sello, { girar: false, alCargar: true });
 	const fotoCambiada = useFotosDemo()[CLAVE_PORTADA];
 
+	// Las versiones de contenido anteriores conservan el lema que sustituyó el equipo.
+	const titular =
+		/^Ven, date un gusto bonito(?:(?:…|\.\.\.) como tú)?[.!]?$/i.test(
+			titulo.trim(),
+		)
+			? "Fresas jugosas, crema esponjosa y tu toque favorito"
+			: titulo;
+	const enfasis = "tu toque favorito";
 	return (
-		<>
-			<section className="portada" aria-labelledby="titulo-portada" ref={raiz}>
+		<section
+			className="portada-borde"
+			aria-labelledby="titulo-portada"
+			ref={raiz}
+		>
+			<div className="portada">
 				<img
 					className="deco portada-trazo"
 					src="/marca/trazo-1-we-peep.svg"
@@ -38,29 +49,15 @@ export function Portada({
 				/>
 				<div className="envoltura portada-grid">
 					<div className="portada-texto">
-						<h1 id="titulo-portada" aria-label={titulo}>
-							{titulo.split(" ").map((palabra, i) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: las palabras del título son una lista fija que no se reordena
-								<Fragment key={`${palabra}-${i}`}>
-									{/* El espacio va fuera de la caja: dentro de un inline-block se pierde y las palabras se pegan. */}
-									{titulo.endsWith("como tú") &&
-									i === titulo.split(" ").length - 2 ? (
-										<em>
-											<span className="portada-palabra-caja">
-												<span className="portada-palabra">como</span>
-											</span>{" "}
-											<span className="portada-palabra-caja">
-												<span className="portada-palabra">tú</span>
-											</span>
-										</em>
-									) : titulo.endsWith("como tú") &&
-										i === titulo.split(" ").length - 1 ? null : (
-										<span className="portada-palabra-caja">
-											<span className="portada-palabra">{palabra}</span>
-										</span>
-									)}{" "}
-								</Fragment>
-							))}
+						<h1 id="titulo-portada">
+							{titular.endsWith(enfasis) ? (
+								<>
+									{titular.slice(0, -enfasis.length)}
+									<em>{enfasis}</em>
+								</>
+							) : (
+								titular
+							)}
 						</h1>
 						<p className="portada-bajada portada-entrada">{texto}</p>
 						<div className="portada-acciones portada-entrada">
@@ -111,32 +108,7 @@ export function Portada({
 						/>
 					</div>
 				</div>
-			</section>
-			<Cinta />
-		</>
-	);
-}
-
-/** Banda con la frase de marca. Se mueve con el desplazamiento; es decorativa. */
-function Cinta() {
-	const pista = useRef<HTMLDivElement>(null);
-	useCintaDesplazamiento(pista as RefObject<HTMLElement>);
-	const trozo = (
-		<>
-			<span>Dulce, pero con estilo</span>
-			<img src="/marca/fresa-we-peep.svg" alt="" width="16" height="23" />
-		</>
-	);
-	return (
-		<div className="cinta" aria-hidden="true">
-			<div className="cinta-pista" ref={pista}>
-				{Array.from({ length: 16 }, (_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: el trozo se repite igual, sin orden propio
-					<span className="cinta-trozo" key={i}>
-						{trozo}
-					</span>
-				))}
 			</div>
-		</div>
+		</section>
 	);
 }

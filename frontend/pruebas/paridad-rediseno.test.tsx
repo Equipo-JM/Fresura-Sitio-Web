@@ -97,11 +97,11 @@ describe("paridad del inicio", () => {
 			expect(pie).not.toHaveTextContent("Sede U");
 		},
 	);
-	it("la foto de portada entra desde una escala mayor como en el prototipo", () => {
+	it("presenta la foto de portada a su escala final desde la entrada", () => {
 		mostrar();
 		const foto = document.querySelector(".portada-arco img");
 		if (!foto) throw new Error("Falta la foto de portada");
-		expect(Number(gsap.getProperty(foto, "scaleX"))).toBeGreaterThan(1);
+		expect(Number(gsap.getProperty(foto, "scaleX"))).toBe(1);
 	});
 	it("liga el sello y Nosotros al desplazamiento y limpia al salir", () => {
 		// Además de estos momentos, los revelados al bajar crean sus propios
@@ -170,9 +170,9 @@ describe("paridad del inicio", () => {
 			mostrar("/", contenido);
 			const titulo = screen.getByRole("heading", {
 				level: 1,
-				name: "Ven, date un gusto bonito… como tú",
+				name: "Fresas jugosas, crema esponjosa y tu toque favorito",
 			});
-			expect(titulo.querySelector("em")).toHaveTextContent("como tú");
+			expect(titulo.querySelector("em")).toHaveTextContent("tu toque favorito");
 			expect(
 				screen.getByText(
 					"Fresas con crema a tu manera: eliges el tamaño, le pones tu toque y terminamos el pedido por WhatsApp.",
@@ -327,11 +327,12 @@ describe("paridad del inicio", () => {
 			"También estamos en TikTok y Facebook.",
 		);
 	});
-	it("muestra el espacio del logo de Google en Nosotros", () => {
+	it("muestra el logo de Google junto a las reseñas en Nosotros", () => {
 		mostrar("/nosotros");
-		expect(
-			screen.getByText("Espacio para el logo de Google"),
-		).toBeInTheDocument();
+		expect(document.querySelector(".google-logo img")).toHaveAttribute(
+			"src",
+			"/marca/google-g.svg",
+		);
 	});
 	it("muestra el mapa de cada sede, el enlace y el cierre por almuerzo", () => {
 		mostrar("/sedes");

@@ -35,3 +35,29 @@ export function radioEnPixeles(
 		2 ** zoom;
 	return (kilometros * 1000) / metrosPorPixel;
 }
+
+/** Posición de una coordenada sobre el mosaico mundial Web Mercator. */
+export function proyectar({ lat, lng }: Coordenadas, zoom: number) {
+	const lado = 256 * 2 ** zoom;
+	const radianes = (lat * Math.PI) / 180;
+	return {
+		x: ((lng + 180) / 360) * lado,
+		y: ((1 - Math.asinh(Math.tan(radianes)) / Math.PI) / 2) * lado,
+	};
+}
+
+/** Centro visible después de arrastrar el mapa en píxeles CSS. */
+export function centroTrasArrastre(
+	centro: Coordenadas,
+	zoom: number,
+	dx: number,
+	dy: number,
+): Coordenadas {
+	const punto = proyectar(centro, zoom);
+	const lado = 256 * 2 ** zoom;
+	const y = Math.max(0, Math.min(1, (punto.y - dy) / lado));
+	return {
+		lat: (Math.atan(Math.sinh(Math.PI * (1 - 2 * y))) * 180) / Math.PI,
+		lng: ((((((punto.x - dx) / lado) * 360) % 360) + 360) % 360) - 180,
+	};
+}

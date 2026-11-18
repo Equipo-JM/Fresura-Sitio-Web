@@ -1926,31 +1926,6 @@ body {
 	filter: drop-shadow(0 10px 16px rgba(91, 59, 36, 0.25));
 }
 
-/* Cinta */
-.cinta {
-	background: var(--superficie-oscura);
-	color: var(--texto-sobre-oscuro);
-	overflow: hidden;
-	padding-block: 14px;
-}
-.cinta-pista {
-	display: flex;
-	align-items: center;
-	gap: 24px;
-	width: max-content;
-	white-space: nowrap;
-	font-family: var(--fuente-titulos);
-	font-style: italic;
-	font-size: var(--titulo-3);
-	line-height: 1;
-	will-change: transform;
-}
-.cinta-pista img {
-	width: 16px;
-	height: auto;
-	flex: none;
-}
-
 /* Selector de antojos */
 .antojos-sec {
 	background: var(--color-we-peep);
