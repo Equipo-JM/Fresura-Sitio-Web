@@ -1583,3 +1583,22 @@ button.paso-num {
 .pie li .pv {
 	margin-left: 8px;
 }
+
+/* Publicaciones de Instagram dentro de las polaroids. El iframe no avisa su alto
+   (eso lo hace el script de Instagram, que no se carga): se le da uno fijo que
+   cabe la cabecera, el video y el pie de la inserción. */
+.polaroid-foto.polaroid-instagram {
+	aspect-ratio: auto;
+	background: var(--color-platinum);
+}
+.polaroid-instagram iframe {
+	display: block;
+	width: 100%;
+	height: 650px;
+	border: 0;
+}
+.polaroid-pie a {
+	color: inherit;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}

@@ -91,21 +91,13 @@ export const FOTO_PORTADA = {
 	alto: 1200,
 } as const;
 
-/** Tres publicaciones de ejemplo para las polaroids de «Lo más reciente». */
-export const FOTOS_RECIENTE = [
-	{
-		src: "/ejemplos/reciente-vaso.webp",
-		alt: "Vaso de fresas con chocolate",
-		cinta: "flamingo",
-	},
-	{
-		src: "/ejemplos/reciente-interior.webp",
-		alt: "Sillas rosadas bajo el arco con el logo de Fresura",
-		cinta: "verde",
-	},
-	{
-		src: "/ejemplos/reciente-toldo.webp",
-		alt: "Toldo de rayas con el logo de Fresura",
-		cinta: "porcini",
-	},
+/**
+ * Publicaciones de @fresuraco que muestran las polaroids de «Lo más reciente»,
+ * por su código en Instagram (las tres últimas sin fijar, al 17 nov 2026).
+ * No se actualizan solas: para cambiarlas se reemplaza el código.
+ */
+export const PUBLICACIONES_RECIENTE = [
+	{ codigo: "Df3FurXt_4g", cinta: "flamingo" },
+	{ codigo: "DfX1EGrsRji", cinta: "verde" },
+	{ codigo: "Dekb08AsDhZ", cinta: "porcini" },
 ] as const;
