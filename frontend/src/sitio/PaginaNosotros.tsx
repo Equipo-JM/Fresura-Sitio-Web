@@ -9,10 +9,7 @@ export function PaginaNosotros() {
 			{(contenido) => (
 				<>
 					<Nosotros comoPagina />
-					<Calificacion
-						opiniones={contenido.opiniones}
-						estado={contenido.estado}
-					/>
+					<Calificacion opiniones={contenido.opiniones} />
 				</>
 			)}
 		</ConContenido>

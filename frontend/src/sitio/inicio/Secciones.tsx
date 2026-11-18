@@ -97,10 +97,8 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 /** Calificación de Google, solo si el contrato la marca como mostrada (RF-12). */
 export function Calificacion({
 	opiniones,
-	estado,
 }: {
 	opiniones: Contenido["opiniones"];
-	estado: Contenido["estado"];
 }) {
 	if (!opiniones.mostrar || opiniones.calificacion === null) return null;
 	const fecha = opiniones.fecha_corte
