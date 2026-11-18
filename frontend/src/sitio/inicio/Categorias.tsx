@@ -1,10 +1,13 @@
+import { type ReactNode, useCallback, useRef, useState } from "react";
 import { Link } from "react-router";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
-import { nombreProducto, pesos } from "../../compartido/carrito/reglas";
+import { nombreProducto } from "../../compartido/carrito/reglas";
 import { Icono } from "../../compartido/componentes/Icono";
+import { useCambioAnimado } from "../../compartido/movimiento/useCambioAnimado";
 import { FotoProducto } from "../FotoProducto";
+import { Abanico, FresaPosicion, precioDesde } from "./Abanico";
 import { DATOS_CATEGORIAS, FRASES_CATEGORIAS } from "./copy";
-import { useCarrusel } from "./useCarrusel";
+import { useAutoavance } from "./useAutoavance";
 
 type Producto = Contenido["productos"][number];
 
@@ -36,7 +39,11 @@ export function Categorias({
 						className={`seccion capa ${indice % 2 === 1 ? "fondo-dust" : ""}`}
 						aria-labelledby={`titulo-${categoria.id}`}
 					>
-						<div className="envoltura">
+						<Vitrina
+							productos={productos}
+							categorias={contenido.categorias}
+							respaldo={respaldo}
+						>
 							<div className="capa-encabezado">
 								<h2 id={`titulo-${categoria.id}`} tabIndex={-1}>
 									{categoria.nombre}
@@ -50,13 +57,7 @@ export function Categorias({
 									{DATOS_CATEGORIAS[categoria.id] ?? tamanos}
 								</p>
 							</div>
-							<Fila
-								productos={productos}
-								respaldo={respaldo}
-								categorias={contenido.categorias}
-								enBeige={indice % 2 === 1}
-							/>
-						</div>
+						</Vitrina>
 					</section>
 				);
 			})}
@@ -64,76 +65,134 @@ export function Categorias({
 	);
 }
 
-/** Productos de una categoría. Con más de tres, se desplazan en horizontal con flechas. */
-function Fila({
+/**
+ * Una categoría del menú en vitrina: a la izquierda el encabezado (`children`)
+ * y el producto al frente, a la derecha el abanico. Avanza solo mientras está a
+ * la vista, con botón para pausar; las flechas, las fresas y las tarjetas
+ * vecinas también cambian el producto.
+ */
+function Vitrina({
 	productos,
 	categorias,
-	enBeige,
 	respaldo,
+	children,
 }: {
 	productos: Producto[];
 	categorias: Contenido["categorias"];
-	enBeige: boolean;
 	respaldo: boolean;
+	children: ReactNode;
 }) {
-	const { carril, posicion, paginas, actualizar, desplazar } = useCarrusel(
-		productos.length,
+	const cantidad = productos.length;
+	const [elegido, setElegido] = useState(0);
+	const [pausado, setPausado] = useState(false);
+	const zona = useRef<HTMLDivElement>(null);
+	const panel = useRef<HTMLDivElement>(null);
+	const ir = useCallback(
+		(paso: number) => setElegido((i) => (i + paso + cantidad) % cantidad),
+		[cantidad],
 	);
-	const tarjetas = productos.map((producto) => (
-		<li key={producto.id}>
-			<TarjetaProducto
-				producto={producto}
-				categorias={categorias}
-				enBeige={enBeige}
-				respaldo={respaldo}
-			/>
-		</li>
-	));
-	if (productos.length <= 3)
-		return <ul className="fila-productos">{tarjetas}</ul>;
+	const avanzar = useCallback(() => ir(1), [ir]);
+	useAutoavance(zona, avanzar, pausado || cantidad < 2);
+	const actual = productos[elegido] ?? productos[0];
+	useCambioAnimado(panel, actual.id);
 
 	return (
-		<div className="carrusel">
-			<ul
-				className="fila-productos carril"
-				ref={carril}
-				// biome-ignore lint/a11y/noNoninteractiveTabindex: el carril permite desplazarse con el teclado además de las flechas visibles.
-				tabIndex={0}
-				aria-label="Productos, usa las flechas para moverte"
-				onScroll={actualizar}
-				onKeyDown={(e) => {
-					if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-						e.preventDefault();
-						desplazar(e.key === "ArrowRight" ? 1 : -1);
-					}
-				}}
-			>
-				{tarjetas}
-			</ul>
-			<div className="carrusel-control">
-				<button
-					type="button"
-					className="redondo"
-					onClick={() => desplazar(-1)}
-					aria-label="Anterior"
-					aria-disabled={posicion <= 1}
-				>
-					<Icono nombre="izquierda" />
-				</button>
-				<span className="carrusel-posicion" aria-live="polite">
-					{posicion} de {paginas}
-				</span>
-				<button
-					type="button"
-					className="redondo"
-					onClick={() => desplazar(1)}
-					aria-label="Siguiente"
-					aria-disabled={posicion >= paginas}
-				>
-					<Icono nombre="derecha" />
-				</button>
+		<div className="envoltura vitrina" ref={zona}>
+			<div className="vitrina-texto">
+				{children}
+				<div className="vitrina-divisor" aria-hidden="true" />
+				<div className="vitrina-actual" ref={panel} aria-live="polite">
+					<div className="vitrina-actual-textos" data-cambio="texto">
+						{cantidad > 1 && (
+							<p className="vitrina-contador">
+								{String(elegido + 1).padStart(2, "0")} /{" "}
+								{String(cantidad).padStart(2, "0")}
+							</p>
+						)}
+						<p className="vitrina-nombre">{actual.nombre}</p>
+						<p>{actual.descripcion}</p>
+						<p className="vitrina-precio">{precioDesde(actual, respaldo)}</p>
+					</div>
+				</div>
+				<Link className="boton" to={`/producto/${actual.id}`}>
+					Elegir y ponerle mi toque
+					<Icono nombre="mas" />
+				</Link>
+				{cantidad > 1 && (
+					<div className="vitrina-controles">
+						<button
+							type="button"
+							className="redondo"
+							onClick={() => ir(-1)}
+							aria-label="Producto anterior"
+						>
+							<Icono nombre="izquierda" />
+						</button>
+						<div className="vitrina-fresas">
+							{productos.map((producto, indice) => (
+								<button
+									key={producto.id}
+									type="button"
+									className="vitrina-fresa"
+									aria-label={`Ver ${producto.nombre}`}
+									aria-current={indice === elegido}
+									onClick={() => setElegido(indice)}
+								>
+									<FresaPosicion activa={indice === elegido} />
+								</button>
+							))}
+						</div>
+						<button
+							type="button"
+							className="redondo"
+							onClick={() => ir(1)}
+							aria-label="Producto siguiente"
+						>
+							<Icono nombre="derecha" />
+						</button>
+						<button
+							type="button"
+							className="vitrina-pausa"
+							onClick={() => setPausado((p) => !p)}
+							aria-label={
+								pausado
+									? "Reanudar el avance automático"
+									: "Pausar el avance automático"
+							}
+							aria-pressed={pausado}
+						>
+							{pausado ? <IconoReanudar /> : <IconoPausa />}
+						</button>
+					</div>
+				)}
 			</div>
+			<Abanico
+				productos={productos}
+				elegido={elegido}
+				alElegir={setElegido}
+				categorias={categorias}
+				respaldo={respaldo}
+			/>
 		</div>
+	);
+}
+
+/** Dos barras de pausa; el conjunto de iconos del sitio no trae una. */
+function IconoPausa() {
+	return (
+		<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+			<rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" />
+			<rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" />
+		</svg>
+	);
+}
+
+/** Triángulo de reanudar. */
+function IconoReanudar() {
+	return (
+		<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+			<path d="M7 5l12 7-12 7z" fill="currentColor" />
+		</svg>
 	);
 }
 
@@ -149,15 +208,7 @@ export function TarjetaProducto({
 	enBeige?: boolean;
 	respaldo?: boolean;
 }) {
-	const precios = producto.presentaciones
-		.map((p) => p.precio)
-		.filter((p): p is number => p !== null);
-	const precio =
-		precios.length > 0
-			? `Desde ${pesos(Math.min(...precios))}`
-			: respaldo
-				? "Consulta precios por WhatsApp"
-				: "Precio por confirmar";
+	const precio = precioDesde(producto, respaldo);
 	return (
 		<Link
 			className="tarjeta"
