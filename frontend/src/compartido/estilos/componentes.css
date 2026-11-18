@@ -1307,6 +1307,16 @@ button.paso-num {
 .explora-tarjetas > li:nth-child(odd):not(:first-child) .explora-tarjeta {
 	background: var(--superficie-alterna);
 }
+/* En dos columnas (tableta y escritorio) los colores van en damero: rosa, beige
+   arriba y beige, rosa abajo. En una columna basta con alternar, como arriba. */
+@media (min-width: 521px) {
+	.explora-tarjetas:not(.sin-promos) > li:nth-child(4) .explora-tarjeta {
+		background: var(--superficie-alterna);
+	}
+	.explora-tarjetas:not(.sin-promos) > li:nth-child(5) .explora-tarjeta {
+		background: var(--superficie);
+	}
+}
 .explora-tarjeta.principal {
 	padding: 34px;
 	background: var(--superficie-oscura);
