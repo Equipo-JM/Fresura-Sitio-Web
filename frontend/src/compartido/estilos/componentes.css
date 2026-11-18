@@ -1612,3 +1612,118 @@ button.paso-num {
 	text-decoration-thickness: 1px;
 	text-underline-offset: 3px;
 }
+
+/* Transición entre secciones (propuesta): el borde inferior de cada sección baja
+   sobre la siguiente con una onda suave y simétrica que se repite pareja de lado a
+   lado. Se usa como máscara y toma el color de
+   la sección, así que funciona con cualquier fondo de la paleta. El aviso de
+   respaldo no la lleva. */
+.seccion,
+.pagina {
+	position: relative;
+	overflow-x: clip;
+	overflow-y: visible;
+}
+/* Sin fondo propio, la sección toma el Platinum de la página para que el borde se vea */
+.seccion:not([class*="fondo-"], .antojos-sec),
+.pagina {
+	background-color: var(--fondo);
+}
+.seccion::after,
+.pagina::after {
+	content: "";
+	position: absolute;
+	z-index: 1;
+	inset-inline: 0;
+	top: calc(100% - 1px);
+	height: 20px;
+	background-color: inherit;
+	/* «round» ajusta el ancho para que entren ondas completas: todas iguales y
+	   sin una onda cortada en los bordes de la pantalla. */
+	/* La primera capa es una franja sólida arriba: tapa las rayitas que deja el
+	   suavizado en la unión de cada onda. */
+	mask-image: linear-gradient(#000 0 0), url("/marca/borde-ondas.svg");
+	mask-size:
+		100% 6px,
+		120px 20px;
+	mask-repeat:
+		no-repeat,
+		round no-repeat;
+	pointer-events: none;
+}
+@media (max-width: 599.98px) {
+	.seccion::after,
+	.pagina::after {
+		height: 14px;
+		mask-size:
+			100% 4px,
+			84px 14px;
+	}
+}
+/* En /menu el título va justo después de los antojos: la curva no debe tocarlo */
+.antojos-sec + .pagina-encabezado {
+	padding-top: 64px;
+}
+
+/* Calcomanías en el corte (propuesta): las secciones que llevaban calcomanía junto al
+   título la llevan ahora montada sobre su borde inferior, a la derecha, mitad en ella
+   y mitad en la siguiente. En /menu va en el corte de los antojos, y la de
+   promociones pasó al corte de «Nuestros favoritos» en el inicio. */
+.titulo-con-calcomania > .calcomania {
+	display: none;
+}
+.seccion:has(.calcomania-explora)::before,
+.destacados::before,
+.pagina:has(.calcomania-sedes)::before,
+.antojos-sec::before {
+	content: "";
+	position: absolute;
+	z-index: 2;
+	bottom: -60px;
+	right: max(16px, calc((100% - var(--ancho-maximo)) / 2));
+	width: 120px;
+	height: 120px;
+	background:
+		url("/calcomanias/fresas-con-crema-chocolate-y-flow.webp") center / contain
+		no-repeat;
+	filter: drop-shadow(0 8px 12px rgba(91, 59, 36, 0.22));
+	rotate: 7deg;
+	pointer-events: none;
+}
+.destacados::before {
+	background-image: url("/calcomanias/ven-date-un-gusto-bonito.webp");
+	rotate: -6deg;
+}
+.pagina:has(.calcomania-sedes)::before {
+	background-image: url("/calcomanias/las-mejores-fresas-de-bogota.webp");
+	rotate: 5deg;
+}
+.antojos-sec::before {
+	background-image: url("/calcomanias/fresitas-fresotas-fresuras.webp");
+	rotate: -6deg;
+}
+@media (min-width: 900px) {
+	.seccion:has(.calcomania-explora)::before,
+	.destacados::before,
+	.pagina:has(.calcomania-sedes)::before,
+	.antojos-sec::before {
+		bottom: -100px;
+		width: 200px;
+		height: 200px;
+	}
+}
+
+/* La última sección antes del pie no lleva onda: el pie entra con un corte recto.
+   En /menu las categorías van dentro de un contenedor, por eso el segundo selector. */
+main > .seccion:last-child::after,
+main > .pagina:last-child::after,
+main > :last-child > .seccion:last-child::after {
+	content: none;
+}
+@media (min-width: 900px) {
+	/* Sobre el pie la calcomanía entra poco, para no tapar la columna de sedes */
+	main > .seccion:last-child::before,
+	main > .pagina:last-child::before {
+		bottom: -24px;
+	}
+}
