@@ -179,8 +179,13 @@ describe("POST /prompt-video (IF-10, PU-16)", () => {
 			prompt: {
 				herramienta: "avatar",
 				...avatar,
-				texto_copiar:
-					"¿Ya armaste la tuya?\n\nTú eliges cada capa.\n\nEscríbenos y te la preparamos.",
+				texto_copiar: [
+					"Video vertical 9:16 de 15 segundos",
+					`Estilo general\n${avatar.estilo_general}`,
+					"Escena 1\nTexto del avatar: ¿Ya armaste la tuya?\nIndicaciones: Sonríe a cámara",
+					"Escena 2\nTexto del avatar: Tú eliges cada capa.\nIndicaciones: Plano medio",
+					"Escena 3\nTexto del avatar: Escríbenos y te la preparamos.\nIndicaciones: Mira a cámara",
+				].join("\n\n"),
 			},
 			modelo: "principal",
 		});
@@ -220,7 +225,7 @@ describe("POST /prompt-video (IF-10, PU-16)", () => {
 				herramienta: "escenas",
 				...escenas,
 				texto_copiar:
-					'Video vertical 9:16 de 15 segundos\n\nLuz natural, cámara fija, ambiente cálido\n\nUna mujer muestra el vaso y dice "¿Ya armaste la tuya?".\n\nElla señala las capas y dice "Tú eliges cada capa".\n\nElla sonríe y dice "Escríbenos y te la preparamos".',
+					'Video vertical 9:16 de 15 segundos\n\nEstilo general\nLuz natural, cámara fija, ambiente cálido\n\nEscena 1\nUna mujer muestra el vaso y dice "¿Ya armaste la tuya?".\n\nEscena 2\nElla señala las capas y dice "Tú eliges cada capa".\n\nEscena 3\nElla sonríe y dice "Escríbenos y te la preparamos".',
 			},
 			modelo: "principal",
 		});

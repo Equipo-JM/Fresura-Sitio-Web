@@ -45,7 +45,8 @@ export function ChatAgente({
 		<section className="panel-seccion" aria-labelledby="chat-titulo">
 			<h2 id="chat-titulo">Conversar con el agente</h2>
 			<div className="agente-distribucion">
-				<nav aria-label="Conversaciones">
+				<nav className="agente-historial" aria-label="Conversaciones">
+					<h3>Historial</h3>
 					<button
 						className="boton secundario"
 						type="button"
@@ -54,11 +55,11 @@ export function ChatAgente({
 					>
 						Nueva conversación
 					</button>
-					<ul className="guiones-lista">
-						{chat.conversaciones.map((c) => (
+					<ul className="agente-conversaciones">
+						{chat.historial.filas.map((c) => (
 							<li key={c.id}>
 								<button
-									className="boton-texto"
+									className="boton-texto agente-conversacion"
 									type="button"
 									aria-current={
 										chat.conversacionActiva === c.id ? "true" : undefined
@@ -78,7 +79,10 @@ export function ChatAgente({
 									Borrar
 								</button>
 								{confirmacion === c.id && (
-									<fieldset aria-label="Confirmar borrado">
+									<fieldset
+										className="agente-confirmar-borrado"
+										aria-label="Confirmar borrado"
+									>
 										<p>
 											¿Borrar esta conversación y sus mensajes? No podrás
 											recuperarlos.
@@ -106,6 +110,46 @@ export function ChatAgente({
 							</li>
 						))}
 					</ul>
+					{(chat.historial.numero > 0 || chat.historial.hayAnteriores) && (
+						<div className="agente-paginacion">
+							<button
+								className="boton-texto"
+								type="button"
+								disabled={chat.ocupado || chat.historial.numero === 0}
+								onClick={() => {
+									setConfirmacion(null);
+									void chat.cambiarPagina(chat.historial.numero - 1);
+								}}
+							>
+								Más recientes
+							</button>
+							<span role="status">Página {chat.historial.numero + 1}</span>
+							<button
+								className="boton-texto"
+								type="button"
+								disabled={chat.ocupado || !chat.historial.hayAnteriores}
+								onClick={() => {
+									setConfirmacion(null);
+									void chat.cambiarPagina(chat.historial.numero + 1);
+								}}
+							>
+								Anteriores
+							</button>
+						</div>
+					)}
+					{chat.errorHistorial && (
+						<div>
+							<p role="alert">{chat.errorHistorial}</p>
+							<button
+								className="boton-texto"
+								type="button"
+								disabled={chat.ocupado}
+								onClick={() => void chat.cambiarPagina(chat.historial.numero)}
+							>
+								Recargar historial
+							</button>
+						</div>
+					)}
 				</nav>
 				<div className="agente-chat">
 					<div

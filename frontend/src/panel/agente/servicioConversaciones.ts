@@ -21,6 +21,15 @@ export type Conversacion = Pick<
 	"id" | "titulo" | "actualizado_en"
 >;
 
+const CONVERSACIONES_POR_PAGINA = 5;
+
+/** Una página del historial, ordenada por la actividad más reciente. */
+export type PaginaConversaciones = {
+	numero: number;
+	filas: Conversacion[];
+	hayAnteriores: boolean;
+};
+
 /** Conserva palabras completas salvo si la primera supera por sí sola el máximo. */
 export function tituloConversacion(mensaje: string) {
 	const texto = mensaje.trim().replace(/\s+/g, " ");
@@ -100,16 +109,24 @@ export function convertirHistorial(
 /** CRUD bajo RLS; el servidor es el único que escribe los mensajes del chat. */
 export function crearServicioConversaciones(cliente: SupabaseClient<Database>) {
 	return {
-		async listar(): Promise<Conversacion[]> {
+		async listar(numero = 0): Promise<PaginaConversaciones> {
+			const desde = numero * CONVERSACIONES_POR_PAGINA;
 			const { data, error } = await cliente
 				.from("agente_conversaciones")
 				.select("id,titulo,actualizado_en")
-				.order("actualizado_en", { ascending: false });
+				.order("actualizado_en", { ascending: false })
+				.order("id", { ascending: false })
+				.range(desde, desde + CONVERSACIONES_POR_PAGINA);
 			if (error)
 				throw new Error(
 					"No pudimos cargar las conversaciones. Inténtalo de nuevo.",
 				);
-			return data ?? [];
+			const filas = data ?? [];
+			return {
+				numero,
+				filas: filas.slice(0, CONVERSACIONES_POR_PAGINA),
+				hayAnteriores: filas.length > CONVERSACIONES_POR_PAGINA,
+			};
 		},
 		async crear(mensaje: string): Promise<Conversacion> {
 			const { data, error } = await cliente

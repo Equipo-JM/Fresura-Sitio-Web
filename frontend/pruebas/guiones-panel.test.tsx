@@ -66,6 +66,7 @@ function simularCliente(iniciales: Fila[] = []) {
 			const ejecutar = () => {
 				if (operacion !== "leer" && falloEscritura)
 					return { data: null, error: { code: "42501" } };
+				if (tabla === "agente_conversaciones") return { data: [], error: null };
 				if (tabla === "versiones_contenido")
 					return { data: { json: contenido }, error: null };
 				if (tabla === "prompts_video")
@@ -98,6 +99,7 @@ function simularCliente(iniciales: Fila[] = []) {
 			const consulta = {
 				select: () => consulta,
 				order: () => consulta,
+				range: () => consulta,
 				eq(campo: string, valor: unknown) {
 					filtros[campo] = valor;
 					return consulta;
@@ -277,15 +279,17 @@ describe("guiones del panel", () => {
 		});
 		montar(simulado);
 		fireEvent.click(await screen.findByRole("button", { name: /^Abrir/ }));
-		expect(await screen.findByLabelText("Texto para copiar")).toHaveValue(
-			"Prompt anterior",
+		expect(
+			await screen.findByLabelText("Prompt completo para escenas"),
+		).toHaveValue(
+			'Video vertical 9:16 de 30 segundos\n\nEstilo general\nLuz suave\n\nEscena 1\nUna persona dice "Hola".',
 		);
 		expect(screen.getByLabelText("Título")).toBeDisabled();
 		vi.spyOn(window, "confirm").mockReturnValue(true);
 		fireEvent.click(screen.getByRole("button", { name: "Editar" }));
 		await waitFor(() =>
 			expect(
-				screen.queryByLabelText("Texto para copiar"),
+				screen.queryByLabelText("Prompt completo para escenas"),
 			).not.toBeInTheDocument(),
 		);
 		expect(simulado.filas[0].estado).toBe("borrador");
@@ -389,9 +393,22 @@ describe("guiones del panel", () => {
 		fireEvent.click(
 			screen.getByRole("button", { name: "Generar prompt de video" }),
 		);
-		expect(await screen.findByText("Mirar a cámara")).toBeInTheDocument();
-		fireEvent.click(screen.getByRole("button", { name: "Copiar prompt" }));
-		await waitFor(() => expect(copiar).toHaveBeenCalledWith("Ven a probarlo"));
-		expect(screen.getByRole("status")).toHaveTextContent("Texto copiado");
+		const campo = await screen.findByLabelText("Prompt completo para avatar");
+		const texto =
+			"Video vertical 9:16 de 30 segundos\n\nEstilo general\nLuz natural\n\nEscena 1\nTexto del avatar: Ven a probarlo\nIndicaciones: Mirar a cámara";
+		expect(campo).toHaveValue(texto);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Copiar prompt completo" }),
+		);
+		await waitFor(() => expect(copiar).toHaveBeenCalledWith(texto));
+		expect(await screen.findByText("Prompt completo copiado.")).toBeVisible();
+		copiar.mockRejectedValueOnce(new Error("Permiso denegado"));
+		fireEvent.click(
+			screen.getByRole("button", { name: "Copiar prompt completo" }),
+		);
+		expect(await screen.findByText(/Prompt seleccionado/)).toBeVisible();
+		expect(campo).toHaveFocus();
+		expect(campo).toHaveProperty("selectionStart", 0);
+		expect(campo).toHaveProperty("selectionEnd", texto.length);
 	});
 });

@@ -67,8 +67,12 @@ function respuesta(metadata = {}) {
 		{ type: "finish", finishReason: "stop", messageMetadata: metadata },
 	]);
 }
-function simular(iniciales = false) {
-	let filas = iniciales ? [conversacion] : [];
+function simular(iniciales: boolean | (typeof conversacion)[] = false) {
+	let filas = Array.isArray(iniciales)
+		? iniciales
+		: iniciales
+			? [conversacion]
+			: [];
 	const guardados: unknown[] = [];
 	let token = "token-inicial-ficticio";
 	let responder = () => respuesta();
@@ -92,10 +96,14 @@ function simular(iniciales = false) {
 					return Response.json(conversacion);
 				}
 				if (opciones?.method === "DELETE") {
-					filas = [];
+					const id = new URL(url).searchParams.get("id");
+					filas = filas.filter((fila) => `eq.${fila.id}` !== id);
 					return new Response(null, { status: 204 });
 				}
-				return Response.json(filas);
+				const parametros = new URL(url).searchParams;
+				const desde = Number(parametros.get("offset") ?? "0");
+				const limite = Number(parametros.get("limit") ?? filas.length);
+				return Response.json(filas.slice(desde, desde + limite));
 			}
 			if (url.includes("agente_mensajes")) return Response.json([]);
 			if (url.includes("guiones") && opciones?.method === "POST") {
@@ -229,6 +237,38 @@ describe("conversión de memoria", () => {
 	});
 });
 describe("chat del panel", () => {
+	it("pagina el historial, permite abrir conversaciones anteriores y vuelve si queda una página vacía", async () => {
+		const filas = Array.from({ length: 6 }, (_, i) => ({
+			...conversacion,
+			id: `a0a0a0a0-1111-4111-8111-${String(i).padStart(12, "0")}`,
+			titulo: `Conversación ${i + 1}`,
+		}));
+		simular(filas);
+		const anteriores = await screen.findByRole("button", {
+			name: "Anteriores",
+		});
+		expect(
+			screen.getByRole("button", { name: "Conversación 5" }),
+		).toBeVisible();
+		expect(screen.queryByRole("button", { name: "Conversación 6" })).toBeNull();
+		fireEvent.click(anteriores);
+		const antigua = await screen.findByRole("button", {
+			name: "Conversación 6",
+		});
+		expect(anteriores).toBeDisabled();
+		fireEvent.click(antigua);
+		await waitFor(() =>
+			expect(antigua).toHaveAttribute("aria-current", "true"),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Borrar Conversación 6" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Confirmar borrado" }));
+		expect(
+			await screen.findByRole("button", { name: "Conversación 1" }),
+		).toBeVisible();
+		expect(screen.queryByRole("button", { name: "Anteriores" })).toBeNull();
+	});
 	it("envía únicamente el contrato y calcula Authorization otra vez en cada envío", async () => {
 		const simulado = simular();
 		enviar();

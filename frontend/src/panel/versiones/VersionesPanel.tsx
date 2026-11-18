@@ -81,8 +81,23 @@ export function VersionesPanel({
 						</button>
 					)}
 				</nav>
-				<main id="versiones" tabIndex={-1} aria-busy={ocupado}>
-					<h1>Versiones</h1>
+				<main
+					id="versiones"
+					className="panel-versiones"
+					tabIndex={-1}
+					aria-busy={ocupado}
+				>
+					<div className="panel-versiones-cabecera">
+						<h1>Versiones</h1>
+						<button
+							type="button"
+							className="boton secundario compacto"
+							disabled={ocupado}
+							onClick={() => void panel.recargar()}
+						>
+							Recargar
+						</button>
+					</div>
 					{error && (
 						<p className="panel-aviso" role="alert">
 							{error}
@@ -101,19 +116,11 @@ export function VersionesPanel({
 							</p>
 						)}
 					</div>
-					<button
-						type="button"
-						className="boton-texto"
-						disabled={ocupado}
-						onClick={() => void panel.recargar()}
-					>
-						Recargar
-					</button>
 					{!versiones && !error && <p>Cargando…</p>}
 					{versiones && (
-						<>
+						<div className="panel-versiones-resumen">
 							<section
-								className="panel-seccion"
+								className="panel-versiones-tarjeta"
 								aria-labelledby="publicada-titulo"
 							>
 								<h2 id="publicada-titulo">Lo que está en el sitio</h2>
@@ -155,7 +162,7 @@ export function VersionesPanel({
 								</button>
 							</section>
 							<section
-								className="panel-seccion"
+								className="panel-versiones-tarjeta"
 								aria-labelledby="borrador-titulo"
 							>
 								<h2 id="borrador-titulo">
@@ -306,7 +313,7 @@ export function VersionesPanel({
 									</div>
 								</dialog>
 							)}
-						</>
+						</div>
 					)}
 				</main>
 			</div>

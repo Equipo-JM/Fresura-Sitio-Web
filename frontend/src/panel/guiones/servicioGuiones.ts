@@ -2,22 +2,26 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { esquemaContenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import {
 	crearEsquemaGuion,
+	type DuracionVideo,
 	esquemaInstruccionGuion,
 	type Guion,
 	type InstruccionGuion,
 } from "../../../../backend/supabase/functions/_shared/esquemas/guion";
+import {
+	type HerramientaVideo,
+	leerSalidaPromptVideo,
+	textoCompletoPromptVideo,
+} from "../../../../backend/supabase/functions/_shared/esquemas/prompt-video";
 import type { Database, Json } from "../../tipos/database.types";
 
 /** Fila original; los textos se validan antes de abrir el editor. */
 export type GuionGuardado = Database["public"]["Tables"]["guiones"]["Row"];
 /** Estado persistente, sujeto a los disparadores de la base. */
 export type EstadoGuion = GuionGuardado["estado"];
-/** Las indicaciones se muestran aparte del texto que se pega en la herramienta. */
+/** Prompt listo para pegar en una herramienta de video. */
 export type PromptVideo = {
-	herramienta: "avatar" | "escenas" | null;
+	herramienta: HerramientaVideo | null;
 	texto_copiar: string;
-	estilo_general: string;
-	escenas: { orden: number; texto: string; indicaciones: string }[];
 };
 
 function objeto(valor: unknown): Record<string, unknown> {
@@ -38,37 +42,26 @@ function errorEscritura(error: { code: string }, accion = "guardar") {
 	return new Error(`No pudimos ${accion} el guion. Inténtalo de nuevo.`);
 }
 
-function leerPrompt(valor: unknown): PromptVideo {
+function leerPrompt(valor: unknown, duracion: DuracionVideo): PromptVideo {
 	const datos = objeto(valor);
-	if (typeof datos.texto_copiar !== "string")
+	const herramienta =
+		datos.herramienta === "avatar" || datos.herramienta === "escenas"
+			? datos.herramienta
+			: null;
+	if (herramienta) {
+		const salida = leerSalidaPromptVideo(herramienta, {
+			estilo_general: datos.estilo_general,
+			escenas: datos.escenas,
+		});
+		if (salida.success)
+			return {
+				herramienta,
+				texto_copiar: textoCompletoPromptVideo(salida.data, duracion),
+			};
+	}
+	if (typeof datos.texto_copiar !== "string" || !datos.texto_copiar.trim())
 		throw new Error("El prompt salió incompleto. Inténtalo de nuevo.");
-	return {
-		herramienta:
-			datos.herramienta === "avatar" || datos.herramienta === "escenas"
-				? datos.herramienta
-				: null,
-		texto_copiar: datos.texto_copiar,
-		estilo_general:
-			typeof datos.estilo_general === "string" ? datos.estilo_general : "",
-		escenas: Array.isArray(datos.escenas)
-			? datos.escenas.map((valor, indice) => {
-					const escena = objeto(valor);
-					return {
-						orden: indice + 1,
-						texto:
-							typeof escena.texto_avatar === "string"
-								? escena.texto_avatar
-								: typeof escena.descripcion === "string"
-									? escena.descripcion
-									: "",
-						indicaciones:
-							typeof escena.indicaciones === "string"
-								? escena.indicaciones
-								: "",
-					};
-				})
-			: [],
-	};
+	return { herramienta, texto_copiar: datos.texto_copiar };
 }
 
 /** Recupera la instrucción sin enviar el nombre histórico al contrato estricto de IA. */
@@ -243,7 +236,7 @@ export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
 			if (error) throw errorEscritura(error, "eliminar");
 			if (!data) throw new Error(conflicto);
 		},
-		async leerPrompt(id: string) {
+		async leerPrompt(id: string, duracion: DuracionVideo) {
 			const { data, error } = await cliente
 				.from("prompts_video")
 				.select("contenido")
@@ -251,11 +244,12 @@ export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
 				.maybeSingle();
 			if (error)
 				throw new Error("No pudimos cargar el prompt. Inténtalo de nuevo.");
-			return data ? leerPrompt(data.contenido) : null;
+			return data ? leerPrompt(data.contenido, duracion) : null;
 		},
 		async generarPrompt(
 			fila: GuionGuardado,
-			herramienta: "avatar" | "escenas",
+			herramienta: HerramientaVideo,
+			duracion: DuracionVideo,
 		) {
 			if (fila.estado !== "aprobado")
 				throw new Error(
@@ -270,6 +264,7 @@ export function crearServicioGuiones(cliente: SupabaseClient<Database>) {
 						"No se pudo generar el prompt. Inténtalo de nuevo en unos minutos.",
 					),
 				).prompt,
+				duracion,
 			);
 		},
 	};

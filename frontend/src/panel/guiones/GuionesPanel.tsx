@@ -178,7 +178,7 @@ export function GuionesPanel({
 									type="button"
 									className="boton secundario"
 									disabled={ocupado}
-									onClick={() => void panel.copiar(false)}
+									onClick={() => void panel.copiar()}
 								>
 									Copiar guion
 								</button>
@@ -248,7 +248,6 @@ export function GuionesPanel({
 								ocupado={ocupado}
 								prompt={panel.prompt}
 								generar={(h) => void panel.generarPrompt(h)}
-								copiar={() => void panel.copiar(true)}
 							/>
 						</section>
 					)}

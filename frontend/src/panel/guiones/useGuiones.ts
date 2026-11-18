@@ -146,7 +146,9 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 			setTrabajo({ ...contenido, fila, sinGuardar: false });
 			setPrompt(null);
 			if (fila.estado === "aprobado")
-				setPrompt(await servicio.leerPrompt(fila.id));
+				setPrompt(
+					await servicio.leerPrompt(fila.id, contenido.instruccion.duracion_s),
+				);
 		});
 	};
 	const guardar = () =>
@@ -216,13 +218,17 @@ export function useGuiones(cliente: SupabaseClient<Database>) {
 				throw new Error(
 					"Guarda y aprueba el guion antes de generar el prompt.",
 				);
-			setPrompt(await servicio.generarPrompt(trabajo.fila, herramienta));
+			setPrompt(
+				await servicio.generarPrompt(
+					trabajo.fila,
+					herramienta,
+					trabajo.instruccion.duracion_s,
+				),
+			);
 		}, "Prompt de video guardado. Puedes copiarlo para usarlo en otra herramienta.");
-	const copiar = (esPrompt: boolean) =>
+	const copiar = () =>
 		ejecutar(async () => {
-			const texto = esPrompt
-				? prompt?.texto_copiar
-				: trabajo && textoGuion(trabajo.editado);
+			const texto = trabajo && textoGuion(trabajo.editado);
 			if (!texto) return;
 			try {
 				await navigator.clipboard.writeText(texto);

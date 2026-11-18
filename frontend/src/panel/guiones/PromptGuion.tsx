@@ -1,30 +1,79 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { HerramientaVideo } from "../../../../backend/supabase/functions/_shared/esquemas/prompt-video";
 import type { PromptVideo } from "./servicioGuiones";
 
-/** Indicaciones separadas del texto que se pega en la herramienta externa de video. */
+function PromptCompleto({
+	prompt,
+	ocupado,
+}: {
+	prompt: PromptVideo;
+	ocupado: boolean;
+}) {
+	const campo = useRef<HTMLTextAreaElement>(null);
+	const [mensaje, setMensaje] = useState("");
+	async function copiar() {
+		try {
+			await navigator.clipboard.writeText(prompt.texto_copiar);
+			setMensaje("Prompt completo copiado.");
+		} catch {
+			campo.current?.focus();
+			campo.current?.select();
+			setMensaje(
+				"Prompt seleccionado. Usa la opción Copiar de tu dispositivo.",
+			);
+		}
+	}
+	return (
+		<div className="guiones-prompt">
+			<div className="guiones-prompt-acciones">
+				<button
+					className="boton secundario"
+					type="button"
+					disabled={ocupado}
+					onClick={() => void copiar()}
+				>
+					Copiar prompt completo
+				</button>
+				<span role="status">{mensaje}</span>
+			</div>
+			<label>
+				{prompt.herramienta === "avatar"
+					? "Prompt completo para avatar"
+					: prompt.herramienta === "escenas"
+						? "Prompt completo para escenas"
+						: "Prompt completo"}
+				<textarea
+					ref={campo}
+					name="prompt-video"
+					autoComplete="off"
+					readOnly
+					value={prompt.texto_copiar}
+					rows={10}
+				/>
+			</label>
+		</div>
+	);
+}
+
+/** Genera y presenta el prompt listo para copiar como un solo bloque. */
 export function PromptGuion({
 	aprobado,
 	ocupado,
 	prompt,
 	generar,
-	copiar,
 }: {
 	aprobado: boolean;
 	ocupado: boolean;
 	prompt: PromptVideo | null;
-	generar: (herramienta: "avatar" | "escenas") => void;
-	copiar: () => void;
+	generar: (herramienta: HerramientaVideo) => void;
 }) {
-	const [herramienta, setHerramienta] = useState<"avatar" | "escenas">(
-		"avatar",
-	);
+	const [herramienta, setHerramienta] = useState<HerramientaVideo>("avatar");
 	return (
-		<section className="panel-seccion" aria-labelledby="prompt-titulo">
+		<section
+			className="panel-seccion guiones-prompt"
+			aria-labelledby="prompt-titulo"
+		>
 			<h3 id="prompt-titulo">Prompt de video</h3>
-			<p>
-				Un prompt es el texto que copias en otra herramienta para crear el
-				video. Aquí no se crean ni publican videos.
-			</p>
 			{!aprobado && (
 				<p>Guarda y aprueba el guion para generar un prompt de video.</p>
 			)}
@@ -34,9 +83,7 @@ export function PromptGuion({
 					name="herramienta-video"
 					disabled={ocupado}
 					value={herramienta}
-					onChange={(e) =>
-						setHerramienta(e.target.value as "avatar" | "escenas")
-					}
+					onChange={(e) => setHerramienta(e.target.value as HerramientaVideo)}
 				>
 					<option value="avatar">Avatar: un presentador digital</option>
 					<option value="escenas">
@@ -44,12 +91,7 @@ export function PromptGuion({
 					</option>
 				</select>
 			</label>
-			{prompt && (
-				<p>
-					Generar otro prompt reemplaza el que está guardado, incluso si eliges
-					otra clase de herramienta.
-				</p>
-			)}
+			{prompt && <p>Generar otro prompt reemplaza el que está guardado.</p>}
 			<button
 				className="boton secundario"
 				type="button"
@@ -59,49 +101,11 @@ export function PromptGuion({
 				Generar prompt de video
 			</button>
 			{prompt && (
-				<div className="guiones-prompt">
-					{prompt.herramienta && (
-						<p>
-							Prompt guardado para{" "}
-							{prompt.herramienta === "avatar"
-								? "un presentador digital"
-								: "un video de escenas"}
-							.
-						</p>
-					)}
-					<h4>Estilo general</h4>
-					<p>{prompt.estilo_general}</p>
-					{prompt.escenas.map((e) => (
-						<div key={e.orden}>
-							<h4>Escena {e.orden}</h4>
-							<p>{e.texto}</p>
-							{e.indicaciones && (
-								<>
-									<h5>Indicaciones</h5>
-									<p>{e.indicaciones}</p>
-								</>
-							)}
-						</div>
-					))}
-					<label>
-						Texto para copiar
-						<textarea
-							name="prompt-video"
-							autoComplete="off"
-							readOnly
-							value={prompt.texto_copiar}
-							rows={8}
-						/>
-					</label>
-					<button
-						className="boton secundario"
-						type="button"
-						disabled={ocupado}
-						onClick={copiar}
-					>
-						Copiar prompt
-					</button>
-				</div>
+				<PromptCompleto
+					key={prompt.texto_copiar}
+					prompt={prompt}
+					ocupado={ocupado}
+				/>
 			)}
 		</section>
 	);

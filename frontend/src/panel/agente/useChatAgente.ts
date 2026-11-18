@@ -1,14 +1,14 @@
 import { useChat } from "@ai-sdk/react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DefaultChatTransport } from "ai";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { esquemaChat } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import type { Database } from "../../tipos/database.types";
 import { invocarFuncionIa } from "../guiones/servicioGuiones";
 import {
-	type Conversacion,
 	crearServicioConversaciones,
 	type MensajeAgente,
+	type PaginaConversaciones,
 } from "./servicioConversaciones";
 
 const ERROR_GENERICO =
@@ -56,7 +56,13 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 	const bloqueo = useRef(false);
 	const revision = useRef(0);
 	const [activa, setActiva] = useState<string | null>(null);
-	const [conversaciones, setConversaciones] = useState<Conversacion[]>([]);
+	const [historial, setHistorial] = useState<PaginaConversaciones>({
+		numero: 0,
+		filas: [],
+		hayAnteriores: false,
+	});
+	const [errorHistorial, setErrorHistorial] = useState("");
+	const revisionHistorial = useRef(0);
 	const [ocupado, setOcupado] = useState(false);
 	const [errorLocal, setErrorLocal] = useState("");
 	const ultimoEnvio = useRef("");
@@ -75,24 +81,31 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 			: ocupado || chat.status === "submitted"
 				? "enviando"
 				: "listo";
-	useEffect(() => {
-		let vigente = true;
-		servicio
-			.listar()
-			.then((filas) => {
-				if (vigente) setConversaciones(filas);
-			})
-			.catch(() => {
-				if (vigente)
-					setErrorLocal(
-						"No pudimos cargar las conversaciones. Inténtalo de nuevo.",
+	const cargarPagina = useCallback(
+		async (numero: number) => {
+			const consulta = ++revisionHistorial.current;
+			setErrorHistorial("");
+			try {
+				let pagina = await servicio.listar(numero);
+				if (numero > 0 && !pagina.filas.length)
+					pagina = await servicio.listar(numero - 1);
+				if (consulta === revisionHistorial.current) setHistorial(pagina);
+			} catch {
+				if (consulta === revisionHistorial.current)
+					setErrorHistorial(
+						"No pudimos cargar el historial de conversaciones.",
 					);
-			});
+			}
+		},
+		[servicio],
+	);
+	useEffect(() => {
+		void cargarPagina(0);
 		return () => {
-			vigente = false;
+			revisionHistorial.current++;
 			revision.current++;
 		};
-	}, [servicio]);
+	}, [cargarPagina]);
 	async function ejecutar(accion: () => Promise<void>) {
 		if (bloqueo.current || respondiendo) return;
 		bloqueo.current = true;
@@ -122,13 +135,12 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 				const conversacion = await servicio.crear(mensaje);
 				activaRef.current = conversacion.id;
 				setActiva(conversacion.id);
-				setConversaciones((filas) => [conversacion, ...filas]);
 			}
 			if (turno !== revision.current) return;
 			if (reintento && chat.messages.some((m) => m.role === "user"))
 				await chat.regenerate();
 			else await chat.sendMessage({ text: mensaje });
-			setConversaciones(await servicio.listar());
+			await cargarPagina(0);
 		});
 	}
 	function nuevaConversacion() {
@@ -145,7 +157,9 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 		mensajes: chat.messages,
 		estado,
 		error,
-		conversaciones,
+		historial,
+		errorHistorial,
+		cambiarPagina: (numero: number) => ejecutar(() => cargarPagina(numero)),
 		conversacionActiva: activa,
 		ocupado: ocupado || respondiendo,
 		enviar,
@@ -153,7 +167,6 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 			ultimoEnvio.current
 				? enviar(ultimoEnvio.current, true)
 				: ejecutar(async () => {
-						setConversaciones(await servicio.listar());
 						if (activaRef.current)
 							chat.setMessages(await servicio.cargar(activaRef.current));
 					}),
@@ -175,13 +188,17 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 		borrar: (id: string) =>
 			ejecutar(async () => {
 				await servicio.borrar(id);
-				setConversaciones((filas) => filas.filter((f) => f.id !== id));
+				setHistorial((pagina) => ({
+					...pagina,
+					filas: pagina.filas.filter((f) => f.id !== id),
+				}));
 				if (activaRef.current === id) {
 					activaRef.current = null;
 					setActiva(null);
 					chat.setMessages([]);
 					ultimoEnvio.current = "";
 				}
+				await cargarPagina(historial.numero);
 			}),
 	};
 }
