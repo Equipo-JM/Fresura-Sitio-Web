@@ -1,5 +1,6 @@
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { Icono } from "../../compartido/componentes/Icono";
+import { MapaSede } from "../MapaSede";
 import { PUBLICACIONES_RECIENTE, TEXTO_RECIENTE } from "./copy";
 
 /** «Lo más reciente»: las últimas publicaciones de Instagram dentro de polaroids. */
@@ -178,8 +179,7 @@ export function Sedes({
 					{contenido.negocio.sedes.map((sede) => (
 						<article className="sede" key={sede.id}>
 							<div className="sede-mapa">
-								<strong>Ubicación en Google Maps</strong>
-								<span>Toca «Cómo llegar» para abrirla</span>
+								<MapaSede nombre={sede.nombre} ubicacion={sede.ubicacion} />
 							</div>
 							<div className="sede-cuerpo">
 								<TituloSede>{sede.nombre}</TituloSede>
