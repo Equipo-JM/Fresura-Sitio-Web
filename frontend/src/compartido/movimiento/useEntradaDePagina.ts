@@ -11,7 +11,7 @@ export function useEntradaDePagina(
 		if (anterior.current === ruta) return;
 		anterior.current = ruta;
 		if (prefiereMenosMovimiento()) return;
-		const entrada = principal.current?.animate(
+		const entrada = principal.current?.animate?.(
 			[{ opacity: 0.96 }, { opacity: 1 }],
 			{ duration: 100, easing: "ease-out" },
 		);

@@ -48,6 +48,11 @@ export function useRevelarAlDesplazar(ruta: string, cargado: boolean) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: ruta no se lee, pero cada página nueva trae otros elementos que revelar
 	useEffect(() => {
 		if (!cargado || prefiereMenosMovimiento()) return;
+		if (
+			typeof IntersectionObserver === "undefined" ||
+			!Element.prototype.animate
+		)
+			return;
 		// Solo animamos elementos que llegan desde debajo de la primera pantalla.
 		const entradas = new Set<Animation>();
 		const observador = new IntersectionObserver((cambios) => {
