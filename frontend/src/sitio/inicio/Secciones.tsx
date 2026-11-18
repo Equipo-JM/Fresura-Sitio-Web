@@ -1,6 +1,7 @@
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { Icono } from "../../compartido/componentes/Icono";
-import { PUBLICACIONES_RECIENTE, TEXTO_RECIENTE } from "./copy";
+import { MapaSede } from "../MapaSede";
+import { PUBLICACIONES_RECIENTE, RESENAS_GOOGLE, TEXTO_RECIENTE } from "./copy";
 
 /** «Lo más reciente»: las últimas publicaciones de Instagram dentro de polaroids. */
 export function LoMasReciente({ contenido }: { contenido: Contenido }) {
@@ -94,55 +95,56 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 	);
 }
 
-/** Calificación de Google, solo si el contrato la marca como mostrada (RF-12). */
+/**
+ * Franja de Google con las reseñas de clientes, solo si el contrato la marca como
+ * mostrada (RF-12). Por decisión del equipo ya no muestra la calificación numérica,
+ * el número de opiniones ni el botón a la ficha: solo una frase y las reseñas.
+ */
 export function Calificacion({
 	opiniones,
 }: {
 	opiniones: Contenido["opiniones"];
 }) {
-	if (!opiniones.mostrar || opiniones.calificacion === null) return null;
-	const fecha = opiniones.fecha_corte
-		? new Date(`${opiniones.fecha_corte}T12:00:00`).toLocaleDateString(
-				"es-CO",
-				{ day: "numeric", month: "long", year: "numeric" },
-			)
-		: "";
+	if (!opiniones.mostrar) return null;
 	return (
 		<section
 			className="seccion fondo-verde google-sec"
 			aria-labelledby="titulo-google"
 		>
 			<div className="envoltura google">
-				<div className="google-espacio" aria-hidden="true">
-					Espacio para el logo de Google
-				</div>
+				<span className="google-logo" aria-hidden="true">
+					<img src="/marca/google-g.svg" alt="" width="44" height="44" />
+				</span>
 				<div className="google-texto">
-					<h2 id="titulo-google">
-						{opiniones.calificacion.toString().replace(".", ",")} de 5 en Google
-					</h2>
-					<p className="google-nota">
-						<span className="estrellas" aria-hidden="true">
-							{Array.from({ length: 5 }, (_, i) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: cinco estrellas fijas
-								<Icono key={i} nombre="estrella" />
-							))}
-						</span>
-						<span>
-							{opiniones.numero_opiniones} opiniones
-							{fecha ? `, al ${fecha}` : ""}
-						</span>
-					</p>
+					<h2 id="titulo-google">Lo que dicen nuestros clientes</h2>
+					<p className="google-nota">Reseñas reales en Google</p>
 				</div>
-				{opiniones.url_ficha && (
-					<a
-						className="boton"
-						href={opiniones.url_ficha}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Ver la ficha
-					</a>
-				)}
+			</div>
+			<div className="envoltura">
+				<ul className="google-resenas">
+					{RESENAS_GOOGLE.map((resena) => (
+						<li key={resena.autor}>
+							<figure className="google-resena">
+								<p
+									className="google-resena-estrellas"
+									role="img"
+									aria-label="5 de 5 estrellas"
+								>
+									{Array.from({ length: 5 }, (_, i) => (
+										// biome-ignore lint/suspicious/noArrayIndexKey: cinco estrellas fijas
+										<Icono key={i} nombre="estrella" />
+									))}
+								</p>
+								<blockquote>
+									<p>{resena.texto}</p>
+								</blockquote>
+								<figcaption>
+									<strong>{resena.autor}</strong> · Reseña en Google
+								</figcaption>
+							</figure>
+						</li>
+					))}
+				</ul>
 			</div>
 		</section>
 	);
@@ -178,8 +180,7 @@ export function Sedes({
 					{contenido.negocio.sedes.map((sede) => (
 						<article className="sede" key={sede.id}>
 							<div className="sede-mapa">
-								<strong>Ubicación en Google Maps</strong>
-								<span>Toca «Cómo llegar» para abrirla</span>
+								<MapaSede nombre={sede.nombre} ubicacion={sede.ubicacion} />
 							</div>
 							<div className="sede-cuerpo">
 								<TituloSede>{sede.nombre}</TituloSede>

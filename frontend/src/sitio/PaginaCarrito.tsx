@@ -17,6 +17,7 @@ import { useCarrito } from "../compartido/carrito/useCarrito";
 import { Icono } from "../compartido/componentes/Icono";
 import { CompraDesactivada } from "./CompraDesactivada";
 import { ConContenido } from "./ConContenido";
+import { MapaEntrega } from "./carrito/MapaEntrega";
 import { MiniaturaProducto } from "./carrito/MiniaturaProducto";
 import { PasoEntrega } from "./carrito/PasoEntrega";
 import { PasoPedido } from "./carrito/PasoPedido";
@@ -211,6 +212,9 @@ function Carrito({ contenido }: { contenido: Contenido }) {
 									</p>
 								</div>
 							</div>
+							{paso > 1 && (
+								<MapaEntrega contenido={contenido} entrega={entrega} />
+							)}
 						</aside>
 						<div className="etapa">
 							{paso === 1 && (

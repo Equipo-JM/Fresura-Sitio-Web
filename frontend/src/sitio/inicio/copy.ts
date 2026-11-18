@@ -101,3 +101,26 @@ export const PUBLICACIONES_RECIENTE = [
 	{ codigo: "DfX1EGrsRji", cinta: "verde" },
 	{ codigo: "Dekb08AsDhZ", cinta: "porcini" },
 ] as const;
+
+/**
+ * Reseñas de clientes tomadas de la ficha de Fresura en Google Maps. Propuesta del
+ * equipo, por validar con Fresura (RF-12 pedía no copiar reseñas individuales).
+ * Los nombres van abreviados y no se usan fotos de perfil; los emojis se dejan como en el original. Se dejaron fuera las
+ * reseñas que mencionan «Nuestro Bogotá», porque no es una de las dos sedes del sitio.
+ */
+export const RESENAS_GOOGLE: { autor: string; texto: string }[] = [
+	{
+		autor: "Paola Q.",
+		texto:
+			"Es El Mejor Lugar De Todo Bogotaaaaaa! Amo Cada Cosa Que Venden Allí Y Es Súper Fácil Llegar. Los Amo 💗.",
+	},
+	{
+		autor: "Estefania G.",
+		texto:
+			"La atención es increíble y los productos deliciosos, recomendado al 100%.",
+	},
+	{
+		autor: "María Fernanda C.",
+		texto: "Excelente atención y servicio, muy recomendado 😜 ✨ 💗",
+	},
+];

@@ -199,6 +199,9 @@ function Personalizador({
 											checked={idPresentacion === p.id}
 											onChange={() => elegirPresentacion(p.id)}
 										/>
+										<span className="op-marca" aria-hidden="true">
+											<Icono nombre="ok" />
+										</span>
 										{p.nombre}
 									</label>
 								))}
@@ -256,7 +259,9 @@ function Personalizador({
 													aria-disabled={bloqueada}
 													onClick={() => alternar(grupo.id, opcion.id)}
 												>
-													{marcada && <Icono nombre="ok" />}
+													<span className="op-marca" aria-hidden="true">
+														<Icono nombre="ok" />
+													</span>
 													{opcion.nombre}
 													{opcion.adicional > 0 && (
 														<span className="costo">

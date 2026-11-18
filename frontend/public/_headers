@@ -4,13 +4,14 @@
 # - *.supabase.co: datos, Auth, funciones y fotos del bucket (desarrollo y producción).
 # - challenges.cloudflare.com: Turnstile (script e iframe, según su guía de CSP).
 # - www.instagram.com: iframes de las publicaciones de «Lo más reciente» (sin script).
+# - www.google.com: mapas insertados de las sedes y del carrito (sin clave ni script).
 # style-src lleva 'unsafe-inline' porque el widget de Turnstile y las animaciones
 # pueden insertar estilos; los scripts sí quedan limitados a orígenes conocidos.
 # font-src admite data: porque Vite incrusta como data: los subconjuntos pequeños
 # de Plus Jakarta Sans (menos de 4 KB); sin eso, el navegador los bloquea.
 
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com https://www.instagram.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co; font-src 'self' data:; connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com https://www.instagram.com https://www.google.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=()

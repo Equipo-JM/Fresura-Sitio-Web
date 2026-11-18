@@ -327,9 +327,16 @@ describe("paridad del inicio", () => {
 			screen.getByText("Espacio para el logo de Google"),
 		).toBeInTheDocument();
 	});
-	it("presenta el mapa como enlace y separa el cierre por almuerzo", () => {
+	it("muestra el mapa de cada sede, el enlace y el cierre por almuerzo", () => {
 		mostrar("/sedes");
-		expect(screen.getAllByText("Ubicación en Google Maps")).toHaveLength(2);
+		const mapa = screen.getByTitle("Mapa de la Sede U Nacional");
+		expect(mapa).toHaveAttribute(
+			"src",
+			expect.stringContaining("google.com/maps?q=4.6347,-74.0785"),
+		);
+		expect(
+			screen.getByTitle("Mapa de la Sede U Javeriana"),
+		).toBeInTheDocument();
 		expect(
 			screen.getByRole("rowheader", { name: "Cierre por almuerzo" }),
 		).toBeInTheDocument();
