@@ -158,18 +158,20 @@ describe("sitio de varias páginas (RF-02)", () => {
 			(p) => p.destacado && p.vigente,
 		);
 		expect(esperados.length).toBeGreaterThan(0);
-		// Un botón por favorito; la tarjeta del elegido lleva a su ficha.
-		const botones = destacados.getAllByRole("button");
-		expect(botones.map((b) => b.textContent)).toEqual(
+		// Un botón por favorito en el selector de antojo; la tarjeta al frente y
+		// el botón «Ver…» del elegido llevan a su ficha.
+		const selector = within(destacados.getByRole("group"));
+		const botones = selector.getAllByRole("button");
+		expect(botones.map((b) => b.getAttribute("aria-label"))).toEqual(
 			esperados.map((p) => p.nombre),
 		);
 		for (const [i, boton] of botones.entries()) {
 			fireEvent.click(boton);
 			expect(boton).toHaveAttribute("aria-pressed", "true");
-			expect(destacados.getByRole("link")).toHaveAttribute(
-				"href",
-				`/producto/${esperados[i].id}`,
-			);
+			const enlaces = destacados.getAllByRole("link");
+			expect(enlaces.length).toBeGreaterThan(0);
+			for (const enlace of enlaces)
+				expect(enlace).toHaveAttribute("href", `/producto/${esperados[i].id}`);
 		}
 	});
 

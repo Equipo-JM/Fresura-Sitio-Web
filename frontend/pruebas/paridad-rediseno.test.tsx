@@ -242,36 +242,35 @@ describe("paridad del inicio", () => {
 	it("identifica la posición de los carruseles", () => {
 		mostrar("/menu");
 		const categoria = within(screen.getByRole("region", { name: "Fresitas" }));
-		expect(categoria.getByText("1 de 5")).toBeInTheDocument();
+		expect(categoria.getByText("01 / 05")).toBeInTheDocument();
 		expect(
-			categoria.getByRole("button", { name: "Siguiente" }),
+			categoria.getByRole("button", { name: "Producto siguiente" }),
 		).toBeInTheDocument();
 	});
-	it("el carrusel recorre páginas con flechas y teclado y anuncia los extremos", () => {
+	it("el carrusel recorre los productos en círculo con flechas y fresas", () => {
 		mostrar("/menu");
-		const categoria = screen.getByRole("region", { name: "Fresitas" });
-		const carril = within(categoria).getByRole("list", {
-			name: /Productos, usa/,
+		const categoria = within(screen.getByRole("region", { name: "Fresitas" }));
+		const siguiente = categoria.getByRole("button", {
+			name: "Producto siguiente",
 		});
-		Object.defineProperties(carril, {
-			clientWidth: { value: 300 },
-			scrollWidth: { value: 1500 },
+		const anterior = categoria.getByRole("button", {
+			name: "Producto anterior",
 		});
-		Object.defineProperty(carril.children[1], "offsetLeft", { value: 300 });
-		carril.scrollTo = function (opciones) {
-			this.scrollLeft = typeof opciones === "object" ? (opciones.left ?? 0) : 0;
-			fireEvent.scroll(this);
-		};
-		fireEvent.scroll(carril);
-		expect(
-			within(categoria).getByRole("button", { name: "Anterior" }),
-		).toHaveAttribute("aria-disabled", "true");
-		fireEvent.click(
-			within(categoria).getByRole("button", { name: "Siguiente" }),
-		);
-		expect(within(categoria).getByText("2 de 5")).toBeInTheDocument();
-		fireEvent.keyDown(carril, { key: "ArrowLeft" });
-		expect(within(categoria).getByText("1 de 5")).toBeInTheDocument();
+		fireEvent.click(siguiente);
+		expect(categoria.getByText("02 / 05")).toBeInTheDocument();
+		fireEvent.click(anterior);
+		fireEvent.click(anterior);
+		// Desde el primero, «anterior» da la vuelta hasta el último.
+		expect(categoria.getByText("05 / 05")).toBeInTheDocument();
+		const fresa = categoria.getByRole("button", { name: "Ver Oscura" });
+		fireEvent.click(fresa);
+		expect(fresa).toHaveAttribute("aria-current", "true");
+		expect(categoria.getByText("03 / 05")).toBeInTheDocument();
+		const pausa = categoria.getByRole("button", {
+			name: "Pausar el avance automático",
+		});
+		fireEvent.click(pausa);
+		expect(pausa).toHaveAttribute("aria-pressed", "true");
 	});
 	it("mantiene la foto publicada y las caras de referencia de DD-43", () => {
 		const contenido = structuredClone(prueba);
@@ -280,6 +279,9 @@ describe("paridad del inicio", () => {
 		// Un id sin foto de Rappi deja a Fresuras Top con las caras de DD-43.
 		contenido.productos[12].id = "fresuras-sin-foto";
 		mostrar("/menu", contenido);
+		// Solo la tarjeta al frente es un enlace: se trae cada producto al frente.
+		fireEvent.click(screen.getByRole("button", { name: "Ver Caribeña" }));
+		fireEvent.click(screen.getByRole("button", { name: "Ver Top" }));
 		const tarjeta = screen.getByRole("link", {
 			name: /Fresitas: Caribeña, Desde/,
 		});
@@ -290,7 +292,9 @@ describe("paridad del inicio", () => {
 		const pendiente = screen.getByRole("link", {
 			name: /Fresuras: Top, Desde/,
 		});
-		expect(pendiente.querySelectorAll(".foto-pendiente")).toHaveLength(2);
+		// La tarjeta del abanico muestra una sola cara (sin la segunda foto al pasar
+		// el puntero de la tarjeta antigua).
+		expect(pendiente.querySelectorAll(".foto-pendiente")).toHaveLength(1);
 		expect(pendiente).not.toHaveTextContent(/por validar/i);
 	});
 	it("ordena las categorías del menú e incluye Nosotros y sus valores", () => {
@@ -865,7 +869,10 @@ describe("estilos de paridad sin medición de geometría", () => {
 		const contenido = structuredClone(prueba);
 		contenido.productos[12].id = "fresuras-sin-foto";
 		mostrar("/menu", contenido);
-		const pendiente = document.querySelector(".tarjeta .foto-pendiente");
+		fireEvent.click(screen.getByRole("button", { name: "Ver Top" }));
+		const pendiente = document.querySelector(
+			".abanico-tarjeta .foto-pendiente",
+		);
 		if (!pendiente) throw new Error("Falta una foto pendiente del menú");
 		expect(getComputedStyle(pendiente).backgroundImage).toBe("none");
 		expect(getComputedStyle(pendiente).gap).toBe("12px");
