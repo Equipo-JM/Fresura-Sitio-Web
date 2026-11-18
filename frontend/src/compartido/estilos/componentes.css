@@ -1809,7 +1809,11 @@ button.paso-num {
 	}
 	/* Desvanece el trazo antes de la onda para que ambas curvas no se rocen. */
 	.portada-trazo {
-		mask-image: linear-gradient(to bottom, #000 calc(100% - 48px), transparent calc(100% - 16px));
+		mask-image: linear-gradient(
+			to bottom,
+			#000 calc(100% - 48px),
+			transparent calc(100% - 16px)
+		);
 	}
 	.seccion::after,
 	.pagina::after {
@@ -2224,7 +2228,7 @@ main > :last-child > .seccion:last-child::after {
 	background: color-mix(in srgb, var(--color-flamingo) 20%, transparent);
 }
 
-/* Nosotros: valores como bloques de color */
+/* Nosotros: valores sobre el fondo rosado de la sección. */
 .valores li {
 	display: grid;
 	align-content: start;
@@ -2232,13 +2236,7 @@ main > :last-child > .seccion:last-child::after {
 	padding: 22px;
 	border-top: 0;
 	border-radius: var(--radio);
-	background: var(--color-platinum);
-}
-.valores li:nth-child(2) {
-	background: var(--color-court-bouillon);
-}
-.valores li:nth-child(3) {
-	background: var(--color-dust-storm);
+	background-color: var(--color-platinum);
 }
 @media (min-width: 900px) {
 	.valores li:nth-child(2) {
@@ -3095,9 +3093,15 @@ main > :last-child > .seccion:last-child::after {
 	animation: revelar-mapa 320ms ease-out both;
 }
 @keyframes revelar-mapa {
-	from { opacity: 0; }
-	to { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 @media (prefers-reduced-motion: reduce) {
-	.mapa-vista-lista { animation-duration: 1ms; }
+	.mapa-vista-lista {
+		animation-duration: 1ms;
+	}
 }
