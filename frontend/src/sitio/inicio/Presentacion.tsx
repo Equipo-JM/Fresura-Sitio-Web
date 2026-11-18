@@ -1,9 +1,12 @@
+import { useRef } from "react";
 import { Link } from "react-router";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { nombreProducto } from "../../compartido/carrito/reglas";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { promocionesVigentes } from "../../compartido/contenido/vigencia";
+import { useCalcomaniaViva } from "../../compartido/movimiento/useCalcomaniaViva";
 import { Calcomania } from "../Calcomania";
+import { CajaSorpresa } from "../promociones/CajaSorpresa";
 import { NOSOTROS } from "./copy";
 
 /**
@@ -22,6 +25,7 @@ export function Promociones({
 	// En la página propia los cupones cuelgan del h1: h2, sin saltar niveles.
 	const Subtitulo = comoPagina ? "h2" : "h3";
 	const vigentes = promocionesVigentes(contenido.promociones);
+	if (comoPagina && vigentes.length === 0) return <PromocionesVacias />;
 	return (
 		<section
 			className="seccion fondo-flamingo"
@@ -85,6 +89,33 @@ export function Promociones({
 	);
 }
 
+/**
+ * /promociones sin promociones vigentes: solo la franja rosa con la caja
+ * sorpresa. El h1 queda para lectores de pantalla y para el orden de títulos.
+ */
+function PromocionesVacias() {
+	return (
+		<section
+			className="seccion fondo-peep promo-vacia-sec"
+			id="promociones"
+			aria-labelledby="titulo-promociones"
+		>
+			<h1 id="titulo-promociones" className="oculto" tabIndex={-1}>
+				Promociones
+			</h1>
+			<div className="envoltura promo-vacia">
+				<CajaSorpresa>
+					<h2>Por ahora no tenemos promociones publicadas</h2>
+					<p className="promo-vacia-bajada">Pronto, nuevas sorpresas dulces.</p>
+				</CajaSorpresa>
+				<Link className="boton" to="/menu">
+					Ver el menú
+				</Link>
+			</div>
+		</section>
+	);
+}
+
 function Cupon({ children }: { children: React.ReactNode }) {
 	return (
 		<article className="cupon">
@@ -106,6 +137,8 @@ function Cupon({ children }: { children: React.ReactNode }) {
 export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 	const Titulo = comoPagina ? "h1" : "h2";
 	const Subtitulo = comoPagina ? "h2" : "h3";
+	const sticker = useRef<HTMLImageElement>(null);
+	useCalcomaniaViva(sticker);
 	return (
 		<section
 			className="seccion fondo-peep"
@@ -129,7 +162,9 @@ export function Nosotros({ comoPagina = false }: { comoPagina?: boolean }) {
 						/>
 					</div>
 					<img
-						className="nosotros-sticker"
+						ref={sticker}
+						className="nosotros-sticker calcomania-viva"
+						draggable={false}
 						src="/marca/sticker-horizontal.svg"
 						alt=""
 						width="220"

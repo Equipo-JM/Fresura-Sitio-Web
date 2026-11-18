@@ -8,12 +8,16 @@ const METROS_POR_PIXEL_ECUADOR = 156543.03392;
 /**
  * Dirección de la inserción de Google Maps centrada en unas coordenadas. No
  * necesita clave ni cuenta; el mapa se carga en un iframe (CSP: frame-src).
+ * Sin `conMarcador`, el mapa solo se centra (`ll`) y no pinta el pin de Google,
+ * para poner encima el marcador propio de la marca.
  */
 export function urlMapaInsertado(
 	{ lat, lng }: Coordenadas,
 	zoom: number,
+	conMarcador = true,
 ): string {
-	return `https://www.google.com/maps?q=${lat},${lng}&z=${zoom}&hl=es&output=embed`;
+	const centro = conMarcador ? `q=${lat},${lng}` : `ll=${lat},${lng}`;
+	return `https://www.google.com/maps?${centro}&z=${zoom}&hl=es&output=embed`;
 }
 
 /**

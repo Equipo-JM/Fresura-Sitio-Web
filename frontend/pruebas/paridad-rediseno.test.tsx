@@ -104,16 +104,18 @@ describe("paridad del inicio", () => {
 		expect(Number(gsap.getProperty(foto, "scaleX"))).toBeGreaterThan(1);
 	});
 	it("liga el sello y Nosotros al desplazamiento y limpia al salir", () => {
+		// Además de estos momentos, los revelados al bajar crean sus propios
+		// disparadores; lo que importa es que estén y que se limpien al salir.
 		const inicio = mostrar();
-		expect(ScrollTrigger.getAll().map((t) => t.trigger)).toEqual([
+		expect(ScrollTrigger.getAll().map((t) => t.trigger)).toContain(
 			document.querySelector(".portada"),
-		]);
+		);
 		inicio.unmount();
 		expect(ScrollTrigger.getAll()).toHaveLength(0);
 		const nosotros = mostrar("/nosotros");
-		expect(ScrollTrigger.getAll().map((t) => t.trigger)).toEqual([
+		expect(ScrollTrigger.getAll().map((t) => t.trigger)).toContain(
 			document.querySelector("#nosotros"),
-		]);
+		);
 		nosotros.unmount();
 		expect(ScrollTrigger.getAll()).toHaveLength(0);
 	});
@@ -332,7 +334,8 @@ describe("paridad del inicio", () => {
 		const mapa = screen.getByTitle("Mapa de la Sede U Nacional");
 		expect(mapa).toHaveAttribute(
 			"src",
-			expect.stringContaining("google.com/maps?q=4.6347,-74.0785"),
+			// Sin pin de Google (`ll`): encima va la fresa de la marca.
+			expect.stringContaining("google.com/maps?ll=4.6347,-74.0785"),
 		);
 		expect(
 			screen.getByTitle("Mapa de la Sede U Javeriana"),

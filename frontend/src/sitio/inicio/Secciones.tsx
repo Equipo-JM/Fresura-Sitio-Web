@@ -180,7 +180,17 @@ export function Sedes({
 					{contenido.negocio.sedes.map((sede) => (
 						<article className="sede" key={sede.id}>
 							<div className="sede-mapa">
-								<MapaSede nombre={sede.nombre} ubicacion={sede.ubicacion} />
+								<MapaSede
+									nombre={sede.nombre}
+									ubicacion={sede.ubicacion}
+									marcadorFresa
+									// La zona de 5 km no cabe con el acercamiento de calle: la
+									// sede que atiende domicilios se muestra un poco más lejos.
+									zoom={sede.atiende_pedidos ? 12 : 16}
+									radioKm={
+										sede.atiende_pedidos ? sede.radio_domicilio_km : null
+									}
+								/>
 							</div>
 							<div className="sede-cuerpo">
 								<TituloSede>{sede.nombre}</TituloSede>

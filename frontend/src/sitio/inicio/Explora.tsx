@@ -88,6 +88,10 @@ export function Explora({
 			id="explora"
 			aria-labelledby="titulo-explora"
 		>
+			<Calcomania
+				nombre="fresas-con-crema-chocolate-y-flow"
+				className="calcomania-corte"
+			/>
 			<div className="envoltura">
 				<div className="titulo-con-calcomania calcomania-explora">
 					<h2 id="titulo-explora">

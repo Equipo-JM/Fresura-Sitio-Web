@@ -13,6 +13,7 @@ import {
 	type Seleccion,
 } from "../compartido/carrito/reglas";
 import { Icono } from "../compartido/componentes/Icono";
+import { volarAlCarrito } from "../compartido/movimiento/volarAlCarrito";
 import { CompraDesactivada } from "./CompraDesactivada";
 import { ConContenido } from "./ConContenido";
 import { FotoProducto } from "./FotoProducto";
@@ -117,10 +118,17 @@ function Personalizador({
 		setAviso(null);
 	}
 
-	function agregar() {
+	function agregar(boton: Element | null) {
 		const error = agregarLinea({ ...linea, indicaciones: indicaciones.trim() });
 		setAviso(error);
-		setAgregado(error === null);
+		if (error !== null || !boton) {
+			setAgregado(false);
+			return;
+		}
+		// El diálogo se abre al aterrizar la fresa en el carrito, para que se vea el vuelo.
+		const vuelo = volarAlCarrito(boton);
+		if (vuelo) vuelo.then(() => setAgregado(true));
+		else setAgregado(true);
 	}
 
 	const elegidos = producto.grupos_opciones.flatMap((grupo) =>
@@ -173,7 +181,11 @@ function Personalizador({
 					className="pz-datos"
 					onSubmit={(evento) => {
 						evento.preventDefault();
-						agregar();
+						agregar(
+							evento.currentTarget.querySelector(
+								".compra-barra button[type=submit]",
+							),
+						);
 					}}
 				>
 					<div className="pz-encabezado">

@@ -4,6 +4,7 @@ import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
 import { Icono } from "../../compartido/componentes/Icono";
 import { CLAVE_PORTADA } from "../../compartido/fotos/almacenFotosDemo";
 import { useFotosDemo } from "../../compartido/fotos/useFotosDemo";
+import { useCalcomaniaViva } from "../../compartido/movimiento/useCalcomaniaViva";
 import { useCintaDesplazamiento } from "../../compartido/movimiento/useCintaDesplazamiento";
 import { useEntradaPortada } from "../../compartido/movimiento/useEntradaPortada";
 import { FOTO_PORTADA } from "./copy";
@@ -23,6 +24,8 @@ export function Portada({
 }) {
 	const raiz = useRef<HTMLElement>(null);
 	useEntradaPortada(raiz);
+	const sello = useRef<HTMLImageElement>(null);
+	useCalcomaniaViva(sello, { girar: false, alCargar: true });
 	const fotoCambiada = useFotosDemo()[CLAVE_PORTADA];
 
 	return (
@@ -98,7 +101,9 @@ export function Portada({
 							)}
 						</div>
 						<img
-							className="portada-sello"
+							ref={sello}
+							className="portada-sello calcomania-viva"
+							draggable={false}
 							src="/marca/sticker-sello.svg"
 							alt=""
 							width="148"

@@ -1824,38 +1824,26 @@ button.paso-num {
 .titulo-con-calcomania > .calcomania {
 	display: none;
 }
-.seccion:has(.calcomania-explora)::before,
-.destacados::before,
-.antojos-sec::before {
-	content: "";
+/* Son imágenes reales (`Calcomania` con `calcomania-corte`), no fondos de `::before`,
+   para que caigan y se puedan arrastrar como las demás. */
+.calcomania-corte {
 	position: absolute;
 	z-index: 2;
 	bottom: -60px;
 	right: max(16px, calc((100% - var(--ancho-maximo)) / 2));
 	width: 120px;
-	height: 120px;
-	background:
-		url("/calcomanias/fresas-con-crema-chocolate-y-flow.webp") center / contain
-		no-repeat;
+	height: auto;
 	filter: drop-shadow(0 8px 12px rgba(91, 59, 36, 0.22));
 	rotate: 7deg;
-	pointer-events: none;
 }
-.destacados::before {
-	background-image: url("/calcomanias/ven-date-un-gusto-bonito.webp");
-	rotate: -6deg;
-}
-.antojos-sec::before {
-	background-image: url("/calcomanias/fresitas-fresotas-fresuras.webp");
+.calcomania-corte.corte-destacados,
+.calcomania-corte.corte-antojos {
 	rotate: -6deg;
 }
 @media (min-width: 900px) {
-	.seccion:has(.calcomania-explora)::before,
-	.destacados::before,
-	.antojos-sec::before {
+	.calcomania-corte {
 		bottom: -100px;
 		width: 200px;
-		height: 200px;
 	}
 }
 
@@ -1868,7 +1856,7 @@ main > :last-child > .seccion:last-child::after {
 }
 @media (min-width: 900px) {
 	/* Sobre el pie la calcomanía entra poco, para no tapar la columna de sedes */
-	main > .seccion:last-child::before {
+	main > .seccion:last-child > .calcomania-corte {
 		bottom: -24px;
 	}
 }
@@ -1959,4 +1947,459 @@ main > :last-child > .seccion:last-child::after {
 .letra-calcomania-court-bouillon {
 	--letra-calcomania: var(--color-platinum);
 	--contorno-calcomania: var(--color-porcini);
+}
+
+/* ------------------------------------------------------------------
+   Movimiento (rediseño de movimiento, nov 2026). Los colores y el diseño
+   son los mismos del sitio; aquí solo van las piezas que se mueven.
+   Regla: lo que anima GSAP no lleva transiciones CSS de `transform`.
+   ------------------------------------------------------------------ */
+
+/* Botones: al pasar el puntero, el color del hover sube como un relleno en vez
+   de cambiar de golpe. La presión usa `scale`, independiente de `transform`. */
+.boton {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+	transition:
+		scale 160ms var(--curva-salida),
+		color 300ms ease,
+		border-color 300ms ease;
+}
+.boton::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	background: var(--color-platinum);
+	transform: translateY(101%);
+	transition: transform 350ms var(--curva-salida);
+}
+.boton:active {
+	transform: none;
+	scale: 0.97;
+}
+.boton.secundario::before {
+	background: var(--boton-fondo);
+}
+.oscuro .boton::before {
+	background: var(--color-peat-brown);
+}
+.boton[aria-disabled="true"]::before {
+	display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+	.boton:hover {
+		background: var(--boton-fondo);
+		color: var(--texto);
+	}
+	.boton:hover::before {
+		transform: translateY(0);
+	}
+	.boton.secundario:hover {
+		background: transparent;
+		color: var(--boton-texto);
+	}
+	.oscuro .boton:hover {
+		background: var(--color-platinum);
+		color: var(--color-platinum);
+	}
+	.boton[aria-disabled="true"]:hover {
+		background: transparent;
+		color: var(--texto);
+	}
+}
+
+/* Calcomanías: caen al aparecer y se pueden arrastrar. */
+/* La nota de Nosotros se centra con `translate`, que no choca con GSAP. */
+.nosotros-sticker {
+	transform: none;
+	translate: -50% 0;
+}
+.calcomania,
+.calcomania-viva {
+	pointer-events: auto;
+	cursor: grab;
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+}
+.calcomania:active,
+.calcomania-viva:active {
+	cursor: grabbing;
+}
+
+/* Cortina de toldo entre páginas */
+.cortina-pagina {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: grid;
+	place-items: center;
+	background: var(--color-flamingo);
+	pointer-events: none;
+	visibility: hidden;
+	overflow: hidden;
+}
+.cortina-pagina::before {
+	content: "";
+	position: absolute;
+	inset: 0 0 auto;
+	height: 32px;
+	background: url(/marca/rayas-toldo.svg) 0 0 / 32px 32px repeat-x;
+}
+.cortina-pagina img {
+	position: relative;
+	width: 84px;
+	height: auto;
+}
+
+/* Fresa que vuela al carrito */
+.vuelo-fresa {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 200;
+	width: 48px;
+	height: auto;
+	pointer-events: none;
+}
+
+/* Lluvia de fresas al llegar al pie */
+.pie {
+	position: relative;
+	overflow: hidden;
+}
+.pie > .envoltura {
+	position: relative;
+	z-index: 1;
+}
+.pie-lluvia {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+.pie-lluvia img {
+	position: absolute;
+	top: 0;
+	width: 38px;
+	height: auto;
+	opacity: 0;
+}
+
+.precio-cuenta {
+	font-variant-numeric: tabular-nums;
+}
+
+/* Menú: barra de categorías fija bajo el encabezado */
+.nav-categorias {
+	/* Sin esto, el ancho de todos los botones en fila ensancha la página en celular. */
+	contain: inline-size;
+	position: sticky;
+	top: 84px;
+	z-index: 20;
+	padding-block: 10px;
+	background: var(--fondo);
+}
+.nav-categorias ul {
+	display: flex;
+	gap: 8px;
+	margin-inline: auto;
+	padding-block: 2px;
+	list-style: none;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+.nav-categorias ul::-webkit-scrollbar {
+	display: none;
+}
+.nav-categorias li {
+	flex: none;
+}
+.chip-categoria {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 18px;
+	border: 1.5px solid var(--texto);
+	border-radius: var(--radio-pildora);
+	color: var(--texto);
+	font-size: var(--texto-chico);
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+	transition:
+		scale 160ms var(--curva-salida),
+		background-color 250ms ease,
+		color 250ms ease;
+}
+.chip-categoria:hover {
+	background: var(--color-we-peep);
+}
+.chip-categoria:active {
+	scale: 0.96;
+}
+.chip-categoria[aria-current="true"] {
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+	border-color: var(--boton-fondo);
+}
+
+/* Promociones sin promociones: caja sorpresa */
+.promo-vacia {
+	display: grid;
+	justify-items: center;
+	gap: 18px;
+	max-width: 640px;
+	text-align: center;
+}
+.promo-vacia h2 {
+	font-size: var(--titulo-3);
+}
+.promo-vacia p {
+	margin: 0;
+}
+.promo-vacia-bajada {
+	font-size: var(--texto-destacado);
+}
+.caja-sorpresa {
+	position: relative;
+	width: 200px;
+	height: 200px;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+.caja-base,
+.caja-tapa {
+	position: absolute;
+	border-radius: 14px;
+	background: var(--color-flamingo);
+}
+.caja-base {
+	inset: 86px 10px 8px;
+}
+.caja-tapa {
+	top: 54px;
+	right: 2px;
+	left: 2px;
+	z-index: 2;
+	height: 44px;
+	transform-origin: 14% 100%;
+	box-shadow: 0 4px 0 rgba(91, 59, 36, 0.25);
+}
+.caja-base::after,
+.caja-tapa::after {
+	content: "";
+	position: absolute;
+	inset: 0 44%;
+	background: var(--color-we-peep);
+}
+.caja-lazo {
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	z-index: 3;
+	width: 62px;
+	margin-left: -31px;
+}
+.caja-confeti {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+	pointer-events: none;
+}
+.caja-confeti img {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 30px;
+	margin: -15px;
+	opacity: 0;
+}
+
+/* Sedes: la fresa de la marca en lugar del pin de Google, con la zona de domicilios */
+.mapa-fresa {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 40px;
+	height: auto;
+	translate: -50% -92%;
+	pointer-events: none;
+	filter: drop-shadow(0 6px 6px rgba(91, 59, 36, 0.3));
+}
+.con-fresa .mapa-radio {
+	border: 3px dashed var(--color-peat-brown);
+	background: color-mix(in srgb, var(--color-flamingo) 20%, transparent);
+}
+
+/* Nosotros: valores como bloques de color */
+.valores li {
+	display: grid;
+	align-content: start;
+	gap: 6px;
+	padding: 22px;
+	border-top: 0;
+	border-radius: var(--radio);
+	background: var(--color-platinum);
+}
+.valores li:nth-child(2) {
+	background: var(--color-court-bouillon);
+}
+.valores li:nth-child(3) {
+	background: var(--color-dust-storm);
+}
+@media (min-width: 900px) {
+	.valores li:nth-child(2) {
+		translate: 0 24px;
+	}
+	.valores {
+		padding-bottom: 24px;
+	}
+}
+
+/* Reseñas como globos de conversación */
+.google-resena {
+	border-radius: 22px 22px 22px 4px;
+	box-shadow: 0 14px 30px -18px rgba(91, 59, 36, 0.45);
+}
+.promo-vacia-sec {
+	display: grid;
+	align-content: center;
+	min-height: 70vh;
+	padding-block: clamp(64px, 10vw, 120px);
+}
+
+/* Lo más reciente: el giro de cada polaroid y de su cinta usan `rotate` y
+   `translate`, que no chocan con el `transform` que anima GSAP al bajar. */
+.polaroid {
+	transform: none;
+	rotate: var(--giro, 0deg);
+	transition:
+		rotate 260ms var(--curva-salida),
+		translate 260ms var(--curva-salida);
+}
+.adhesivo {
+	transform: none;
+	translate: -50% 0;
+	rotate: -3deg;
+}
+@media (hover: hover) and (pointer: fine) {
+	.polaroid:hover {
+		transform: none;
+		rotate: 0deg;
+		translate: 0 -4px;
+	}
+}
+
+/* Nuestros favoritos con el diseño del «Hoy se me antoja…» del prototipo: título y
+   botones redondeados a la izquierda, tarjeta con foto a la derecha que cambia al
+   elegir. Colores de la paleta oficial. */
+.favoritos {
+	display: grid;
+	gap: clamp(24px, 4vw, 48px);
+	align-items: center;
+}
+.favoritos-texto {
+	display: grid;
+	gap: 22px;
+	justify-items: start;
+}
+.favoritos-texto .destacados-encabezado {
+	margin: 0;
+}
+.favoritos-lista {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.chip-favorito {
+	min-height: 44px;
+	padding: 0 18px;
+	border: 2px solid var(--texto);
+	border-radius: var(--radio-pildora);
+	background: transparent;
+	color: var(--texto);
+	font: inherit;
+	font-weight: 600;
+	cursor: pointer;
+	transition:
+		scale 180ms var(--curva-salida),
+		background-color 250ms ease,
+		color 250ms ease,
+		border-color 250ms ease;
+}
+.chip-favorito:hover {
+	background: color-mix(in srgb, var(--color-flamingo) 40%, transparent);
+}
+.chip-favorito:active {
+	scale: 0.96;
+}
+.chip-favorito[aria-pressed="true"] {
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+	border-color: var(--boton-fondo);
+}
+.favoritos-nota {
+	font-size: var(--texto-chico);
+}
+.favorito-tarjeta {
+	display: grid;
+	overflow: hidden;
+	border-radius: var(--radio);
+	background: var(--color-court-bouillon);
+	color: var(--texto);
+	box-shadow: 0 18px 34px -20px rgba(91, 59, 36, 0.5);
+}
+.favorito-foto.tarjeta-foto {
+	aspect-ratio: 16 / 10;
+	border-radius: 0;
+	box-shadow: none;
+}
+.favorito-cuerpo {
+	display: grid;
+	gap: 8px;
+	justify-items: start;
+	padding: clamp(20px, 3vw, 28px);
+}
+.favorito-nombre {
+	font-family: var(--fuente-titulos);
+	font-size: var(--titulo-3);
+	line-height: 1.05;
+}
+.favorito-precio {
+	font-weight: 700;
+}
+.favorito-cuerpo .boton {
+	margin-top: 8px;
+}
+@media (min-width: 900px) {
+	.favoritos {
+		grid-template-columns: 1fr 1.05fr;
+	}
+}
+
+/* Tarjetas de producto con profundidad: la foto es un poco más alta que su arco
+   y se desplaza dentro de él al bajar (GSAP, en useRevelarAlDesplazar). Al pasar
+   el puntero la foto se acerca un poco más que antes; `scale` se suma al zoom
+   que ya tenía y no choca con el `transform` que anima GSAP. */
+.tarjeta-foto .cara {
+	inset: -8% 0;
+}
+.tarjeta-foto .cara img {
+	transition:
+		transform 600ms var(--curva-salida),
+		scale 600ms var(--curva-salida);
+}
+@media (hover: hover) and (pointer: fine) {
+	.tarjeta:hover .tarjeta-foto .cara img,
+	.tarjeta:focus-visible .tarjeta-foto .cara img {
+		scale: 1.04;
+	}
 }
