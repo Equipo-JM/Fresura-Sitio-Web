@@ -6,7 +6,7 @@
 			"titulo": "Ven, date un gusto bonito… como tú",
 			"texto": "Fresas con crema a tu manera: eliges el tamaño, le pones tu toque y terminamos el pedido por WhatsApp."
 		},
-		"whatsapp": "573000000000",
+		"whatsapp": "573227920330",
 		"sedes": [
 			{
 				"id": "u-nacional",
@@ -64,7 +64,7 @@
 			"id": "fresitas-arma-tu-fresita",
 			"categoria": "fresitas",
 			"nombre": "Arma tu Fresita",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Tu antojo, a tu manera: 9 oz de fresas frescas y crema esponjosa con la base que más te guste, un espolvoreado, una salsa y tu topping favorito.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Arma tu Fresita, foto por validar",
@@ -313,7 +313,7 @@
 			"id": "fresitas-caribena",
 			"categoria": "fresitas",
 			"nombre": "Caribeña",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Un viaje al Caribe en 9 oz: fresas frescas y crema esponjosa sobre base de leche condensada, con coco rallado, salsa de mora y merenguitos crujientes.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Caribeña, foto por validar",
@@ -562,7 +562,7 @@
 			"id": "fresitas-oscura",
 			"categoria": "fresitas",
 			"nombre": "Oscura",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Para quienes aman lo intenso: fresas frescas y crema esponjosa sobre base de chocolate, con leche en polvo, salsa de arequipe y un barquillo crujiente. 9 oz.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Oscura, foto por validar",
@@ -811,7 +811,7 @@
 			"id": "fresitas-chocolatosa",
 			"categoria": "fresitas",
 			"nombre": "Chocolatosa",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Chocolate en cada capa: fresas frescas y crema esponjosa sobre base de chocolate, con espolvoreado de Oreo, salsa de chocolate y M&M's crujientes. 9 oz.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Chocolatosa, foto por validar",
@@ -1060,7 +1060,7 @@
 			"id": "fresitas-frutos-secos",
 			"categoria": "fresitas",
 			"nombre": "Frutos secos",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Fresca y crocante: fresas con crema esponjosa sobre base de maracuyá, con granola casera, salsa de mora y maní triturado. 9 oz.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Frutos secos, foto por validar",
@@ -1309,7 +1309,7 @@
 			"id": "fresotas-arma-tu-fresota",
 			"categoria": "fresotas",
 			"nombre": "Arma tu Fresota",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Más grande, más tuya: 13 oz de fresas con crema con tu base favorita, 2 espolvoreados, 2 salsas y 2 toppings para un postre lleno de sabor.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Arma tu Fresota, foto por validar",
@@ -1558,7 +1558,7 @@
 			"id": "fresotas-chocolatosa",
 			"categoria": "fresotas",
 			"nombre": "Chocolatosa",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Un clásico irresistible: 13 oz de fresas con crema sobre base de chocolate, con maní y coco rallado, doble baño de chocolate y mora, barquillo y chispas de chocolate.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Chocolatosa, foto por validar",
@@ -1807,7 +1807,7 @@
 			"id": "fresotas-acida",
 			"categoria": "fresotas",
 			"nombre": "Ácida",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Una fiesta de sabor: 13 oz de fresas con crema sobre base de maracuyá, con coco rallado y quipitos, doble salsa de mora y cereza, burbujas explosivas y moritas.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Ácida, foto por validar",
@@ -2056,7 +2056,7 @@
 			"id": "fresotas-sorpresa",
 			"categoria": "fresotas",
 			"nombre": "Sorpresa",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Cada cucharada sorprende: 13 oz de fresas con crema sobre base de leche condensada, lluvia de Choco Krispis y leche en polvo, salsas de chocolate y mora, mini masmelos y minichips.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Sorpresa, foto por validar",
@@ -2305,7 +2305,7 @@
 			"id": "fresotas-explosiva",
 			"categoria": "fresotas",
 			"nombre": "Explosiva",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Una explosión de sabor: 13 oz de fresas con crema sobre base de cereza, con Milo y Choco Krispis, doble salsa de leche condensada y arequipe, burbujas explosivas y mini masmelos.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Explosiva, foto por validar",
@@ -2554,7 +2554,7 @@
 			"id": "fresuras-arma-tu-fresura",
 			"categoria": "fresuras",
 			"nombre": "Arma tu Fresura",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "La Fresura definitiva: 16 oz para combinar a tu gusto con una base, doble espolvoreado, doble salsa, 2 toppings y un cremoso helado de temporada.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Arma tu Fresura, foto por validar",
@@ -2803,7 +2803,7 @@
 			"id": "fresuras-acida",
 			"categoria": "fresuras",
 			"nombre": "Ácida",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Tropical y divertida: 16 oz de fresas con crema sobre base de mora, con granola casera y coco rallado, doble baño de mora y chocolate, mini masmelos, burbujas explosivas y helado del día.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Ácida, foto por validar",
@@ -3052,7 +3052,7 @@
 			"id": "fresuras-top",
 			"categoria": "fresuras",
 			"nombre": "Top",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "La más consentida: 16 oz de fresas con crema sobre base de chocolate, con Oreo y Choco Krispis, salsas de leche condensada y chocolate, M&M's, barquillos y helado del día.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Top, foto por validar",
@@ -3301,7 +3301,7 @@
 			"id": "fresuras-dulce",
 			"categoria": "fresuras",
 			"nombre": "Dulce",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Para un antojo bien dulce: 16 oz de fresas con crema sobre base de arequipe, con Milo y quipitos, salsas de arequipe y chocolate, M&M's, minichips y helado del día.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Dulce, foto por validar",
@@ -3550,7 +3550,7 @@
 			"id": "fresuras-fit",
 			"categoria": "fresuras",
 			"nombre": "Fit",
-			"descripcion": "Elige tus opciones y déjanos tus indicaciones.",
+			"descripcion": "Fresca y frutal: 16 oz de fresas con crema sobre base de maracuyá, con granola y coco rallado, salsas de mora y maracuyá, merenguitos, chispas de chocolate y helado del día.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fit, foto por validar",
@@ -3799,7 +3799,7 @@
 			"id": "chocolate-fresitas",
 			"categoria": "chocolate",
 			"nombre": "Fresitas",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Fresas jugosas bañadas en chocolate blanco, oscuro o una mezcla de ambos, con el espolvoreado que más te guste. 9 oz.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresitas, foto por validar",
@@ -3824,7 +3824,7 @@
 			"id": "chocolate-fresotas",
 			"categoria": "chocolate",
 			"nombre": "Fresotas",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Fresas frescas cubiertas de chocolate oscuro, blanco o ambos, coronadas con el espolvoreado y el topping que elijas. 12 oz.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresotas, foto por validar",
@@ -3849,7 +3849,7 @@
 			"id": "chocolate-fresuras",
 			"categoria": "chocolate",
 			"nombre": "Fresuras",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Fresas frescas cubiertas de chocolate blanco u oscuro, con doble espolvoreado y un topping irresistible. 16 oz.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresuras, foto por validar",
@@ -3874,7 +3874,7 @@
 			"id": "miti-fresitas",
 			"categoria": "miti",
 			"nombre": "Fresitas",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Lo mejor de dos mundos: fresas con crema y chocolate caliente, con un espolvoreado a elección de nuestra barra.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresitas, foto por validar",
@@ -3899,7 +3899,7 @@
 			"id": "miti-fresotas",
 			"categoria": "miti",
 			"nombre": "Fresotas",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Lo mejor de dos mundos: fresas con crema y chocolate caliente, con un espolvoreado y un topping a elección de nuestra barra.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresotas, foto por validar",
@@ -3924,7 +3924,7 @@
 			"id": "miti-fresuras",
 			"categoria": "miti",
 			"nombre": "Fresuras",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Lo mejor de dos mundos, en grande: fresas con crema y chocolate caliente, con dos espolvoreados y un topping a elección de nuestra barra.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresuras, foto por validar",
@@ -3949,7 +3949,7 @@
 			"id": "compartir-ensalada-de-frutas",
 			"categoria": "compartir",
 			"nombre": "Ensalada de frutas",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Para compartir: 24 oz de fruta fresca con 4 frutas a elección, queso fresco y toppings.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Ensalada de frutas, foto por validar",
@@ -3974,7 +3974,7 @@
 			"id": "compartir-merengon",
 			"categoria": "compartir",
 			"nombre": "Merengón",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "El equilibrio perfecto entre frescura, cremosidad y crocancia: 3 frutas frescas, merengues crujientes y nuestra crema de leche. Ponle tu toque con 1 espolvoreado, 1 topping y 1 salsa.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Merengón, foto por validar",
@@ -3999,7 +3999,7 @@
 			"id": "compartir-fresubowl",
 			"categoria": "compartir",
 			"nombre": "Fresubowl",
-			"descripcion": "Déjanos tus indicaciones al hacer tu pedido.",
+			"descripcion": "Un bowl para disfrutar juntos: tus 2 frutas favoritas con nuestra crema de leche, bañadas en chocolate caliente y con 1 topping para darle tu toque.",
 			"imagen": {
 				"ruta": "https://ejemplo.invalid/fresas.webp",
 				"alt": "Fresubowl, foto por validar",

@@ -91,7 +91,7 @@ describe("paridad del inicio", () => {
 			mostrar(ruta);
 			expect(screen.getAllByRole("table", { name: "Horario" })).toHaveLength(2);
 			const pie = screen.getByRole("contentinfo");
-			expect(within(pie).getByText("Número por definir")).toBeInTheDocument();
+			expect(within(pie).queryByText("Número por definir")).toBeNull();
 			expect(pie).toHaveTextContent("U Nacional:");
 			expect(pie).toHaveTextContent("U Javeriana:");
 			expect(pie).not.toHaveTextContent("Sede U");
@@ -452,17 +452,11 @@ describe("paridad de ficha y personalización", () => {
 				.map((h) => h.textContent?.trim()),
 		).toEqual(["Descripción", "Características", "Tamaños", "Toppings"]);
 	});
-	it.each(prueba.productos.map((p) => [p.id, p.grupos_opciones.length > 0]))(
+	it.each(prueba.productos.map((p) => [p.id, p.descripcion]))(
 		"lee la descripción y las características del contenido de %s",
-		(id, personalizable) => {
+		(id, descripcion) => {
 			mostrar(`/producto/${id}`);
-			expect(
-				screen.getByText(
-					personalizable
-						? "Elige tus opciones y déjanos tus indicaciones."
-						: "Déjanos tus indicaciones al hacer tu pedido.",
-				),
-			).toBeInTheDocument();
+			expect(screen.getByText(descripcion)).toBeInTheDocument();
 			expect(
 				screen.getByText("Disponible en las sedes U Nacional y U Javeriana"),
 			).toBeInTheDocument();

@@ -31,9 +31,6 @@ export function PaginaSedes() {
 								<Icono nombre="chat" />
 								Escríbenos por WhatsApp
 							</a>
-							{contenido.estado === "ejemplo" && (
-								<span className="pv">Número por definir</span>
-							)}
 							<ul className="chips">
 								{Object.entries(contenido.negocio.redes)
 									.filter(([, url]) => url)

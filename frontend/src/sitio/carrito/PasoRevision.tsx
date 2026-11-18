@@ -96,7 +96,6 @@ export function PasoRevision({
 					<img className="chat-avatar" src="/marca/simbolo-color.svg" alt="" />
 					<div>
 						<p className="negrita">Fresura</p>
-						<span className="pv">Número por definir</span>
 					</div>
 				</div>
 				<div className="chat-cuerpo">

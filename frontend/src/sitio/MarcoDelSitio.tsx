@@ -220,9 +220,6 @@ export function MarcoDelSitio() {
 										>
 											WhatsApp
 										</a>
-										{contenido?.estado === "ejemplo" && (
-											<span className="pv">Número por definir</span>
-										)}
 									</li>
 									<li>
 										<Link to="/sedes">Sedes y contacto</Link>
