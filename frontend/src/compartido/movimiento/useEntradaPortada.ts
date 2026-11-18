@@ -3,7 +3,7 @@ import { type RefObject, useEffect } from "react";
 
 /**
  * Entrada de la portada: las palabras del título suben una a una y la foto se
- * abre desde abajo. Se ejecuta una sola vez al cargar, nunca en bucle.
+ * abre desde abajo. El sello cae aparte, como las demás calcomanías. Se ejecuta una sola vez al cargar, nunca en bucle.
  */
 export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 	useEffect(() => {
@@ -34,17 +34,6 @@ export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 						ease: "expo.inOut",
 					},
 					0.05,
-				)
-				.from(
-					".portada-sello",
-					{
-						scale: 0.8,
-						rotate: -40,
-						opacity: 0,
-						duration: 0.9,
-						ease: "back.out(1.7)",
-					},
-					0.75,
 				)
 				.from(".portada-arco img", { scale: 1.18, duration: 1.6 }, 0.05)
 				.from(".portada-trazo", { opacity: 0, x: -40, duration: 1.4 }, 0.1)

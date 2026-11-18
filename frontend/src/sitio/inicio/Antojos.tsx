@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { useCalcomaniaViva } from "../../compartido/movimiento/useCalcomaniaViva";
+import { Calcomania } from "../Calcomania";
 import { ANTOJOS } from "./copy";
 
 /**
@@ -14,6 +16,8 @@ function conMayuscula(texto: string): string {
 export function Antojos() {
 	const [elegido, setElegido] = useState<string | null>(null);
 	const navegar = useNavigate();
+	const sticker = useRef<HTMLImageElement>(null);
+	useCalcomaniaViva(sticker);
 
 	function elegir(texto: string, categoria: string) {
 		setElegido(texto);
@@ -26,9 +30,15 @@ export function Antojos() {
 			id="antojos"
 			aria-labelledby="titulo-antojos"
 		>
+			<Calcomania
+				nombre="fresitas-fresotas-fresuras"
+				className="calcomania-corte corte-antojos"
+			/>
 			<div className="envoltura antojos">
 				<img
-					className="antojos-sticker"
+					ref={sticker}
+					className="antojos-sticker calcomania-viva"
+					draggable={false}
 					src="/marca/sticker-simbolo.svg"
 					alt=""
 					width="132"

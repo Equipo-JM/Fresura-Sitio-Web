@@ -1,6 +1,8 @@
+import { useRef } from "react";
 import { Link, useParams } from "react-router";
 import { nombreProducto, pesos } from "../compartido/carrito/reglas";
 import { Icono } from "../compartido/componentes/Icono";
+import { useConteoPrecio } from "../compartido/movimiento/useConteoPrecio";
 import { ConContenido } from "./ConContenido";
 import { FotoProducto } from "./FotoProducto";
 import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
@@ -45,11 +47,15 @@ export function PaginaProducto() {
 											{nombreProducto(producto, categoria ? [categoria] : [])}
 										</h1>
 										<p className="ficha-precio">
-											{sinPrecio
-												? origen === "respaldo"
-													? "Consulta precios por WhatsApp"
-													: "Precio por confirmar"
-												: `Desde ${pesos(Math.min(...precios))}`}
+											{sinPrecio ? (
+												origen === "respaldo" ? (
+													"Consulta precios por WhatsApp"
+												) : (
+													"Precio por confirmar"
+												)
+											) : (
+												<PrecioDesde valor={Math.min(...precios)} />
+											)}
 										</p>
 									</div>
 									{origen === "principal" && (
@@ -139,5 +145,22 @@ export function PaginaProducto() {
 				);
 			}}
 		</ConContenido>
+	);
+}
+
+/** «Desde $…» con el número subiendo hasta el precio; el valor final se lee en texto oculto. */
+function PrecioDesde({ valor }: { valor: number }) {
+	const numero = useRef<HTMLSpanElement>(null);
+	useConteoPrecio(numero, valor, pesos);
+	return (
+		<>
+			<span aria-hidden="true">
+				Desde{" "}
+				<span className="precio-cuenta" ref={numero}>
+					{pesos(valor)}
+				</span>
+			</span>
+			<span className="oculto">Desde {pesos(valor)}</span>
+		</>
 	);
 }

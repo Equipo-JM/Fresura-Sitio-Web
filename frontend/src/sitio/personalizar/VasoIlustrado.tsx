@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import type { Producto, Seleccion } from "../../compartido/carrito/reglas";
+import { useVasoAnimado } from "./useVasoAnimado";
 
 /** Color de la base o de la salsa según el sabor elegido (propuesta, por validar). */
 const COLOR_SABOR: Record<string, string> = {
@@ -36,6 +38,7 @@ const HILOS = [
  * Vaso por capas que se llena con lo que la persona elige. Las capas no se
  * cruzan: la base abajo, las fresas en el medio, la crema con la salsa en hilo
  * y los espolvoreados encima. La base y la salsa toman el color del sabor.
+ * Se traza al entrar y reacciona a cada elección (ver `useVasoAnimado`).
  */
 export function VasoIlustrado({
 	producto,
@@ -49,10 +52,13 @@ export function VasoIlustrado({
 	const espolvoreados = seleccion.espolvoreados ?? [];
 	const colorBase = (base && COLOR_SABOR[base]) ?? "#CFA67B";
 	const armado = producto.grupos_opciones.length > 0;
+	const vaso = useRef<SVGSVGElement>(null);
+	useVasoAnimado(vaso, seleccion);
 
 	return (
 		<div className="zona-vaso">
 			<svg
+				ref={vaso}
 				className="vaso"
 				viewBox="0 0 240 280"
 				aria-hidden="true"
@@ -77,6 +83,7 @@ export function VasoIlustrado({
 					{armado && (
 						<>
 							<image
+								className="vaso-fresa"
 								href="/marca/fresa-flamingo.svg"
 								x="58"
 								y="128"
@@ -84,6 +91,7 @@ export function VasoIlustrado({
 								height="65"
 							/>
 							<image
+								className="vaso-fresa"
 								href="/marca/fresa-flamingo.svg"
 								x="97"
 								y="118"
@@ -91,6 +99,7 @@ export function VasoIlustrado({
 								height="65"
 							/>
 							<image
+								className="vaso-fresa"
 								href="/marca/fresa-flamingo.svg"
 								x="136"
 								y="128"
@@ -125,6 +134,7 @@ export function VasoIlustrado({
 					</g>
 				</g>
 				<path
+					className="vaso-contorno"
 					d="M34 40 H206 L186 262 Q184 272 172 272 H68 Q56 272 54 262 Z"
 					fill="none"
 					stroke="#5B3B24"
@@ -132,6 +142,7 @@ export function VasoIlustrado({
 					strokeLinejoin="round"
 				/>
 				<path
+					className="vaso-contorno"
 					d="M26 40 H214"
 					stroke="#5B3B24"
 					strokeWidth="6"

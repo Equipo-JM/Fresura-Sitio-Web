@@ -4,13 +4,33 @@ import { unidadesCarrito } from "../compartido/carrito/unidades";
 import { useCarrito } from "../compartido/carrito/useCarrito";
 import { Icono } from "../compartido/componentes/Icono";
 import { useContenido } from "../compartido/contenido/useContenido";
+import {
+	useAperturaAnimada,
+	useDesplegablesSuaves,
+} from "../compartido/movimiento/useAperturaAnimada";
+import { useCortinaEntrePaginas } from "../compartido/movimiento/useCortinaEntrePaginas";
 import { useDesplazamientoAlNavegar } from "../compartido/movimiento/useDesplazamientoAlNavegar";
 import { useDesplazamientoSuave } from "../compartido/movimiento/useDesplazamientoSuave";
+import { useRevelarAlDesplazar } from "../compartido/movimiento/useRevelarAlDesplazar";
 import { AvisoRespaldo } from "./AvisoRespaldo";
 import { PAGINAS_SITIO } from "./inicio/Explora";
 import { useMomentosDesplazamiento } from "./inicio/useMomentosDesplazamiento";
 import { useCierreNavegacion } from "./useCierreNavegacion";
 import { useTituloPagina } from "./useTituloPagina";
+
+/** Colores de las fresas que caen sobre el pie al llegar al final de la página. */
+const FRESAS_LLUVIA = [
+	"flamingo",
+	"we-peep",
+	"porcini",
+	"flamingo",
+	"we-peep",
+	"porcini",
+	"flamingo",
+	"we-peep",
+	"flamingo",
+	"porcini",
+] as const;
 
 /** Páginas de la navegación después del desplegable «Menú»: cada opción abre su propia página (RF-02). */
 const SECCIONES = PAGINAS_SITIO.filter((p) => p.ruta !== "/menu");
@@ -36,6 +56,12 @@ export function MarcoDelSitio() {
 	const respaldo = data?.origen === "respaldo";
 	const principal = useRef<HTMLElement>(null);
 	useMomentosDesplazamiento(principal, pathname, Boolean(contenido));
+	useRevelarAlDesplazar(pathname, Boolean(contenido));
+	useDesplegablesSuaves();
+	useAperturaAnimada(menuAbierto, "#nav-principal .raiz > li");
+	useAperturaAnimada(categoriasAbiertas, "#desplegable > li");
+	const cortina = useRef<HTMLDivElement>(null);
+	useCortinaEntrePaginas(cortina, pathname);
 	const compra =
 		!respaldo &&
 		(pathname === "/carrito" || pathname.startsWith("/personalizar/"));
@@ -197,6 +223,12 @@ export function MarcoDelSitio() {
 
 			{!compra && (
 				<footer className="pie oscuro">
+					<div className="pie-lluvia" aria-hidden="true">
+						{FRESAS_LLUVIA.map((color, i) => (
+							// biome-ignore lint/suspicious/noArrayIndexKey: lista fija decorativa
+							<img key={i} src={`/marca/fresa-${color}.svg`} alt="" />
+						))}
+					</div>
 					<div className="envoltura">
 						<div className="pie-grid">
 							<div>
@@ -259,6 +291,9 @@ export function MarcoDelSitio() {
 					</div>
 				</footer>
 			)}
+			<div className="cortina-pagina" ref={cortina} aria-hidden="true">
+				<img src="/marca/fresa-we-peep.svg" alt="" width="84" height="119" />
+			</div>
 			{!compra && contenido && (
 				// En celular es un círculo con el ícono: la píldora con texto tapaba
 				// precios, horarios y botones (revisión en 360 px, 17 nov).

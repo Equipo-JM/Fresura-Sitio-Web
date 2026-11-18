@@ -10,11 +10,14 @@ export function registrarLenis(lenis: Lenis | null) {
 	lenisActivo = lenis;
 }
 
-/** Altura del encabezado fijo, para que no tape el inicio de la sección. */
+/**
+ * Altura de lo que queda fijo arriba (encabezado y, en /menu, la barra de
+ * categorías), para que no tape el inicio de la sección.
+ */
 function alturaEncabezado(): number {
-	return (
-		document.querySelector(".sitio-h")?.getBoundingClientRect().height ?? 0
-	);
+	const alto = (selector: string) =>
+		document.querySelector(selector)?.getBoundingClientRect().height ?? 0;
+	return alto(".sitio-h") + alto(".nav-categorias");
 }
 
 /**

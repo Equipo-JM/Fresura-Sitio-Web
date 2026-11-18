@@ -154,13 +154,23 @@ describe("sitio de varias páginas (RF-02)", () => {
 		const destacados = within(
 			screen.getByRole("region", { name: "Nuestros favoritos" }),
 		);
-		const esperados = contenido.productos
-			.filter((p) => p.destacado && p.vigente)
-			.map((p) => `/producto/${p.id}`);
+		const esperados = contenido.productos.filter(
+			(p) => p.destacado && p.vigente,
+		);
 		expect(esperados.length).toBeGreaterThan(0);
-		expect(
-			destacados.getAllByRole("link").map((a) => a.getAttribute("href")),
-		).toEqual(esperados);
+		// Un botón por favorito; la tarjeta del elegido lleva a su ficha.
+		const botones = destacados.getAllByRole("button");
+		expect(botones.map((b) => b.textContent)).toEqual(
+			esperados.map((p) => p.nombre),
+		);
+		for (const [i, boton] of botones.entries()) {
+			fireEvent.click(boton);
+			expect(boton).toHaveAttribute("aria-pressed", "true");
+			expect(destacados.getByRole("link")).toHaveAttribute(
+				"href",
+				`/producto/${esperados[i].id}`,
+			);
+		}
 	});
 
 	it("sin destacados vigentes, el inicio no muestra la franja", () => {
