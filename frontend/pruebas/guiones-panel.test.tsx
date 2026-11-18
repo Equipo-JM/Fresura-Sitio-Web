@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { PERFIL_AVATAR_FRESURA } from "../../backend/supabase/functions/_shared/esquemas/prompt-video";
 import { GuionesPanel } from "../src/panel/guiones/GuionesPanel";
 import type { Database, Json } from "../src/tipos/database.types";
 import contenido from "./datos/contenido-prueba.json";
@@ -394,8 +395,7 @@ describe("guiones del panel", () => {
 			screen.getByRole("button", { name: "Generar prompt de video" }),
 		);
 		const campo = await screen.findByLabelText("Prompt completo para avatar");
-		const texto =
-			"Video vertical 9:16 de 30 segundos\n\nEstilo general\nLuz natural\n\nEscena 1\nTexto del avatar: Ven a probarlo\nIndicaciones: Mirar a cámara";
+		const texto = `Video vertical 9:16 de 30 segundos\n\n${PERFIL_AVATAR_FRESURA}\n\nEstilo general\nLuz natural\n\nEscena 1\nTexto del avatar: Ven a probarlo\nIndicaciones: Mirar a cámara`;
 		expect(campo).toHaveValue(texto);
 		fireEvent.click(
 			screen.getByRole("button", { name: "Copiar prompt completo" }),

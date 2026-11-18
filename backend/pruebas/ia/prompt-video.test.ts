@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { PERFIL_AVATAR_FRESURA } from "../../supabase/functions/_shared/esquemas/prompt-video";
 import type { LlamarModelo } from "../../supabase/functions/ia/proveedor/generar";
 import { crearRutaPromptVideo } from "../../supabase/functions/ia/skills/prompt-video";
 import { guionDePrueba } from "../datos/guion";
@@ -181,6 +182,7 @@ describe("POST /prompt-video (IF-10, PU-16)", () => {
 				...avatar,
 				texto_copiar: [
 					"Video vertical 9:16 de 15 segundos",
+					PERFIL_AVATAR_FRESURA,
 					`Estilo general\n${avatar.estilo_general}`,
 					"Escena 1\nTexto del avatar: ¿Ya armaste la tuya?\nIndicaciones: Sonríe a cámara",
 					"Escena 2\nTexto del avatar: Tú eliges cada capa.\nIndicaciones: Plano medio",
@@ -198,6 +200,7 @@ describe("POST /prompt-video (IF-10, PU-16)", () => {
 		).toBe(true);
 		expect(p.consultas[0].url.searchParams.get("id")).toBe(`eq.${id}`);
 		const peticion = p.llamar.mock.calls[0][0];
+		expect(peticion.prompt.sistema).toContain(PERFIL_AVATAR_FRESURA);
 		expect(peticion.prompt.usuario).toContain('"red": "tiktok"');
 		expect(peticion.prompt.usuario).toContain('"duracion_s": 15');
 		expect(peticion.prompt.usuario).toContain(
@@ -229,6 +232,9 @@ describe("POST /prompt-video (IF-10, PU-16)", () => {
 			},
 			modelo: "principal",
 		});
+		expect(p.llamar.mock.lastCall?.[0].prompt.sistema).not.toContain(
+			PERFIL_AVATAR_FRESURA,
+		);
 		expect(p.guardados.size).toBe(1);
 		expect(p.guardados.get(id)).toMatchObject({ herramienta: "escenas" });
 	});

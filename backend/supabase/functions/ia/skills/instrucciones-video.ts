@@ -3,7 +3,10 @@ import {
 	type InstruccionGuion,
 	objetivoCaracteresVoz,
 } from "../../_shared/esquemas/guion.ts";
-import type { HerramientaVideo } from "../../_shared/esquemas/prompt-video.ts";
+import {
+	type HerramientaVideo,
+	PERFIL_AVATAR_FRESURA,
+} from "../../_shared/esquemas/prompt-video.ts";
 import type { PromptGuion } from "../proveedor/generar.ts";
 import { PERFIL_MARCA } from "./marca.ts";
 
@@ -24,7 +27,7 @@ Reglas:
 - Devuelve solo el JSON con la estructura pedida.`;
 
 const REGLAS_HERRAMIENTA: Record<HerramientaVideo, string> = {
-	avatar: `El estilo_general describe presentador, fondo, luz y ritmo de voz. Cada escena contiene orden, texto_avatar e indicaciones. texto_avatar lleva solo lo que dice el presentador, sin acciones. Las indicaciones de gesto y encuadre van aparte. La suma de texto_avatar de todas las escenas no puede superar el máximo de caracteres indicado. Si la voz del guion es más larga, resúmela conservando la idea, el gancho y el llamado a la acción de cada escena.`,
+	avatar: `Usa siempre esta identidad fija:\n${PERFIL_AVATAR_FRESURA}\nNo propongas cambios de identidad, apariencia, voz, acento ni velocidad. El estilo_general solo describe la luz, el fondo y el encuadre. Cada escena contiene orden, texto_avatar e indicaciones. texto_avatar lleva solo lo que dice el presentador, sin acciones. Las indicaciones de gesto y encuadre van aparte. La suma de texto_avatar de todas las escenas no puede superar el máximo de caracteres indicado. Si la voz del guion es más larga, resúmela conservando la idea, el gancho y el llamado a la acción de cada escena.`,
 	escenas: `El estilo_general describe cámara, luz y ambiente. Cada escena contiene orden y descripcion. El único personaje es una persona que habla en cada escena; no se admiten escenas sin nadie que hable. Escribe los diálogos entre comillas y las acciones en prosa, en tercera persona y sin comillas.`,
 };
 
