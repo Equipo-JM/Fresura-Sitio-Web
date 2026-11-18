@@ -1,8 +1,11 @@
 import type { Producto } from "../compartido/carrito/reglas";
 import { FotoEjemplo } from "../compartido/componentes/FotoEjemplo";
-import { tieneFoto } from "../compartido/contenido/fotos";
+import { fotoRappi, tieneFoto } from "../compartido/contenido/fotos";
 
-/** Foto publicada prioritaria; a falta de ella, referencias y fresas de DD-43. */
+/**
+ * Foto publicada prioritaria; a falta de ella, la provisional de Rappi y, si
+ * tampoco hay, referencias y fresas de DD-43.
+ */
 export function FotoProducto({
 	producto,
 	enBeige = false,
@@ -23,6 +26,22 @@ export function FotoProducto({
 				height={producto.imagen.alto}
 				loading="lazy"
 			/>
+		);
+	const provisional = fotoRappi(producto.id);
+	if (provisional)
+		return (
+			<>
+				{marcada && !segunda && <span className="pv pv-foto">Por validar</span>}
+				<img
+					src={provisional}
+					alt={segunda ? "" : `${producto.nombre}, foto provisional`}
+					// Casi todas son cuadradas; el marco las recorta con `object-fit`,
+					// así que estas medidas solo reservan espacio mientras carga.
+					width="500"
+					height="500"
+					loading="lazy"
+				/>
+			</>
 		);
 	const chocolate = producto.categoria === "chocolate";
 	const textura = producto.nombre.startsWith("Arma tu");

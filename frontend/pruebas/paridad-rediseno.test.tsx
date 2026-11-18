@@ -275,6 +275,8 @@ describe("paridad del inicio", () => {
 		const contenido = structuredClone(prueba);
 		contenido.productos[1].imagen.ruta =
 			"https://fotos.example.com/caribena.webp";
+		// Un id sin foto de Rappi deja a Fresuras Top con las caras de DD-43.
+		contenido.productos[12].id = "fresuras-sin-foto";
 		mostrar("/menu", contenido);
 		const tarjeta = screen.getByRole("link", {
 			name: /Fresitas: Caribeña, Desde/,
@@ -284,7 +286,7 @@ describe("paridad del inicio", () => {
 			"https://fotos.example.com/caribena.webp",
 		);
 		const pendiente = screen.getByRole("link", {
-			name: /Fresitas: Oscura, Desde/,
+			name: /Fresuras: Top, Desde/,
 		});
 		expect(within(pendiente).getByText("Foto por validar")).toBeInTheDocument();
 		expect(
@@ -418,8 +420,8 @@ describe("paridad de ficha y personalización", () => {
 			screen.getByText(/9 oz\. Elige la cantidad y déjanos tus indicaciones\./),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("img", { name: /Vaso transparente con fresas/ }),
-		).toBeInTheDocument();
+			screen.getByRole("img", { name: "Fresitas, foto provisional" }),
+		).toHaveAttribute("src", "/ejemplos/productos/fresitas-con-chocolate.webp");
 		expect(
 			screen.queryByRole("heading", { name: "Base" }),
 		).not.toBeInTheDocument();
@@ -860,7 +862,10 @@ describe("estilos de paridad sin medición de geometría", () => {
 		if (!portada) throw new Error("Falta la foto de portada");
 		expect(getComputedStyle(portada).objectPosition).toBe("45% 72%");
 		inicio.unmount();
-		mostrar("/menu");
+		// Todos tienen foto de Rappi; un id sin ella muestra el espacio pendiente.
+		const contenido = structuredClone(prueba);
+		contenido.productos[12].id = "fresuras-sin-foto";
+		mostrar("/menu", contenido);
 		const pendiente = document.querySelector(".tarjeta .foto-pendiente");
 		if (!pendiente) throw new Error("Falta una foto pendiente del menú");
 		expect(getComputedStyle(pendiente).backgroundImage).toBe("none");
