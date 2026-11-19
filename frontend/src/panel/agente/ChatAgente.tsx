@@ -284,6 +284,7 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 						{chat.ocupado && (
 							<p>{consultando ? "Consultando datos…" : "Escribiendo…"}</p>
 						)}
+						{chat.esperandoVideo && <p>Esperando el video de D-ID…</p>}
 					</div>
 					{chat.error && (
 						<div className="panel-aviso" role="alert">

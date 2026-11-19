@@ -2,13 +2,19 @@ import { useChat } from "@ai-sdk/react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { esquemaChat } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
+import {
+	AVISO_VIDEO_EN_CURSO,
+	esquemaChat,
+	esquemaEstadoVideo,
+	esquemaRespuestaEstadoVideo,
+} from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import type { Database } from "../../tipos/database.types";
 import {
 	crearServicioConversaciones,
 	type MensajeAgente,
 	type PaginaConversaciones,
 } from "./servicioConversaciones";
+import { useEstadoVideo } from "./useEstadoVideo";
 
 const ERROR_GENERICO =
 	"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.";
@@ -16,6 +22,7 @@ const ERROR_GENERICO =
 /** Invoca IA mediante Supabase, que conserva la URL y renueva la sesión en cada petición. */
 async function invocarFuncionIa(
 	cliente: SupabaseClient<Database>,
+	ruta: "chat" | "estado-video",
 	body: object,
 	generico: string,
 	signal?: AbortSignal,
@@ -24,7 +31,7 @@ async function invocarFuncionIa(
 	if (errorSesion || !sesion.session)
 		throw new Error("Tu sesión venció. Vuelve a entrar al panel.");
 	const respuesta = await cliente.functions
-		.invoke<unknown>("ia/chat", {
+		.invoke<unknown>(`ia/${ruta}`, {
 			body,
 			signal,
 			headers: { Authorization: `Bearer ${sesion.session.access_token}` },
@@ -74,6 +81,7 @@ export function crearTransporteChat(
 		fetch: async (_url, opciones) => {
 			const respuesta = await invocarFuncionIa(
 				cliente,
+				"chat",
 				JSON.parse(String(opciones?.body)),
 				ERROR_GENERICO,
 				opciones?.signal ?? undefined,
@@ -144,6 +152,39 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 			revision.current++;
 		};
 	}, [cargarPagina]);
+	const ultimo = chat.messages.at(-1);
+	const videoEnCurso =
+		activa !== null &&
+		!respondiendo &&
+		ultimo?.role === "assistant" &&
+		ultimo.parts.some(
+			(parte) =>
+				parte.type === "text" &&
+				parte.text.trimEnd().endsWith(AVISO_VIDEO_EN_CURSO),
+		);
+	useEstadoVideo({
+		activo: videoEnCurso,
+		clave: `${activa}:${ultimo?.id}`,
+		consultar: async (signal) =>
+			esquemaRespuestaEstadoVideo.parse(
+				await invocarFuncionIa(
+					cliente,
+					"estado-video",
+					esquemaEstadoVideo.parse({ conversacion_id: activaRef.current }),
+					ERROR_GENERICO,
+					signal,
+				),
+			),
+		alTerminar: (mensaje) =>
+			chat.setMessages((mensajes) => [
+				...mensajes,
+				{
+					id: crypto.randomUUID(),
+					role: "assistant",
+					parts: [{ type: "text", text: mensaje }],
+				},
+			]),
+	});
 	async function ejecutar(accion: () => Promise<void>) {
 		if (bloqueo.current || respondiendo) return;
 		bloqueo.current = true;
@@ -199,6 +240,7 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 		errorHistorial,
 		cambiarPagina: (numero: number) => ejecutar(() => cargarPagina(numero)),
 		conversacionActiva: activa,
+		esperandoVideo: videoEnCurso,
 		ocupado: ocupado || respondiendo,
 		enviar,
 		reintentar: () =>
