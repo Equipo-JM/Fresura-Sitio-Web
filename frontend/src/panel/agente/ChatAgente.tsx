@@ -5,6 +5,49 @@ import type { Database } from "../../tipos/database.types";
 import { cuerpoGuion, leerTarjeta } from "./servicioConversaciones";
 import { useChatAgente } from "./useChatAgente";
 
+function CopiarRespuesta({ texto }: { texto: string }) {
+	const [estado, setEstado] = useState<"copiado" | "manual" | null>(null);
+
+	async function copiar() {
+		try {
+			await navigator.clipboard.writeText(texto);
+			setEstado("copiado");
+		} catch {
+			setEstado("manual");
+		}
+	}
+
+	return (
+		<div className="agente-copia">
+			<button
+				className="boton secundario compacto"
+				type="button"
+				onClick={() => void copiar()}
+			>
+				Copiar respuesta completa
+			</button>
+			<div role="status">
+				{estado === "copiado" && "Respuesta copiada."}
+				{estado === "manual" && "Usa la opción Copiar de tu dispositivo."}
+			</div>
+			{estado === "manual" && (
+				<label>
+					Texto completo para copiar
+					<textarea
+						readOnly
+						value={texto}
+						rows={5}
+						ref={(campo) => {
+							campo?.focus();
+							campo?.select();
+						}}
+					/>
+				</label>
+			)}
+		</div>
+	);
+}
+
 /** Chat de guiones con historial y entregas en el propio hilo. */
 export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 	const chat = useChatAgente(cliente);
@@ -181,31 +224,42 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 						)}
 						{chat.mensajes.map((m) => {
 							const tarjeta = leerTarjeta(m.metadata?.tarjetaGuion);
+							const partes = m.parts.filter((parte) => parte.type === "text");
+							const cuerpo = tarjeta ? cuerpoGuion(tarjeta.guion) : "";
+							const ficha = tarjeta
+								? `${tarjeta.instruccion.red} · ${tarjeta.instruccion.duracion_s} segundos`
+								: "";
+							const textoCompleto = [
+								...partes.map((parte) => parte.text),
+								tarjeta?.guion.titulo,
+								ficha,
+								cuerpo,
+							]
+								.filter((parte) => parte?.trim())
+								.join("\n\n");
 							return (
 								<article className="panel-bloque agente-mensaje" key={m.id}>
 									<strong>{m.role === "user" ? "Tú" : "Agente"}</strong>
-									{m.parts
-										.filter((p) => p.type === "text")
-										.map((p) => (
-											<p className="agente-texto" key={p.type + p.text}>
-												{p.text}
-											</p>
-										))}
+									{partes.map((p) => (
+										<p className="agente-texto" key={p.type + p.text}>
+											{p.text}
+										</p>
+									))}
 									{m.metadata?.aviso && (
 										<p className="panel-aviso">{m.metadata.aviso.mensaje}</p>
 									)}
 									{tarjeta && (
 										<div className="agente-tarjeta">
 											<h3>{tarjeta.guion.titulo}</h3>
-											<p>
-												{tarjeta.instruccion.red} ·{" "}
-												{tarjeta.instruccion.duracion_s} segundos
-											</p>
-											<p className="agente-texto">
-												{cuerpoGuion(tarjeta.guion)}
-											</p>
+											<p>{ficha}</p>
+											<p className="agente-texto">{cuerpo}</p>
 										</div>
 									)}
+									{m.role === "assistant" &&
+										textoCompleto &&
+										(!chat.ocupado || m.id !== ultimo?.id) && (
+											<CopiarRespuesta texto={textoCompleto} />
+										)}
 								</article>
 							);
 						})}

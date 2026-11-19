@@ -375,6 +375,13 @@
 	display: grid;
 	gap: 16px;
 }
+.agente-copia {
+	display: grid;
+	gap: 8px;
+}
+.agente-copia button {
+	justify-self: start;
+}
 .agente-tarjeta h3 {
 	font-family: "Restora Neue", serif;
 }

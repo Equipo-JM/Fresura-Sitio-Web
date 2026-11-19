@@ -147,7 +147,10 @@ function enviar(texto = "Quiero un guion") {
 	});
 	fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
 }
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
+});
 describe("conversión de memoria", () => {
 	it("muestra solo texto visible de ambos roles", () => {
 		expect(
@@ -392,6 +395,55 @@ describe("chat del panel", () => {
 				([url]) => !String(url).includes("/rest/v1/guiones"),
 			),
 		).toBe(true);
+		const copiar = vi.fn().mockResolvedValue(undefined);
+		vi.stubGlobal(
+			"navigator",
+			Object.create(navigator, { clipboard: { value: { writeText: copiar } } }),
+		);
+		const boton = await screen.findByRole("button", {
+			name: "Copiar respuesta completa",
+		});
+		fireEvent.click(boton);
+		expect(await screen.findByText("Respuesta copiada.")).toBeVisible();
+		expect(copiar).toHaveBeenCalledWith(
+			expect.stringContaining("Antojo Fresura"),
+		);
+		expect(copiar).toHaveBeenCalledWith(
+			expect.stringContaining(tarjeta.guion.escenas[0].voz),
+		);
+		expect(copiar).toHaveBeenCalledWith(
+			expect.stringContaining(tarjeta.guion.notas_produccion),
+		);
+	});
+	it("permite copiar un prompt escrito en el chat aunque el navegador bloquee el portapapeles", async () => {
+		const simulado = simular();
+		const prompt =
+			"Video vertical 9:16\nEscena 1: plano medio\nVoz: Conoce Fresura";
+		simulado.responder(() =>
+			flujo([
+				{ type: "start", messageId: "prompt" },
+				{ type: "text-start", id: "texto" },
+				{ type: "text-delta", id: "texto", delta: prompt },
+				{ type: "text-end", id: "texto" },
+				{ type: "finish", finishReason: "stop" },
+			]),
+		);
+		const copiar = vi.fn().mockRejectedValue(new Error("Permiso denegado"));
+		vi.stubGlobal(
+			"navigator",
+			Object.create(navigator, { clipboard: { value: { writeText: copiar } } }),
+		);
+		enviar("Dame las indicaciones para HeyGen");
+		fireEvent.click(
+			await screen.findByRole("button", { name: "Copiar respuesta completa" }),
+		);
+		const campo = await screen.findByRole("textbox", {
+			name: "Texto completo para copiar",
+		});
+		expect(copiar).toHaveBeenCalledWith(prompt);
+		expect(campo).toHaveValue(prompt);
+		expect(campo).toHaveFocus();
+		expect(campo).toHaveProperty("selectionEnd", prompt.length);
 	});
 	it("ofrece opciones de bienvenida y permite responder con un número por el mismo chat", async () => {
 		const simulado = simular();
