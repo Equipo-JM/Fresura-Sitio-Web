@@ -99,6 +99,10 @@ describe("piezas de contenido del agente", () => {
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain("«Prompt para Canva IA»");
 		expect(INSTRUCCIONES_AGENTE).toContain("Elige en instruccion.fondo");
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"Nunca escribas un prompt en el texto del chat",
+		);
+		expect(INSTRUCCIONES_AGENTE).toContain("sin mencionárselo a la persona");
 	});
 
 	it("entrega piezas válidas y rechaza precios no publicados salvo en una revisión", async () => {

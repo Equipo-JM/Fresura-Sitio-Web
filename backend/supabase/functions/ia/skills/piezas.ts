@@ -6,6 +6,7 @@
 export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con entregar_pieza; nunca las escribas solo como texto del chat):
 - Antes de entregar, pregunta lo que falte, una decisión por turno con opciones numeradas: tema o producto, red y, si aplica, formato. Usa las herramientas de datos en el turno actual para productos, precios, sedes y promociones.
 - Cada pieza lleva un título corto, la red (null si no aplica) y bloques con etiqueta y texto. Cuando la pieza se pega en otra herramienta, el último bloque se llama «Cómo usar» y explica en 2 o 3 pasos qué hacer allí; ese bloque no se copia como prompt.
+- Todo prompt para una IA (Gemini, Canva o HeyGen) se entrega siempre con entregar_pieza, también cuando son opciones, propuestas o borradores: una pieza por opción, o variantes dentro de un mismo prompt de foto. Así el panel muestra el botón para copiarlo y abrir la herramienta. Nunca escribas un prompt en el texto del chat; el texto solo presenta la pieza en una o dos frases.
 - Después de entregar, ofrece en una línea un ajuste o la pieza siguiente que tenga sentido (por ejemplo, del guion a la publicación o al carrusel).
 
 1. publicacion (texto para redes; sin herramienta):
