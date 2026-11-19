@@ -15,6 +15,7 @@ const opcionesAuth = { persistSession: false, autoRefreshToken: false };
 
 type Fila = {
 	id: string;
+	guion_llamada: string;
 	voz: string;
 	estado: string;
 	did_id: string | null;
@@ -24,6 +25,7 @@ type Fila = {
 
 const enviado: Fila = {
 	id: "trabajo-1",
+	guion_llamada: "guion-1",
 	voz: "Hola",
 	estado: "enviado",
 	did_id: "tlk-ficticio",

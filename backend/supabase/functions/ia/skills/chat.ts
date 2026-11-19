@@ -146,8 +146,10 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			);
 		const accion = accionVideoDid(mensaje);
 		if (accion) {
+			// Confirmar también lee el guion entregado para elegir fondo y expresión;
+			// si quedó fuera de los mensajes recientes, se usa el fondo de marca.
 			const historial =
-				accion === "preparar" && opciones.videoDid
+				accion !== "consultar" && opciones.videoDid
 					? await cargarMensajes(cliente, id)
 					: [];
 			const texto = await procesarVideoDid(

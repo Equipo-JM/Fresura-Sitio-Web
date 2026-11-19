@@ -10,6 +10,7 @@ import {
 import { crearRutaChat } from "../../supabase/functions/ia/skills/chat";
 import {
 	accionVideoDid,
+	estiloVideo,
 	procesarVideoDid,
 } from "../../supabase/functions/ia/skills/video-did";
 import { guionDePrueba } from "../datos/guion";
@@ -276,28 +277,59 @@ describe("video de Fresura con D-ID", () => {
 		expect(pedir).toHaveBeenCalledTimes(2);
 		expect(crearModelo).not.toHaveBeenCalled();
 	});
-	it("envía el fondo de marca solo si está configurado en el perfil Expressive", async () => {
+	it("elige el fondo por tema y la expresión animada según la instrucción del guion", () => {
+		const base = {
+			producto_id: null,
+			campana: null,
+			objetivo: "dar_a_conocer",
+			tono: "Cercano",
+			red: "tiktok",
+			duracion_s: 15,
+		} as const;
+		expect(estiloVideo(base)).toEqual({ tema: "marca", animado: false });
+		expect(estiloVideo({ ...base, producto_id: "fresas" }).tema).toBe(
+			"producto",
+		);
+		expect(estiloVideo({ ...base, campana: "Amor y amistad" }).tema).toBe(
+			"temporada",
+		);
+		expect(estiloVideo({ ...base, objetivo: "promocion" }).animado).toBe(true);
+	});
+	it("envía fondo y expresión del estilo solo si están configurados en el perfil Expressive", async () => {
 		const pedir = vi.fn<typeof fetch>(async () =>
 			Response.json({ id: "exp_ficticio" }, { status: 201 }),
 		);
 		const perfil = {
 			tipo: "expresivo" as const,
 			avatar: "avatar@de-prueba",
-			sentimiento: "snt_ficticio",
+			sentimiento: "snt_amable",
 			voz: "voz-ficticia",
 			modeloVoz: "eleven_flash_v2_5",
 		};
-		const fondo = "https://fresura.example/marca/fondo-presentadora.png";
 		await crearProveedorDid({
 			clave: "c",
-			perfil: { ...perfil, fondo },
+			perfil: {
+				...perfil,
+				fondos: "https://fresura.example/marca/",
+				sentimientoAnimado: "snt_animado",
+			},
 			pedir,
-		}).generar("Hola");
-		await crearProveedorDid({ clave: "c", perfil, pedir }).generar("Hola");
+		}).generar("Hola", { tema: "producto", animado: true });
+		await crearProveedorDid({ clave: "c", perfil, pedir }).generar("Hola", {
+			tema: "producto",
+			animado: true,
+		});
 		const cuerpos = pedir.mock.calls.map(([, o]) =>
 			JSON.parse(String(o?.body)),
 		);
-		expect(cuerpos[0].background).toEqual({ type: "image_url", value: fondo });
+		expect(cuerpos[0]).toMatchObject({
+			sentiment_id: "snt_animado",
+			background: {
+				type: "image_url",
+				value: "https://fresura.example/marca/fondo-presentadora-producto.png",
+			},
+		});
+		expect(cuerpos[1].sentiment_id).toBe("snt_amable");
 		expect(cuerpos[1]).not.toHaveProperty("background");
 	});
 	it("conserva avatar, sentimiento y voz privada en Expressive y consulta ese mismo recurso", async () => {
@@ -307,6 +339,7 @@ describe("video de Fresura con D-ID", () => {
 			sentimiento: "snt_ficticio",
 			voz: "voz-privada-ficticia",
 			modeloVoz: "eleven_flash_v2_5",
+			fondos: "https://fresura.example/marca/",
 		});
 		pedir.mockResolvedValueOnce(
 			Response.json({ id: "exp_ficticio" }, { status: 201 }),
@@ -318,6 +351,10 @@ describe("video de Fresura con D-ID", () => {
 		expect(JSON.parse(String(opciones?.body))).toMatchObject({
 			avatar_id: "avatar@de-prueba",
 			sentiment_id: "snt_ficticio",
+			// El guion de prueba no tiene producto ni campaña: fondo de marca.
+			background: {
+				value: "https://fresura.example/marca/fondo-presentadora-marca.png",
+			},
 			script: {
 				provider: {
 					type: "elevenlabs",

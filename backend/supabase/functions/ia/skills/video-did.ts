@@ -18,7 +18,7 @@ import {
 } from "../../_shared/http.ts";
 import type { ManejadorRuta } from "../../_shared/servidor.ts";
 import { guardarMensajes, leerConversacion } from "../agente/memoria.ts";
-import type { crearProveedorDid } from "../proveedor/did.ts";
+import type { crearProveedorDid, EstiloVideo } from "../proveedor/did.ts";
 
 /** Dependencias privadas. El navegador nunca recibe la configuración de D-ID. */
 export type VideoDid = {
@@ -50,6 +50,7 @@ export function accionVideoDid(mensaje: string): Accion | undefined {
 
 const trabajo = z.object({
 	id: z.string(),
+	guion_llamada: z.string(),
 	voz: z.string(),
 	estado: z.enum([
 		"pendiente",
@@ -78,9 +79,33 @@ const entradaGuion = z.object({
 });
 const entregaValida = z.object({ ok: z.literal(true) });
 
-function ultimoGuion(historial: ModelMessage[]) {
+type InstruccionEntregada = z.infer<typeof esquemaInstruccionGuion>;
+
+/**
+ * Fondo por tema y expresión según la instrucción del guion: un producto lleva
+ * el fondo de producto; una campaña, el de temporada; lo demás, el de marca.
+ * Promociones y lanzamientos usan la expresión animada si está configurada.
+ */
+export function estiloVideo(instruccion: InstruccionEntregada): EstiloVideo {
+	return {
+		tema: instruccion.producto_id
+			? "producto"
+			: instruccion.campana
+				? "temporada"
+				: "marca",
+		animado:
+			instruccion.objetivo === "promocion" ||
+			instruccion.objetivo === "lanzamiento",
+	};
+}
+
+/** Guiones válidos entregados en la conversación, por id de llamada y en orden. */
+function guionesEntregados(historial: ModelMessage[]) {
 	const llamadas = new Map<string, unknown>();
-	let entrega: { id: string; voz: string } | undefined;
+	const entregas = new Map<
+		string,
+		{ id: string; voz: string; instruccion: InstruccionEntregada }
+	>();
 	for (const mensaje of historial) {
 		if (mensaje.role === "assistant" && Array.isArray(mensaje.content)) {
 			for (const parte of mensaje.content)
@@ -102,19 +127,24 @@ function ultimoGuion(historial: ModelMessage[]) {
 				entrada.data.instruccion.duracion_s,
 			).safeParse(entrada.data.guion);
 			if (guion.success)
-				entrega = {
+				entregas.set(parte.toolCallId, {
 					id: parte.toolCallId,
+					instruccion: entrada.data.instruccion,
 					voz: guion.data.escenas
 						.map((e) => e.voz.trim())
 						.filter(Boolean)
 						.join("\n\n"),
-				};
+				});
 		}
 	}
-	return entrega;
+	return entregas;
 }
 
-const COLUMNAS = "id,voz,estado,did_id,did_recurso,confirmado_en";
+function ultimoGuion(historial: ModelMessage[]) {
+	return [...guionesEntregados(historial).values()].at(-1);
+}
+
+const COLUMNAS = "id,guion_llamada,voz,estado,did_id,did_recurso,confirmado_en";
 const CONFIRMAR =
 	"D-ID puede consumir créditos de tu cupo al renderizar con Presentadora Fresura. Escribe «confirmar video» para enviar el diálogo del guion.";
 const INCIERTO =
@@ -315,7 +345,11 @@ export async function procesarVideoDid(
 	if (reservado.error) throw new Error("video_did_confirmacion");
 	if (!reservado.data)
 		return "Esta solicitud ya fue atendida. Escribe «estado del video».";
-	const envio = await video.proveedor.generar(actual.voz);
+	const entregado = guionesEntregados(historial).get(actual.guion_llamada);
+	const envio = await video.proveedor.generar(
+		actual.voz,
+		entregado ? estiloVideo(entregado.instruccion) : undefined,
+	);
 	const resultado = await tabla()
 		.update({
 			estado: envio.tipo,
