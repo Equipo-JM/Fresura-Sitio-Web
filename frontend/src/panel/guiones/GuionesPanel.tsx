@@ -11,7 +11,7 @@ const VISTAS = [
 	["biblioteca", "Biblioteca"],
 	["estilo", "Estilo de redes"],
 ] as const;
-/** Acceso al chat de Guiones desde el panel administrativo. */
+/** Sección «Agente» del panel: chat, biblioteca y estilo de redes. */
 export function GuionesPanel({
 	cliente,
 	irVersiones,
@@ -60,11 +60,11 @@ export function GuionesPanel({
 						Versiones
 					</button>
 					<a href="#guiones" aria-current="page">
-						Guiones
+						Agente
 					</a>
 				</nav>
 				<main id="guiones" tabIndex={-1}>
-					<h1>Guiones</h1>
+					<h1>Agente de contenido</h1>
 					<fieldset className="agente-vistas">
 						<legend className="oculto">Vista</legend>
 						{VISTAS.map(([valor, nombre]) => (

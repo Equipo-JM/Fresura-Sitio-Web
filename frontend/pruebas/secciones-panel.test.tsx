@@ -43,16 +43,16 @@ function abrirPanel() {
 }
 
 describe("menú del panel", () => {
-	it("empieza en Versiones y ofrece Contenido y Guiones", () => {
+	it("empieza en Versiones y ofrece Contenido y Agente", () => {
 		abrirPanel();
 		expect(screen.getByRole("heading", { name: "Pantalla de versiones" }));
 		expect(screen.getByRole("button", { name: "Contenido" }));
-		expect(screen.getByRole("button", { name: "Guiones" }));
+		expect(screen.getByRole("button", { name: "Agente" }));
 	});
 
-	it("abre Guiones a pantalla completa y vuelve a Versiones con su propio botón", () => {
+	it("abre Agente a pantalla completa y vuelve a Versiones con su propio botón", () => {
 		abrirPanel();
-		fireEvent.click(screen.getByRole("button", { name: "Guiones" }));
+		fireEvent.click(screen.getByRole("button", { name: "Agente" }));
 		expect(screen.getByRole("heading", { name: "Pantalla de guiones" }));
 		expect(screen.queryByRole("navigation", { name: "Menú del panel" })).toBe(
 			null,
@@ -66,7 +66,7 @@ describe("menú del panel", () => {
 		abrirPanel();
 		fireEvent.click(screen.getByRole("button", { name: "Contenido" }));
 		fireEvent.click(screen.getByRole("button", { name: "Escribir algo" }));
-		fireEvent.click(screen.getByRole("button", { name: "Guiones" }));
+		fireEvent.click(screen.getByRole("button", { name: "Agente" }));
 		expect(confirmar).toHaveBeenCalled();
 		expect(screen.getByRole("heading", { name: "Pantalla de contenido" }));
 		confirmar.mockRestore();

@@ -77,7 +77,7 @@ export function VersionesPanel({
 							disabled={ocupado}
 							onClick={irGuiones}
 						>
-							Guiones
+							Agente
 						</button>
 					)}
 				</nav>

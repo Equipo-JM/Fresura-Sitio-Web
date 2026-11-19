@@ -294,7 +294,7 @@
 	border: 1px solid var(--texto);
 	border-radius: var(--radio-chico);
 }
-/* Controles del chat de Guiones. */
+/* Controles del chat de la sección Agente. */
 .guiones-panel label {
 	display: grid;
 	gap: 8px;
