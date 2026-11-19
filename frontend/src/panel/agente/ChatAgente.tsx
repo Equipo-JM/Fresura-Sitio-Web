@@ -1,9 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-	ENLACE_VIDEO_DID,
-	INICIO_CHAT,
-} from "../../../../backend/supabase/functions/_shared/esquemas/chat";
+import { INICIO_CHAT } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import { textoPieza } from "../../../../backend/supabase/functions/_shared/esquemas/pieza";
 import type { Database } from "../../tipos/database.types";
 import { GuardarEnBiblioteca } from "../biblioteca/GuardarEnBiblioteca";
@@ -11,23 +8,6 @@ import { crearServicioBiblioteca } from "../biblioteca/servicioBiblioteca";
 import { cuerpoGuion, leerPiezas, leerTarjeta } from "./servicioConversaciones";
 import { TarjetaPieza } from "./TarjetaPieza";
 import { useChatAgente } from "./useChatAgente";
-
-function TextoAgente({ texto }: { texto: string }) {
-	const prefijo = `${ENLACE_VIDEO_DID}\n`;
-	const enlace = texto.startsWith(prefijo) ? texto.slice(prefijo.length) : "";
-	if (enlace && URL.canParse(enlace) && new URL(enlace).protocol === "https:") {
-		return (
-			<p>
-				{ENLACE_VIDEO_DID}{" "}
-				<a href={enlace} target="_blank" rel="noreferrer">
-					Abrir video
-					<span className="oculto"> (se abre en otra pestaña)</span>
-				</a>
-			</p>
-		);
-	}
-	return <p className="agente-texto">{texto}</p>;
-}
 
 function CopiarRespuesta({ texto }: { texto: string }) {
 	const [estado, setEstado] = useState<"copiado" | "manual" | null>(null);
@@ -269,7 +249,9 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 								<article className="panel-bloque agente-mensaje" key={m.id}>
 									<strong>{m.role === "user" ? "Tú" : "Agente"}</strong>
 									{partes.map((p) => (
-										<TextoAgente key={p.type + p.text} texto={p.text} />
+										<p className="agente-texto" key={p.type + p.text}>
+											{p.text}
+										</p>
 									))}
 									{m.metadata?.aviso && (
 										<p className="panel-aviso">{m.metadata.aviso.mensaje}</p>
@@ -318,7 +300,6 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 						{chat.ocupado && (
 							<p>{consultando ? "Consultando datos…" : "Escribiendo…"}</p>
 						)}
-						{chat.esperandoVideo && <p>Esperando el video de D-ID…</p>}
 					</div>
 					{chat.error && (
 						<div className="panel-aviso" role="alert">

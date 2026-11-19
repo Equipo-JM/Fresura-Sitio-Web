@@ -76,6 +76,42 @@ describe("piezas de contenido en el chat", () => {
 		).toBeVisible();
 	});
 
+	it("omite las piezas de HeyGen guardadas antes del cambio a Dreamina", () => {
+		const anterior = { ...pieza, tipo: "prompt_heygen" };
+		expect(leerPiezas([anterior, pieza])).toEqual([pieza]);
+	});
+
+	it("el avatar de Dreamina se copia sin «Cómo usar» y abre Dreamina", async () => {
+		const escribir = vi.fn(async () => {});
+		vi.stubGlobal("navigator", { clipboard: { writeText: escribir } });
+		render(
+			<TarjetaPieza
+				pieza={{
+					tipo: "prompt_avatar_dreamina",
+					titulo: "Arma tu Fresita",
+					red: "tiktok",
+					bloques: [
+						{ etiqueta: "Lo que dice", texto: "¡Arma tu Fresita hoy!" },
+						{ etiqueta: "Movimiento y cámara", texto: "Sonríe." },
+						{ etiqueta: "Cómo usar", texto: "Abre AI Avatar." },
+					],
+				}}
+			/>,
+		);
+		expect(screen.getByText("Avatar de Dreamina · TikTok")).toBeVisible();
+		const enlace = screen.getByRole("link", {
+			name: /Copiar y abrir Dreamina/,
+		});
+		expect(enlace).toHaveAttribute(
+			"href",
+			"https://dreamina.capcut.com/ai-tool/ai-video",
+		);
+		fireEvent.click(enlace);
+		expect(escribir).toHaveBeenCalledWith(
+			"Lo que dice\n¡Arma tu Fresita hoy!\n\nMovimiento y cámara\nSonríe.",
+		);
+	});
+
 	it("una publicación se copia completa y no abre ninguna herramienta", async () => {
 		const escribir = vi.fn(async () => {});
 		vi.stubGlobal("navigator", { clipboard: { writeText: escribir } });

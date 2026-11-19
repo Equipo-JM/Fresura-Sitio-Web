@@ -2,19 +2,13 @@ import { useChat } from "@ai-sdk/react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-	AVISO_VIDEO_EN_CURSO,
-	esquemaChat,
-	esquemaEstadoVideo,
-	esquemaRespuestaEstadoVideo,
-} from "../../../../backend/supabase/functions/_shared/esquemas/chat";
+import { esquemaChat } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import type { Database } from "../../tipos/database.types";
 import {
 	crearServicioConversaciones,
 	type MensajeAgente,
 	type PaginaConversaciones,
 } from "./servicioConversaciones";
-import { useEstadoVideo } from "./useEstadoVideo";
 
 const ERROR_GENERICO =
 	"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.";
@@ -22,7 +16,7 @@ const ERROR_GENERICO =
 /** Invoca IA mediante Supabase, que conserva la URL y renueva la sesión en cada petición. */
 async function invocarFuncionIa(
 	cliente: SupabaseClient<Database>,
-	ruta: "chat" | "estado-video",
+	ruta: "chat",
 	body: object,
 	generico: string,
 	signal?: AbortSignal,
@@ -152,39 +146,6 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 			revision.current++;
 		};
 	}, [cargarPagina]);
-	const ultimo = chat.messages.at(-1);
-	const videoEnCurso =
-		activa !== null &&
-		!respondiendo &&
-		ultimo?.role === "assistant" &&
-		ultimo.parts.some(
-			(parte) =>
-				parte.type === "text" &&
-				parte.text.trimEnd().endsWith(AVISO_VIDEO_EN_CURSO),
-		);
-	useEstadoVideo({
-		activo: videoEnCurso,
-		clave: `${activa}:${ultimo?.id}`,
-		consultar: async (signal) =>
-			esquemaRespuestaEstadoVideo.parse(
-				await invocarFuncionIa(
-					cliente,
-					"estado-video",
-					esquemaEstadoVideo.parse({ conversacion_id: activaRef.current }),
-					ERROR_GENERICO,
-					signal,
-				),
-			),
-		alTerminar: (mensaje) =>
-			chat.setMessages((mensajes) => [
-				...mensajes,
-				{
-					id: crypto.randomUUID(),
-					role: "assistant",
-					parts: [{ type: "text", text: mensaje }],
-				},
-			]),
-	});
 	async function ejecutar(accion: () => Promise<void>) {
 		if (bloqueo.current || respondiendo) return;
 		bloqueo.current = true;
@@ -240,7 +201,6 @@ export function useChatAgente(cliente: SupabaseClient<Database>) {
 		errorHistorial,
 		cambiarPagina: (numero: number) => ejecutar(() => cargarPagina(numero)),
 		conversacionActiva: activa,
-		esperandoVideo: videoEnCurso,
 		ocupado: ocupado || respondiendo,
 		enviar,
 		reintentar: () =>

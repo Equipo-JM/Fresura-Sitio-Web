@@ -9,10 +9,7 @@ import {
 import { createUIMessageStreamResponse, type UIMessageChunk } from "ai";
 import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-	ENLACE_VIDEO_DID,
-	tituloConversacion,
-} from "../../backend/supabase/functions/_shared/esquemas/chat";
+import { tituloConversacion } from "../../backend/supabase/functions/_shared/esquemas/chat";
 import { convertirHistorial } from "../src/panel/agente/servicioConversaciones";
 import { GuionesPanel } from "../src/panel/guiones/GuionesPanel";
 import type { Database } from "../src/tipos/database.types";
@@ -537,7 +534,7 @@ describe("chat del panel", () => {
 			"navigator",
 			Object.create(navigator, { clipboard: { value: { writeText: copiar } } }),
 		);
-		enviar("Dame las indicaciones para HeyGen");
+		enviar("Dame las indicaciones para Dreamina");
 		fireEvent.click(
 			await screen.findByRole("button", { name: "Copiar respuesta completa" }),
 		);
@@ -581,27 +578,6 @@ describe("chat del panel", () => {
 			{ conversacion_id: id, mensaje: "2" },
 			{ conversacion_id: id, mensaje: "1" },
 		]);
-	});
-	it("ofrece abrir el enlace temporal de D-ID dentro del chat", async () => {
-		const enlace = "https://result.d-id.com/fresura.mp4";
-		simular(
-			[{ ...conversacion, titulo: "Demo con D-ID" }],
-			[
-				{
-					id: "video",
-					contenido: {
-						role: "assistant",
-						content: `${ENLACE_VIDEO_DID}\n${enlace}`,
-					},
-				},
-			],
-		);
-		fireEvent.click(
-			await screen.findByRole("button", { name: "Demo con D-ID" }),
-		);
-		expect(
-			await screen.findByRole("link", { name: /Abrir video/ }),
-		).toHaveAttribute("href", enlace);
 	});
 	it("muestra el mensaje JSON de un 503 y permite reintentar", async () => {
 		const simulado = simular();
