@@ -66,19 +66,26 @@ export function Abanico({
 	);
 }
 
-/** Tarjeta en arco del abanico, con el sello de onzas cuando el producto lo tiene. */
-function TarjetaAbanico({
+/**
+ * Tarjeta en arco del abanico, con el sello de onzas cuando el producto lo
+ * tiene. Con `activa` es un enlace a la ficha; si no, un botón que la trae al
+ * frente. El carril de celular la usa siempre activa y con `conDescripcion`,
+ * para que funcione como catálogo sin abrir cada ficha.
+ */
+export function TarjetaAbanico({
 	producto,
 	activa,
 	alElegir,
 	categorias,
 	respaldo,
+	conDescripcion = false,
 }: {
 	producto: Producto;
 	activa: boolean;
 	alElegir: () => void;
 	categorias: Contenido["categorias"];
 	respaldo: boolean;
+	conDescripcion?: boolean;
 }) {
 	const precio = precioDesde(producto, respaldo);
 	const onzas = onzasDe(producto);
@@ -96,6 +103,9 @@ function TarjetaAbanico({
 			<span className="abanico-info">
 				<span className="abanico-textos">
 					<span className="abanico-nombre">{producto.nombre}</span>
+					{conDescripcion && producto.descripcion && (
+						<span className="abanico-descripcion">{producto.descripcion}</span>
+					)}
 					<span className="abanico-precio">{precio}</span>
 				</span>
 				<span className="abanico-elegir" aria-hidden="true">

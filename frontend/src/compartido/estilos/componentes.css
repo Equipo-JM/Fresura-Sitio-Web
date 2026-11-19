@@ -2645,6 +2645,158 @@ main > :last-child > .seccion:last-child::after {
 		margin-inline: calc(var(--espacio-lateral-movil) * -1);
 	}
 }
+
+/* Carril de productos en celular (menú y favoritos): las mismas tarjetas en arco
+   del abanico, en fila y dentro del flujo, para que nunca se salgan de su
+   sección. La tarjeta completa —foto, nombre, precio y «Elegir»— cabe en una
+   pantalla y la siguiente asoma por el borde. Va a sangre: el carril llega a
+   los bordes de la pantalla y su primera tarjeta se alinea con el texto. */
+.carril-productos-zona {
+	width: 100%;
+	min-width: 0;
+}
+.carril-productos {
+	--ancho-carta: min(62vw, 260px);
+	display: flex;
+	gap: 14px;
+	margin: 0 calc(var(--espacio-lateral-movil) * -1);
+	/* Aire arriba para que la tarjeta al frente flote sin recortarse, y abajo
+	   para su sombra. */
+	padding: 16px var(--espacio-lateral-movil) 24px;
+	list-style: none;
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scroll-snap-type: x mandatory;
+	scroll-padding-inline: var(--espacio-lateral-movil);
+	scrollbar-width: none;
+}
+.carril-productos::-webkit-scrollbar {
+	display: none;
+}
+.carril-productos > li {
+	flex: 0 0 var(--ancho-carta);
+	scroll-snap-align: start;
+}
+.carril-productos .abanico-tarjeta {
+	height: 100%;
+	transition: scale 180ms var(--curva-salida);
+}
+/* Al tocar, la tarjeta se hunde un poco: respuesta inmediata al dedo. */
+.carril-productos .abanico-tarjeta:active {
+	scale: 0.97;
+}
+/* La tarjeta al frente flota y su sello se balancea, como la elegida del
+   abanico; las demás quedan quietas. */
+.carril-productos > li[data-activa="true"] .abanico-tarjeta {
+	animation: abanico-flota 4s ease-in-out infinite;
+}
+.carril-productos > li[data-activa="true"] .abanico-sello {
+	animation: abanico-sello 3s ease-in-out infinite;
+}
+.carril-productos .abanico-elegir {
+	transition:
+		background-color 200ms ease,
+		color 200ms ease,
+		scale 180ms var(--curva-salida);
+}
+.carril-productos .abanico-tarjeta:active .abanico-elegir {
+	background: var(--boton-fondo);
+	color: var(--boton-texto);
+}
+@media (prefers-reduced-motion: reduce) {
+	.carril-productos > li[data-activa="true"] .abanico-tarjeta,
+	.carril-productos > li[data-activa="true"] .abanico-sello {
+		animation: none;
+	}
+	.carril-productos .abanico-tarjeta {
+		transition: none;
+	}
+}
+/* Con descripción, el nombre y la descripción ocupan todo el ancho y el precio
+   queda junto a «Elegir»: así la descripción no se aprieta al lado del botón. */
+.carril-productos .abanico-info {
+	display: grid;
+	flex: 1;
+	grid-template-columns: 1fr auto;
+	grid-template-rows: auto 1fr auto;
+	align-items: end;
+	gap: 6px 10px;
+}
+.carril-productos .abanico-textos {
+	display: contents;
+}
+.carril-productos .abanico-nombre,
+.carril-productos .abanico-descripcion {
+	grid-column: 1 / -1;
+}
+.carril-productos .abanico-descripcion {
+	align-self: start;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	overflow: hidden;
+	font-size: var(--texto-chico);
+	line-height: 1.4;
+}
+.carril-productos .abanico-precio {
+	grid-column: 1;
+}
+/* Contador junto a las fresas: a la derecha lo tapaba la calcomanía del corte. */
+.carril-avance {
+	flex-wrap: nowrap;
+}
+@media (max-width: 899.98px) {
+	/* Menos aire entre categorías: así caben el encabezado y el carril juntos. */
+	.seccion.capa,
+	.seccion.destacados {
+		padding-block: 48px;
+	}
+	#menu > .capa:first-child {
+		padding-block-start: 16px;
+	}
+	.capa-movil {
+		gap: 12px;
+	}
+	.capa-movil .destacados-encabezado {
+		margin-bottom: 0;
+	}
+	/* El menú pegado arriba tapa el inicio de la categoría al saltar a ella. */
+	#menu > .capa {
+		scroll-margin-top: 140px;
+	}
+	/* «Hoy se me antoja…»: los antojos en un carril deslizable en vez de una
+	   lista que ocupaba la pantalla entera antes del menú. */
+	.antojos {
+		gap: 16px;
+	}
+	.lista-antojos {
+		display: flex;
+		gap: 12px;
+		margin: 0 calc(var(--espacio-lateral-movil) * -1);
+		/* Aire para el borde y la sombra de sticker de cada óvalo. */
+		padding: 8px calc(var(--espacio-lateral-movil) + 6px) 14px;
+		list-style: none;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x proximity;
+		scroll-padding-inline: calc(var(--espacio-lateral-movil) + 6px);
+		scrollbar-width: none;
+		width: calc(100% + var(--espacio-lateral-movil) * 2);
+	}
+	.lista-antojos::-webkit-scrollbar {
+		display: none;
+	}
+	.lista-antojos > li {
+		flex: none;
+		scroll-snap-align: start;
+	}
+	.lista-antojos .antojo {
+		width: auto;
+		white-space: nowrap;
+	}
+}
+
 @media (min-width: 900px) {
 	.vitrina {
 		grid-template-columns: minmax(0, 380px) minmax(0, 1fr);

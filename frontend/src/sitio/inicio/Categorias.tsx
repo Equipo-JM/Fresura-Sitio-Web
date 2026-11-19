@@ -5,13 +5,19 @@ import { nombreProducto } from "../../compartido/carrito/reglas";
 import { Icono } from "../../compartido/componentes/Icono";
 import { useCambioAnimado } from "../../compartido/movimiento/useCambioAnimado";
 import { FotoProducto } from "../FotoProducto";
+import { useEsMovil } from "../useEsMovil";
 import { Abanico, FresaPosicion, precioDesde } from "./Abanico";
+import { CarrilProductos } from "./CarrilProductos";
 import { DATOS_CATEGORIAS, FRASES_CATEGORIAS } from "./copy";
 import { useAutoavance } from "./useAutoavance";
 
 type Producto = Contenido["productos"][number];
 
-/** Menú completo: una sección por categoría, en el orden del contrato. */
+/**
+ * Menú completo: una sección por categoría, en el orden del contrato. En
+ * escritorio cada una es una vitrina con abanico; en celular, el mismo
+ * encabezado y un carril deslizable para ver los productos en la misma pantalla.
+ */
 export function Categorias({
 	contenido,
 	respaldo = false,
@@ -19,6 +25,7 @@ export function Categorias({
 	contenido: Contenido;
 	respaldo?: boolean;
 }) {
+	const esMovil = useEsMovil();
 	const categorias = [...contenido.categorias].sort(
 		(a, b) => a.orden - b.orden,
 	);
@@ -32,6 +39,19 @@ export function Categorias({
 				const tamanos = productos[0].presentaciones
 					.map((p) => p.nombre)
 					.join(", ");
+				const encabezado = (
+					<div className="capa-encabezado">
+						<h2 id={`titulo-${categoria.id}`} tabIndex={-1}>
+							{categoria.nombre}
+						</h2>
+						{FRASES_CATEGORIAS[categoria.id] && (
+							<p className="capa-frase">{FRASES_CATEGORIAS[categoria.id]}</p>
+						)}
+						<p className="capa-dato">
+							{DATOS_CATEGORIAS[categoria.id] ?? tamanos}
+						</p>
+					</div>
+				);
 				return (
 					<section
 						key={categoria.id}
@@ -39,25 +59,25 @@ export function Categorias({
 						className={`seccion capa ${indice % 2 === 1 ? "fondo-dust" : ""}`}
 						aria-labelledby={`titulo-${categoria.id}`}
 					>
-						<Vitrina
-							productos={productos}
-							categorias={contenido.categorias}
-							respaldo={respaldo}
-						>
-							<div className="capa-encabezado">
-								<h2 id={`titulo-${categoria.id}`} tabIndex={-1}>
-									{categoria.nombre}
-								</h2>
-								{FRASES_CATEGORIAS[categoria.id] && (
-									<p className="capa-frase">
-										{FRASES_CATEGORIAS[categoria.id]}
-									</p>
-								)}
-								<p className="capa-dato">
-									{DATOS_CATEGORIAS[categoria.id] ?? tamanos}
-								</p>
+						{esMovil ? (
+							<div className="envoltura vitrina-texto capa-movil">
+								{encabezado}
+								<CarrilProductos
+									productos={productos}
+									categorias={contenido.categorias}
+									respaldo={respaldo}
+									etiqueta={`Productos de ${categoria.nombre}`}
+								/>
 							</div>
-						</Vitrina>
+						) : (
+							<Vitrina
+								productos={productos}
+								categorias={contenido.categorias}
+								respaldo={respaldo}
+							>
+								{encabezado}
+							</Vitrina>
+						)}
 					</section>
 				);
 			})}
