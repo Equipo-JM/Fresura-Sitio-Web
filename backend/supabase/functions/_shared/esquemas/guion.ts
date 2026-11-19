@@ -21,6 +21,12 @@ export const FONDOS_PRESENTADORA = [
 	"fresas",
 	"festivo",
 	"flores",
+	"fresal",
+	"terraza",
+	"noche",
+	"navidad",
+	"rosado",
+	"corazones",
 ] as const;
 
 /** Clave de un fondo de la presentadora. */
