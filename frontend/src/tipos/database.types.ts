@@ -142,6 +142,42 @@ export type Database = {
 					},
 				];
 			};
+			referencias_estilo: {
+				Row: {
+					creado_en: string;
+					creado_por: string;
+					enlace: string | null;
+					formato: string;
+					id: string;
+					origen: string;
+					publicada_en: string | null;
+					red: string;
+					texto: string;
+				};
+				Insert: {
+					creado_en?: string;
+					creado_por?: string;
+					enlace?: string | null;
+					formato: string;
+					id?: string;
+					origen?: string;
+					publicada_en?: string | null;
+					red: string;
+					texto: string;
+				};
+				Update: {
+					creado_en?: string;
+					creado_por?: string;
+					enlace?: string | null;
+					formato?: string;
+					id?: string;
+					origen?: string;
+					publicada_en?: string | null;
+					red?: string;
+					texto?: string;
+				};
+				Relationships: [];
+			};
 			guiones: {
 				Row: {
 					actualizado_en: string;

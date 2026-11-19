@@ -16,6 +16,11 @@ import {
 } from "../../_shared/esquemas/chat.ts";
 import { esquemaContenido } from "../../_shared/esquemas/contenido.ts";
 import {
+	esquemaReferenciaEstilo,
+	MAXIMO_REFERENCIAS_AGENTE,
+	type ReferenciaEstilo,
+} from "../../_shared/esquemas/referencia.ts";
+import {
 	leerCuerpoJson,
 	responderCuerpoInvalido,
 	responderError,
@@ -119,6 +124,29 @@ export function modeloConRespaldo(
 	});
 }
 
+/**
+ * Publicaciones recientes para imitar el estilo. Un fallo al leerlas no
+ * detiene el chat: el agente sigue con el perfil de marca.
+ */
+async function leerReferenciasEstilo(
+	cliente: SupabaseClient,
+): Promise<ReferenciaEstilo[]> {
+	const { data, error } = await cliente
+		.from("referencias_estilo")
+		.select("red,formato,enlace,texto,publicada_en")
+		.order("publicada_en", { ascending: false, nullsFirst: false })
+		.order("creado_en", { ascending: false })
+		.limit(MAXIMO_REFERENCIAS_AGENTE);
+	if (error) {
+		console.error(JSON.stringify(datosRegistroFallo("lectura_referencias")));
+		return [];
+	}
+	return (data ?? []).flatMap((fila) => {
+		const leida = esquemaReferenciaEstilo.safeParse(fila);
+		return leida.success ? [leida.data] : [];
+	});
+}
+
 export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 	const crearModelo =
 		opciones.crearModelo ??
@@ -196,7 +224,12 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			productosConsultados: new Set(),
 		};
 		const hoy = fechaColombia(new Date());
-		const herramientas = crearHerramientasAgente(contenido.data, hoy, estado);
+		const herramientas = crearHerramientasAgente(
+			contenido.data,
+			hoy,
+			estado,
+			await leerReferenciasEstilo(cliente),
+		);
 		const instrucciones = [
 			INSTRUCCIONES_AGENTE,
 			// El calendario y las fechas especiales se cuentan desde hoy en Colombia.

@@ -4,6 +4,13 @@ import { Link } from "react-router";
 import type { Database } from "../../tipos/database.types";
 import { ChatAgente } from "../agente/ChatAgente";
 import { BibliotecaPanel } from "../biblioteca/BibliotecaPanel";
+import { EstiloRedesPanel } from "../estilo/EstiloRedesPanel";
+
+const VISTAS = [
+	["chat", "Chat"],
+	["biblioteca", "Biblioteca"],
+	["estilo", "Estilo de redes"],
+] as const;
 /** Acceso al chat de Guiones desde el panel administrativo. */
 export function GuionesPanel({
 	cliente,
@@ -12,8 +19,8 @@ export function GuionesPanel({
 	cliente: SupabaseClient<Database>;
 	irVersiones: () => void;
 }) {
-	const [vista, setVista] = useState<"chat" | "biblioteca">("chat");
-	// La biblioteca se monta de nuevo al abrirla para leer lo recién guardado.
+	const [vista, setVista] = useState<(typeof VISTAS)[number][0]>("chat");
+	// Biblioteca y estilo se montan de nuevo al abrirlos para leer lo recién guardado.
 	const [aperturas, setAperturas] = useState(0);
 	return (
 		<div className="panel guiones-panel">
@@ -60,25 +67,20 @@ export function GuionesPanel({
 					<h1>Guiones</h1>
 					<fieldset className="agente-vistas">
 						<legend className="oculto">Vista</legend>
-						<button
-							className={`boton compacto${vista === "chat" ? "" : " secundario"}`}
-							type="button"
-							aria-pressed={vista === "chat"}
-							onClick={() => setVista("chat")}
-						>
-							Chat
-						</button>
-						<button
-							className={`boton compacto${vista === "biblioteca" ? "" : " secundario"}`}
-							type="button"
-							aria-pressed={vista === "biblioteca"}
-							onClick={() => {
-								setVista("biblioteca");
-								setAperturas((n) => n + 1);
-							}}
-						>
-							Biblioteca
-						</button>
+						{VISTAS.map(([valor, nombre]) => (
+							<button
+								key={valor}
+								className={`boton compacto${vista === valor ? "" : " secundario"}`}
+								type="button"
+								aria-pressed={vista === valor}
+								onClick={() => {
+									setVista(valor);
+									setAperturas((n) => n + 1);
+								}}
+							>
+								{nombre}
+							</button>
+						))}
 					</fieldset>
 					{/* El chat queda montado para no perder la conversación abierta. */}
 					<div hidden={vista !== "chat"}>
@@ -86,6 +88,9 @@ export function GuionesPanel({
 					</div>
 					{vista === "biblioteca" && (
 						<BibliotecaPanel key={aperturas} cliente={cliente} />
+					)}
+					{vista === "estilo" && (
+						<EstiloRedesPanel key={aperturas} cliente={cliente} />
 					)}
 				</main>
 			</div>

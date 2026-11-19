@@ -36,6 +36,7 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 			"entregar_guion",
 			"entregar_pieza",
 			"listar_productos",
+			"ver_estilo_redes",
 			"ver_negocio",
 			"ver_producto",
 			"ver_promociones",
