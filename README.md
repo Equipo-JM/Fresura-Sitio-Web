@@ -153,6 +153,21 @@ npm run functions:deploy -- panel
 ```
 
 
+## Render de Presentadora Fresura con D-ID
+
+El administrador usa «crear video», «confirmar video» y «estado del video» en el mismo chat. La Edge Function `ia` envía únicamente la voz del último guion entregado a D-ID, con el avatar y la voz fijos que se configuren. La generación empieza después de la confirmación. Para probar, basta un guion de unos 15 segundos.
+
+1. En el proyecto Supabase de prueba, revisa y aplica la migración `20261118210000_videos_agente_did.sql` con `npm run db:push -- --dry-run` y `npm run db:push`. La tabla solo permite acceso desde el servidor con la clave de servicio.
+2. En **D-ID Studio → Account Settings**, crea una clave de API y verifica el cupo de la prueba. En **Supabase → Edge Functions → Secrets**, configura:
+   - `DID_API_KEY`: copia el valor tal como aparece en D-ID, con el formato `usuario:contraseña`.
+   - Para el perfil **Expressive** de Fresura, guarda `DID_AVATAR_ID` con el valor de `presenter.presenter_id`, `DID_SENTIMENT_ID` con el ID de la expresión elegida, `DID_VOICE_ID` con la voz de ElevenLabs y `DID_VOICE_MODEL_ID` con su modelo. Fresura usa Friendly y el modelo `eleven_flash_v2_5`. La cuenta de API debe tener acceso al avatar y a la voz privada.
+   - Para el perfil de foto, configura solo `DID_AVATAR_IMAGE_URL` con la URL HTTPS directa de un JPG o PNG autorizado y `DID_VOICE_ID` con una voz Microsoft. Deja vacíos los tres campos exclusivos de Expressive.
+   - Los ID fijan el perfil del video. Si cambias el agente en D-ID Studio, actualiza los secretos correspondientes para reflejar esa elección.
+3. Despliega la función con `npm run functions:deploy -- ia --use-api` y el frontend con el procedimiento de despliegue de este README. Entra con la cuenta administradora y prueba las tres órdenes. El enlace de D-ID caduca. Escribe «estado del video» para recuperar el enlace vigente.
+4. Si falta configuración, el chat puede seguir entregando guiones. Si se pierde la respuesta al enviar un render, revisa D-ID antes de intentar otro. El servidor reserva cada guion antes de enviar para evitar dobles cargos por reintentos concurrentes.
+
+[Clave de API de D-ID](https://docs.d-id.com/reference/basic-authentication) · [API de avatares Expressive](https://docs.d-id.com/docs/v4-expressive-avatar-quickstart) · [Voces ElevenLabs](https://docs.d-id.com/docs/tts-elevenlabs)
+
 ## Respaldo semanal
 
 Cada **viernes**, desde la raíz del repositorio:

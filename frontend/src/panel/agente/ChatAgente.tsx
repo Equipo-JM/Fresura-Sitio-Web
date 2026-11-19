@@ -1,9 +1,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useRef, useState } from "react";
-import { INICIO_CHAT } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
+import {
+	ENLACE_VIDEO_DID,
+	INICIO_CHAT,
+} from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import type { Database } from "../../tipos/database.types";
 import { cuerpoGuion, leerTarjeta } from "./servicioConversaciones";
 import { useChatAgente } from "./useChatAgente";
+
+function TextoAgente({ texto }: { texto: string }) {
+	const prefijo = `${ENLACE_VIDEO_DID}\n`;
+	const enlace = texto.startsWith(prefijo) ? texto.slice(prefijo.length) : "";
+	if (enlace && URL.canParse(enlace) && new URL(enlace).protocol === "https:") {
+		return (
+			<p>
+				{ENLACE_VIDEO_DID}{" "}
+				<a href={enlace} target="_blank" rel="noreferrer">
+					Abrir video
+					<span className="oculto"> (se abre en otra pestaña)</span>
+				</a>
+			</p>
+		);
+	}
+	return <p className="agente-texto">{texto}</p>;
+}
 
 function CopiarRespuesta({ texto }: { texto: string }) {
 	const [estado, setEstado] = useState<"copiado" | "manual" | null>(null);
@@ -241,9 +261,7 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 								<article className="panel-bloque agente-mensaje" key={m.id}>
 									<strong>{m.role === "user" ? "Tú" : "Agente"}</strong>
 									{partes.map((p) => (
-										<p className="agente-texto" key={p.type + p.text}>
-											{p.text}
-										</p>
+										<TextoAgente key={p.type + p.text} texto={p.text} />
 									))}
 									{m.metadata?.aviso && (
 										<p className="panel-aviso">{m.metadata.aviso.mensaje}</p>

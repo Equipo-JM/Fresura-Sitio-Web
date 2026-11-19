@@ -40,3 +40,7 @@ export function tituloConversacion(mensaje: string): string {
 	const corte = texto.lastIndexOf(" ", 60);
 	return texto.slice(0, corte > 0 ? corte : 60);
 }
+
+/** Texto que precede al enlace temporal devuelto por D-ID. */
+export const ENLACE_VIDEO_DID =
+	"Tu video de Presentadora Fresura está listo. Este enlace es temporal:";
