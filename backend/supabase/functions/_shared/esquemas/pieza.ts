@@ -48,7 +48,7 @@ export const NOMBRE_PIEZA: Record<TipoPieza, string> = {
 /** Bloques permitidos por tipo: [mínimo, máximo]. Un carrusel de Instagram admite 10 imágenes. */
 export const BLOQUES_PIEZA: Record<TipoPieza, readonly [number, number]> = {
 	publicacion: [1, 3],
-	carrusel: [4, 12],
+	carrusel: [5, 14],
 	prompt_imagen: [1, 4],
 	prompt_clip: [1, 8],
 	prompt_heygen: [1, 2],
@@ -93,6 +93,10 @@ export function erroresPieza(pieza: Pieza): string[] {
 			errores.push(
 				`El carrusel lleva de 3 a 10 bloques con etiqueta «Lámina N»; tiene ${laminas}.`,
 			);
+		if (!pieza.bloques.some((b) => /^prompt para canva/i.test(b.etiqueta)))
+			errores.push(
+				"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
+			);
 	}
 	if (
 		(pieza.tipo === "publicacion" || pieza.tipo === "carrusel") &&
@@ -111,10 +115,13 @@ export function textoPieza(pieza: Pieza): string {
 }
 
 /**
- * Lo que se pega en la herramienta externa: solo los bloques de prompt, sin la
- * explicación para la administradora (etiquetas que empiezan por «Cómo usar»).
+ * Lo que se pega en la herramienta externa. Si hay un bloque «Prompt para …»
+ * (el del carrusel para Canva IA), se copia solo ese, porque ya trae todo; si
+ * no, los bloques de prompt sin la explicación «Cómo usar».
  */
 export function promptPieza(pieza: Pieza): string {
+	const directo = pieza.bloques.find((b) => /^prompt para/i.test(b.etiqueta));
+	if (directo) return directo.texto;
 	const prompts = pieza.bloques.filter(
 		(b) => !/^c[oó]mo usar/i.test(b.etiqueta),
 	);

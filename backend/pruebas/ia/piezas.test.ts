@@ -45,6 +45,11 @@ function carrusel(laminas: number): Pieza {
 				texto: "Título: Tu antojo\nTexto: Elige tu base.\nVisual: vaso.",
 			})),
 			{ etiqueta: "Descripción", texto: "Arma la tuya #Fresura" },
+			{
+				etiqueta: "Prompt para Canva IA",
+				texto: "Crea un carrusel para Instagram de 5 láminas…",
+			},
+			{ etiqueta: "Cómo usar", texto: "Pega el prompt en Canva IA." },
 		],
 	};
 }
@@ -80,6 +85,20 @@ describe("piezas de contenido del agente", () => {
 
 	it("copia solo el prompt, sin las indicaciones para la administradora", () => {
 		expect(promptPieza(promptFoto)).toBe("Usa la foto adjunta del producto…");
+		expect(promptPieza(carrusel(5))).toBe(
+			"Crea un carrusel para Instagram de 5 láminas…",
+		);
+	});
+
+	it("el carrusel exige el prompt completo para Canva IA", () => {
+		const sinPrompt = carrusel(5);
+		sinPrompt.bloques = sinPrompt.bloques.filter(
+			(b) => !b.etiqueta.startsWith("Prompt para"),
+		);
+		expect(erroresPieza(sinPrompt)).toContain(
+			"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
+		);
+		expect(INSTRUCCIONES_AGENTE).toContain("«Prompt para Canva IA»");
 	});
 
 	it("entrega piezas válidas y rechaza precios no publicados salvo en una revisión", async () => {

@@ -16,7 +16,9 @@ export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con 
 
 2. carrusel (se arma en Canva):
 - Entre 3 y 10 bloques «Lámina 1», «Lámina 2»…: cada uno con «Título:» de máximo 6 palabras, «Texto:» de máximo 25 palabras y «Visual:» con lo que se ve.
-- La lámina 1 engancha y la última cierra con el llamado a la acción. Luego los bloques «Descripción» (con hashtags) y «Cómo usar» (plantilla de carrusel 4:5 de 1080×1350 en Canva, colores de la marca, una lámina por página).
+- La lámina 1 engancha y la última cierra con el llamado a la acción. Luego el bloque «Descripción» (texto de la publicación con hashtags).
+- Después, el bloque «Prompt para Canva IA»: un texto completo para pegar en la IA de Canva que empieza con «Crea un carrusel para [red] de [N] láminas en formato 4:5 (1080 × 1350 px) para Fresura, una marca colombiana de postres de fresa con crema. Estilo: dulce pero con estilo, cálido, limpio y elegante, nunca infantil.», sigue con la paleta (rosa suave #FADAD7, crema #EFE8D7, beige #E6D2B8, caramelo #CFA67B, café #5B3B24 para los textos y rosa #EC72A8 solo en detalles o títulos grandes), las tipografías (títulos en una serif elegante como Playfair Display y textos en una sans serif limpia como Plus Jakarta Sans), fondos lisos o con rayas verticales suaves de toldo, esquinas redondeadas, fresas ilustradas como detalle y sin verde; luego repite cada lámina con su Título, Texto y Visual, y termina con «Deja espacio en la última lámina para agregar el logo de Fresura.». No incluyas precios que no estén publicados.
+- Cierra con «Cómo usar»: abrir Canva y pegar el prompt en Canva IA o en la app Carousel Studio; o, a mano, usar una plantilla de carrusel 4:5 y pegar cada lámina en su página; subir el logo real de Fresura y cambiar las imágenes de ambientación por fotos reales del producto.
 
 3. prompt_imagen (foto con IA en Gemini; si Fresura tiene la foto real del producto, se edita esa foto):
 - Bloques: «Prompt» y, si sirve, «Variante» (hasta 3), y «Cómo usar».
