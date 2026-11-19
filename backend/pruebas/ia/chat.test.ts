@@ -80,6 +80,7 @@ function preparar(
 ) {
 	const guardados: ReturnType<typeof filasDeMensajes> = [];
 	const titulos: string[] = [];
+	const escrituras: string[] = [];
 	let existe = true;
 	const crearModelo = vi.fn(() => modelo);
 	const ruta = crearRutaChat({
@@ -97,6 +98,9 @@ function preparar(
 						expect(new Headers(opciones?.headers).get("Authorization")).toBe(
 							"Bearer administrador",
 						);
+						const metodo = opciones?.method;
+						if (metodo && metodo !== "GET")
+							escrituras.push(`${metodo} ${url.pathname}`);
 						if (opciones?.method === "POST") {
 							guardados.push(...JSON.parse(String(opciones.body)));
 							return new Response(null, { status: 201 });
@@ -124,6 +128,7 @@ function preparar(
 	return {
 		guardados,
 		titulos,
+		escrituras,
 		crearModelo,
 		sinConversacion: () => {
 			existe = false;
@@ -140,6 +145,29 @@ function preparar(
 			}),
 	};
 }
+const fallosProveedor = [
+	{
+		estado: 429,
+		mensajeProveedor: "RequestsPerDay: dato privado",
+		mensajePanel: "Se alcanzó el límite de hoy. Inténtalo mañana.",
+	},
+	{
+		estado: 503,
+		mensajeProveedor: "Saturado: dato privado",
+		mensajePanel:
+			"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.",
+	},
+];
+
+function falloProveedor(estado: number, mensaje: string) {
+	return new APICallError({
+		message: mensaje,
+		url: "https://proveedor.test",
+		requestBodyValues: {},
+		statusCode: estado,
+	});
+}
+
 afterEach(() => vi.restoreAllMocks());
 describe("POST /chat", () => {
 	it.each([
@@ -200,50 +228,50 @@ describe("POST /chat", () => {
 		);
 	});
 
-	it("reintenta el 503 y envía el mensaje seguro si falla el respaldo", async () => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
-		const p = preparar(
-			new MockLanguageModelV3({
-				doStream: async () => {
-					throw new APICallError({
-						message: "secreto privado",
-						url: "https://proveedor.test",
-						requestBodyValues: {},
-						statusCode: 503,
-					});
-				},
-			}),
-		);
-		const texto = await (await p.pedir()).text();
-		expect(p.crearModelo.mock.calls).toEqual([["principal"], ["respaldo"]]);
-		expect(texto).toContain(
-			"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.",
-		);
-		expect(texto).not.toContain("secreto");
-		expect(p.guardados).toHaveLength(1);
-	});
-	it("usa respaldo exitoso tras cupo diario sin duplicar el mensaje del administrador", async () => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
-		let llamadas = 0;
-		const p = preparar(
-			new MockLanguageModelV3({
-				doStream: async () => {
-					if (llamadas++ === 0)
-						throw new APICallError({
-							message: "RequestsPerDay",
-							url: "https://proveedor.test",
-							requestBodyValues: {},
-							statusCode: 429,
-						});
-					return respuestaTexto();
-				},
-			}),
-		);
-		const texto = await (await p.pedir()).text();
-		expect(texto).toContain('"delta":"Hola"');
-		expect(p.crearModelo.mock.calls).toEqual([["principal"], ["respaldo"]]);
-		expect(p.guardados.map((f) => f.rol)).toEqual(["administrador", "agente"]);
-	});
+	it.each(fallosProveedor)(
+		"emite el error seguro por SSE si ambos modelos devuelven $estado",
+		async ({ estado, mensajeProveedor, mensajePanel }) => {
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			const p = preparar(
+				new MockLanguageModelV3({
+					doStream: async () => {
+						throw falloProveedor(estado, mensajeProveedor);
+					},
+				}),
+			);
+			const texto = await (await p.pedir()).text();
+			expect(p.crearModelo.mock.calls).toEqual([["principal"], ["respaldo"]]);
+			expect(texto).toContain(
+				JSON.stringify({ type: "error", errorText: mensajePanel }),
+			);
+			expect(texto).not.toContain("dato privado");
+			expect(p.guardados).toHaveLength(1);
+		},
+	);
+	it.each(fallosProveedor)(
+		"usa un respaldo exitoso tras $estado sin duplicar el mensaje del administrador",
+		async ({ estado, mensajeProveedor }) => {
+			vi.spyOn(console, "error").mockImplementation(() => {});
+			let llamadas = 0;
+			const p = preparar(
+				new MockLanguageModelV3({
+					doStream: async () => {
+						if (llamadas++ === 0)
+							throw falloProveedor(estado, mensajeProveedor);
+						return respuestaTexto();
+					},
+				}),
+			);
+			const texto = await (await p.pedir()).text();
+			expect(texto).toContain('"delta":"Hola"');
+			expect(texto).not.toContain('"type":"error"');
+			expect(p.crearModelo.mock.calls).toEqual([["principal"], ["respaldo"]]);
+			expect(p.guardados.map((f) => f.rol)).toEqual([
+				"administrador",
+				"agente",
+			]);
+		},
+	);
 	it("pasa al respaldo si el 503 llega después de usar herramientas", async () => {
 		// Caso del 17 nov: Gemini saturado en un paso intermedio del turno.
 		vi.spyOn(console, "error").mockImplementation(() => {});
@@ -305,7 +333,7 @@ describe("POST /chat", () => {
 		expect(texto).not.toContain("privado");
 	});
 
-	it("consulta producto, entrega tarjeta y guarda resultados", async () => {
+	it("RF-18: entrega la tarjeta del producto y solo escribe en la conversación", async () => {
 		const p = preparar(
 			new MockLanguageModelV3({
 				doStream: [
@@ -327,6 +355,11 @@ describe("POST /chat", () => {
 		expect(texto).toContain('"tarjetaGuion":{"instruccion":');
 		expect(p.guardados.filter((f) => f.rol === "herramienta")).toHaveLength(2);
 		expect(p.titulos).toEqual([guionDePrueba().titulo]);
+		expect(p.escrituras).toEqual([
+			"POST /rest/v1/agente_mensajes",
+			"POST /rest/v1/agente_mensajes",
+			"PATCH /rest/v1/agente_conversaciones",
+		]);
 	});
 	it("entrega en el flujo una tarjeta sobre una sede sin producto", async () => {
 		const general = { ...instruccion, producto_id: null };
