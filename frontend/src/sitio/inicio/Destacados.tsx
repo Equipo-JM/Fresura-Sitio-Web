@@ -4,7 +4,9 @@ import type { Contenido } from "../../../../backend/supabase/functions/_shared/e
 import { Icono } from "../../compartido/componentes/Icono";
 import { useCambioAnimado } from "../../compartido/movimiento/useCambioAnimado";
 import { Calcomania } from "../Calcomania";
+import { useEsMovil } from "../useEsMovil";
 import { Abanico, onzasDe, precioDesde } from "./Abanico";
+import { CarrilProductos } from "./CarrilProductos";
 import { DATOS_CATEGORIAS } from "./copy";
 
 type Producto = Contenido["productos"][number];
@@ -61,9 +63,41 @@ export function Destacados({
 	const panel = useRef<HTMLDivElement>(null);
 	const actual = destacados[elegido] ?? destacados[0] ?? null;
 	useCambioAnimado(panel, actual?.id ?? "");
+	const esMovil = useEsMovil();
 	if (!actual) return null;
 	const porTamano = destacados.every((p) => onzasDe(p) !== null);
 	const incluye = inclusiones(actual.categoria);
+
+	// En celular, selector, datos y abanico quedaban uno debajo del otro y las
+	// tarjetas flotantes tapaban la sección siguiente: se cambia por un carril
+	// con las mismas tarjetas, que ya traen foto, precio y botón.
+	if (esMovil)
+		return (
+			<section
+				className="seccion destacados fondo-dust"
+				id="destacados"
+				aria-labelledby="titulo-destacados"
+			>
+				<Calcomania
+					nombre="ven-date-un-gusto-bonito"
+					className="calcomania-corte corte-destacados"
+				/>
+				<div className="envoltura vitrina-texto capa-movil">
+					<div className="destacados-encabezado">
+						<h2 id="titulo-destacados">
+							Nuestros <em>favoritos</em>
+						</h2>
+						<p>Elegidos por Fresura para que empieces por aquí.</p>
+					</div>
+					<CarrilProductos
+						productos={destacados}
+						categorias={contenido.categorias}
+						respaldo={respaldo}
+						etiqueta="Nuestros favoritos"
+					/>
+				</div>
+			</section>
+		);
 
 	return (
 		<section
