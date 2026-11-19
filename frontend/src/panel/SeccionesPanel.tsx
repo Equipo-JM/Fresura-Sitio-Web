@@ -28,8 +28,7 @@ export function SeccionesPanel({
 		setPendiente(false);
 		setSeccion(siguiente);
 	}
-	// Guiones trae su encabezado y su propio botón de volver, que pregunta antes de
-	// perder un guion sin guardar; por eso aquí no se dibuja un segundo menú.
+	// El chat trae su propio encabezado y navegación.
 	if (seccion === "guiones")
 		return (
 			<GuionesPanel cliente={cliente} irVersiones={() => abrir("versiones")} />

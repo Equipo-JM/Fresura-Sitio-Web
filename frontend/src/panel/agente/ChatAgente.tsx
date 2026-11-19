@@ -1,25 +1,24 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { INICIO_CHAT } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import type { Database } from "../../tipos/database.types";
-import { EditorGuion } from "../guiones/EditorGuion";
-import type { GuionGuardado } from "../guiones/servicioGuiones";
-import { leerTarjeta } from "./servicioConversaciones";
-import { useBorradoresAgente } from "./useBorradoresAgente";
+import { cuerpoGuion, leerTarjeta } from "./servicioConversaciones";
 import { useChatAgente } from "./useChatAgente";
 
-/** Chat con historial y guardado explícito de los guiones. */
-export function ChatAgente({
-	cliente,
-	abrirGuion,
-	productos,
-}: {
-	cliente: SupabaseClient<Database>;
-	abrirGuion: (fila: GuionGuardado) => void;
-	productos: { id: string; nombre: string }[];
-}) {
+/** Chat de guiones con historial y entregas en el propio hilo. */
+export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 	const chat = useChatAgente(cliente);
-	const borradores = useBorradoresAgente(cliente, abrirGuion, productos);
 	const [texto, setTexto] = useState("");
+	const hilo = useRef<HTMLDivElement>(null);
+	const seguirHilo = useRef(true);
+	useEffect(() => {
+		if (
+			(chat.mensajes.length > 0 || chat.ocupado) &&
+			seguirHilo.current &&
+			hilo.current
+		)
+			hilo.current.scrollTop = hilo.current.scrollHeight;
+	}, [chat.mensajes, chat.ocupado]);
 	const [confirmacion, setConfirmacion] = useState<string | null>(null);
 	const ultimo = chat.mensajes.at(-1);
 	const consultando =
@@ -38,6 +37,7 @@ export function ChatAgente({
 		!ultimo.metadata?.tarjetaGuion;
 	function enviar() {
 		if (chat.ocupado || !texto.trim()) return;
+		seguirHilo.current = true;
 		void chat.enviar(texto);
 		setTexto("");
 	}
@@ -51,7 +51,10 @@ export function ChatAgente({
 						className="boton secundario"
 						type="button"
 						disabled={chat.ocupado}
-						onClick={chat.nuevaConversacion}
+						onClick={() => {
+							seguirHilo.current = true;
+							chat.nuevaConversacion();
+						}}
 					>
 						Nueva conversación
 					</button>
@@ -65,7 +68,10 @@ export function ChatAgente({
 										chat.conversacionActiva === c.id ? "true" : undefined
 									}
 									disabled={chat.ocupado}
-									onClick={() => void chat.cambiarConversacion(c.id)}
+									onClick={() => {
+										seguirHilo.current = true;
+										void chat.cambiarConversacion(c.id);
+									}}
 								>
 									{c.titulo}
 								</button>
@@ -153,11 +159,26 @@ export function ChatAgente({
 				</nav>
 				<div className="agente-chat">
 					<div
+						className="agente-hilo"
+						ref={hilo}
+						onScroll={({ currentTarget }) => {
+							seguirHilo.current =
+								currentTarget.scrollHeight -
+									currentTarget.scrollTop -
+									currentTarget.clientHeight <
+								48;
+						}}
 						role="log"
 						aria-live="polite"
 						aria-relevant="additions text"
 						aria-label="Mensajes del agente"
 					>
+						{!chat.conversacionActiva && chat.mensajes.length === 0 && (
+							<article className="panel-bloque agente-mensaje">
+								<strong>Agente</strong>
+								<p className="agente-texto">{INICIO_CHAT}</p>
+							</article>
+						)}
 						{chat.mensajes.map((m) => {
 							const tarjeta = leerTarjeta(m.metadata?.tarjetaGuion);
 							return (
@@ -180,26 +201,9 @@ export function ChatAgente({
 												{tarjeta.instruccion.red} ·{" "}
 												{tarjeta.instruccion.duracion_s} segundos
 											</p>
-											<details>
-												<summary>Ver escenas y contenido del guion</summary>
-												<EditorGuion
-													guion={tarjeta.guion}
-													cambiar={() => {}}
-													bloqueado
-												/>
-											</details>
-											{borradores.guardados.has(m.id) ? (
-												<p>Guardado como borrador</p>
-											) : (
-												<button
-													className="boton"
-													type="button"
-													disabled={chat.ocupado || borradores.guardando}
-													onClick={() => void borradores.guardar(m.id, tarjeta)}
-												>
-													Guardar como borrador
-												</button>
-											)}
+											<p className="agente-texto">
+												{cuerpoGuion(tarjeta.guion)}
+											</p>
 										</div>
 									)}
 								</article>
@@ -209,7 +213,6 @@ export function ChatAgente({
 							<p>{consultando ? "Consultando datos…" : "Escribiendo…"}</p>
 						)}
 					</div>
-					{borradores.error && <p role="alert">{borradores.error}</p>}
 					{chat.error && (
 						<div className="panel-aviso" role="alert">
 							<p>{chat.error}</p>
@@ -236,8 +239,7 @@ export function ChatAgente({
 						}}
 					>
 						<p id="chat-privacidad">
-							Pide un guion sobre un producto, una sede, una temporada o la
-							marca. Evita incluir datos personales.
+							Evita incluir datos personales en el chat.
 						</p>
 						<label htmlFor="chat-mensaje">Mensaje para el agente</label>
 						<textarea

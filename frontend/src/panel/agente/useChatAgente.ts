@@ -4,7 +4,6 @@ import { DefaultChatTransport } from "ai";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { esquemaChat } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import type { Database } from "../../tipos/database.types";
-import { invocarFuncionIa } from "../guiones/servicioGuiones";
 import {
 	crearServicioConversaciones,
 	type MensajeAgente,
@@ -13,6 +12,46 @@ import {
 
 const ERROR_GENERICO =
 	"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.";
+
+/** Invoca IA mediante Supabase, que conserva la URL y renueva la sesión en cada petición. */
+async function invocarFuncionIa(
+	cliente: SupabaseClient<Database>,
+	body: object,
+	generico: string,
+	signal?: AbortSignal,
+) {
+	const { data: sesion, error: errorSesion } = await cliente.auth.getSession();
+	if (errorSesion || !sesion.session)
+		throw new Error("Tu sesión venció. Vuelve a entrar al panel.");
+	const respuesta = await cliente.functions
+		.invoke<unknown>("ia/chat", {
+			body,
+			signal,
+			headers: { Authorization: `Bearer ${sesion.session.access_token}` },
+		})
+		.catch(() => {
+			throw new Error(generico);
+		});
+	if (respuesta.error) {
+		let mensaje = generico;
+		if (respuesta.error.context instanceof Response) {
+			try {
+				const datos: unknown = await respuesta.error.context.json();
+				if (
+					datos &&
+					typeof datos === "object" &&
+					"mensaje" in datos &&
+					typeof datos.mensaje === "string"
+				)
+					mensaje = datos.mensaje;
+			} catch {
+				/* Los errores de red pueden carecer de JSON. */
+			}
+		}
+		throw new Error(mensaje);
+	}
+	return respuesta.data;
+}
 
 /** Adapta HTTP al invocador común: Supabase resuelve URL y sesión, el SDK consume el SSE. */
 export function crearTransporteChat(
@@ -35,7 +74,6 @@ export function crearTransporteChat(
 		fetch: async (_url, opciones) => {
 			const respuesta = await invocarFuncionIa(
 				cliente,
-				"chat",
 				JSON.parse(String(opciones?.body)),
 				ERROR_GENERICO,
 				opciones?.signal ?? undefined,

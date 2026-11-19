@@ -294,21 +294,12 @@
 	border: 1px solid var(--texto);
 	border-radius: var(--radio-chico);
 }
-/* Guiones reutiliza superficies, medidas y controles del panel existente. */
-.guiones-editor,
-.guiones-editor fieldset,
-.guiones-prompt {
-	display: grid;
-	gap: 16px;
-	max-width: 760px;
-}
+/* Controles del chat de Guiones. */
 .guiones-panel label {
 	display: grid;
 	gap: 8px;
 	min-width: 0;
 }
-.guiones-panel input,
-.guiones-panel select,
 .guiones-panel textarea {
 	width: 100%;
 	min-width: 0;
@@ -323,11 +314,6 @@
 .guiones-panel textarea {
 	min-height: 100px;
 	resize: vertical;
-}
-.guiones-editor fieldset {
-	padding: 16px;
-	border: 1px solid var(--texto);
-	border-radius: var(--radio-chico);
 }
 .panel-editor .campo input,
 .panel-editor .campo textarea,
@@ -357,20 +343,6 @@
 .panel-editor [id^="error-"] {
 	scroll-margin-top: calc(var(--objetivo-tactil) * 3);
 }
-.guiones-editor legend {
-	font-weight: 700;
-}
-.guiones-lista {
-	padding: 0;
-	list-style: none;
-}
-.guiones-lista li {
-	padding-block: 16px;
-	border-bottom: 1px solid var(--color-dust-storm);
-}
-.guiones-lista button {
-	margin: 8px;
-}
 .guiones-panel button {
 	max-width: 100%;
 	white-space: normal;
@@ -378,11 +350,6 @@
 .guiones-panel :is(input, textarea, select, button, a) {
 	scroll-margin-block: 100px;
 }
-.guiones-lista li {
-	content-visibility: auto;
-	contain-intrinsic-size: auto 100px;
-}
-
 /* El chat conserva las superficies y medidas ya usadas en el panel. */
 .agente-distribucion {
 	display: grid;
@@ -392,6 +359,10 @@
 .agente-chat,
 .agente-tarjeta {
 	min-width: 0;
+}
+.agente-hilo {
+	max-block-size: 55dvh;
+	overflow: auto;
 }
 .agente-mensaje {
 	background: var(--color-we-peep);
@@ -407,12 +378,6 @@
 .agente-tarjeta h3 {
 	font-family: "Restora Neue", serif;
 }
-.agente-tarjeta details {
-	max-width: 100%;
-}
-.agente-tarjeta .guiones-editor {
-	min-width: 0;
-}
 @media (min-width: 768px) {
 	.agente-distribucion {
 		grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
@@ -421,17 +386,13 @@
 .agente-chat .panel-aviso {
 	flex-wrap: wrap;
 }
-.agente-tarjeta .guiones-editor fieldset {
-	min-width: 0;
-}
 
 .panel-versiones {
 	display: grid;
 	gap: 16px;
 	max-width: 960px;
 }
-.panel-versiones-cabecera,
-.guiones-prompt-acciones {
+.panel-versiones-cabecera {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
@@ -508,7 +469,4 @@
 	gap: 4px 8px;
 	margin-block-start: 8px;
 	font-size: var(--texto-chico);
-}
-.guiones-prompt > .boton {
-	justify-self: start;
 }

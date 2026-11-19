@@ -7,12 +7,13 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { createUIMessageStreamResponse, type UIMessageChunk } from "ai";
+import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ChatAgente } from "../src/panel/agente/ChatAgente";
 import {
 	convertirHistorial,
 	tituloConversacion,
 } from "../src/panel/agente/servicioConversaciones";
+import { GuionesPanel } from "../src/panel/guiones/GuionesPanel";
 import type { Database } from "../src/tipos/database.types";
 
 const id = "a0a0a0a0-1111-4111-8111-111111111111";
@@ -73,7 +74,6 @@ function simular(iniciales: boolean | (typeof conversacion)[] = false) {
 		: iniciales
 			? [conversacion]
 			: [];
-	const guardados: unknown[] = [];
 	let token = "token-inicial-ficticio";
 	let responder = () => respuesta();
 	const peticiones: { cuerpo: unknown; autorizacion: string | null }[] = [];
@@ -87,9 +87,6 @@ function simular(iniciales: boolean | (typeof conversacion)[] = false) {
 				});
 				return responder();
 			}
-			const cuerpo = opciones?.body
-				? JSON.parse(String(opciones.body))
-				: undefined;
 			if (url.includes("agente_conversaciones")) {
 				if (opciones?.method === "POST") {
 					filas = [conversacion];
@@ -106,16 +103,6 @@ function simular(iniciales: boolean | (typeof conversacion)[] = false) {
 				return Response.json(filas.slice(desde, desde + limite));
 			}
 			if (url.includes("agente_mensajes")) return Response.json([]);
-			if (url.includes("guiones") && opciones?.method === "POST") {
-				guardados.push(cuerpo);
-				return Response.json({
-					...cuerpo,
-					id: "borrador",
-					creado_en: conversacion.actualizado_en,
-					actualizado_en: conversacion.actualizado_en,
-					creado_por: "admin",
-				});
-			}
 			throw new Error(`Petición inesperada: ${url}`);
 		},
 	);
@@ -138,20 +125,13 @@ function simular(iniciales: boolean | (typeof conversacion)[] = false) {
 				ReturnType<typeof cliente.auth.getSession>
 			>,
 	);
-	const abrir = vi.fn();
 	render(
-		<div className="panel guiones-panel">
-			<ChatAgente
-				cliente={cliente}
-				abrirGuion={abrir}
-				productos={[{ id: "fresas", nombre: "Fresas" }]}
-			/>
-		</div>,
+		<MemoryRouter>
+			<GuionesPanel cliente={cliente} irVersiones={vi.fn()} />
+		</MemoryRouter>,
 	);
 	return {
 		peticiones,
-		abrir,
-		guardados,
 		fetchSimulado,
 		cambiarToken: () => {
 			token = "token-renovado-ficticio";
@@ -379,11 +359,14 @@ describe("chat del panel", () => {
 		);
 	});
 
-	it("muestra tarjeta, aviso y guarda mediante el servicio de guiones para abrir el editor", async () => {
+	it("muestra el guion completo y el aviso dentro del chat, sin acciones de revisión", async () => {
 		const simulado = simular();
 		simulado.responder(() =>
 			respuesta({
-				tarjetaGuion: tarjeta,
+				tarjetaGuion: {
+					...tarjeta,
+					instruccion: { ...tarjeta.instruccion, producto_id: null },
+				},
 				aviso: {
 					tipo: "precio_no_publicado",
 					mensaje: "Revisa los datos no publicados.",
@@ -393,56 +376,54 @@ describe("chat del panel", () => {
 		enviar();
 		expect(
 			await screen.findByRole("heading", { name: "Antojo Fresura" }),
-		).toBeInTheDocument();
+		).toBeVisible();
+		expect(screen.getByText(/Escena 1.*0.*30 s/)).toHaveTextContent(
+			tarjeta.guion.escenas[0].voz,
+		);
+		expect(screen.getByText("Revisa los datos no publicados.")).toBeVisible();
+		expect(screen.queryByText(/Guiones guardados|Revisar guion/)).toBeNull();
 		expect(
-			screen.getByText("Revisa los datos no publicados."),
-		).toBeInTheDocument();
+			screen.queryByRole("button", {
+				name: /Guardar como borrador|Generar prompt|Generar guion/i,
+			}),
+		).toBeNull();
+		expect(
+			simulado.fetchSimulado.mock.calls.every(
+				([url]) => !String(url).includes("/rest/v1/guiones"),
+			),
+		).toBe(true);
+	});
+	it("ofrece opciones de bienvenida y permite responder con un número por el mismo chat", async () => {
+		const simulado = simular();
+		expect(
+			screen.getByText(/¿Qué quieres mostrar en el video\?/),
+		).toHaveTextContent("2. Una sede");
+		simulado.responder(() =>
+			flujo([
+				{ type: "start", messageId: "eleccion" },
+				{ type: "text-start", id: "opciones" },
+				{
+					type: "text-delta",
+					id: "opciones",
+					delta: "¿Qué sede? 1. U Nacional 2. U Javeriana",
+				},
+				{ type: "text-end", id: "opciones" },
+				{ type: "finish", finishReason: "stop" },
+			]),
+		);
+		enviar("2");
+		expect(await screen.findByText(/¿Qué sede/)).toBeVisible();
 		await waitFor(() =>
 			expect(
-				screen.getByRole("button", { name: "Guardar como borrador" }),
+				screen.getByRole("button", { name: "Nueva conversación" }),
 			).toBeEnabled(),
 		);
-		fireEvent.click(
-			screen.getByRole("button", { name: "Guardar como borrador" }),
-		);
-		expect(
-			await screen.findByText("Guardado como borrador"),
-		).toBeInTheDocument();
-		expect(simulado.guardados).toEqual([
-			{
-				instruccion: { ...tarjeta.instruccion, producto_nombre: "Fresas" },
-				generado: tarjeta.guion,
-				editado: tarjeta.guion,
-				estado: "borrador",
-			},
-		]);
-		expect(simulado.abrir).toHaveBeenCalledWith(
-			expect.objectContaining({ id: "borrador", estado: "borrador" }),
-		);
-	});
-	it("guarda como borrador un guion general sin asociar un producto", async () => {
-		const simulado = simular();
-		const general = {
-			...tarjeta,
-			instruccion: { ...tarjeta.instruccion, producto_id: null },
-		};
-		simulado.responder(() => respuesta({ tarjetaGuion: general }));
-		enviar();
-		const guardar = await screen.findByRole("button", {
-			name: "Guardar como borrador",
-		});
-		await waitFor(() => expect(guardar).toBeEnabled());
-		expect(simulado.guardados).toHaveLength(0);
-		fireEvent.click(guardar);
-		await screen.findByText("Guardado como borrador");
-		expect(simulado.guardados).toEqual([
-			expect.objectContaining({
-				instruccion: {
-					...general.instruccion,
-					producto_nombre: "Guion general",
-				},
-				estado: "borrador",
-			}),
+		simulado.responder(() => respuesta());
+		enviar("1");
+		await screen.findByText("Vamos a preparar tu guion");
+		expect(simulado.peticiones.map((p) => p.cuerpo)).toEqual([
+			{ conversacion_id: id, mensaje: "2" },
+			{ conversacion_id: id, mensaje: "1" },
 		]);
 	});
 	it("muestra el mensaje JSON de un 503 y permite reintentar", async () => {

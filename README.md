@@ -98,9 +98,7 @@ El sitio es de varias páginas (RF-02): cada opción del menú y del pie abre su
 
 El carrito vive en `sessionStorage` (clave `fresura-carrito`), como en el prototipo. Las reglas de precio, límites y mensaje están en `frontend/src/compartido/carrito/reglas.ts` y tienen pruebas en `frontend/pruebas/carrito.test.ts`.
 
-«Conversar con el agente» es la forma de generar guiones en «Guiones»: permite crear, retomar y borrar conversaciones, ver la respuesta en flujo, detenerla y guardar las tarjetas de guion como borradores para abrir el editor. El transporte reutiliza `functions.invoke` y consulta la sesión en cada envío; solo manda `{conversacion_id, mensaje}` a `ia/chat`. Las pruebas de flujo SSE y memoria están en `frontend/pruebas/agente-panel.test.tsx`. El agente usa los datos públicos de Fresura y los turnos recientes de la conversación activa.
-
-La sección «Guiones» del panel real permite generar sobre productos, sedes, temporadas, campañas o la marca, y editar, copiar y guardar como borrador; también aprobar, descartar, recuperar y eliminar. Editar un aprobado pide confirmación y lo devuelve a borrador; la base borra su prompt. Solo un aprobado permite solicitar el prompt para avatar o escenas. El cliente usa `ia/chat` e `ia/prompt-video`. Ninguna acción de «Guiones» publica contenido. Sus pruebas con cliente simulado están en `frontend/pruebas/guiones-panel.test.tsx`.
+En «Guiones», el chat ofrece opciones por mensaje, pide un dato a la vez y entrega los guiones dentro de la conversación. El administrador puede pedir ajustes por escrito y retomar sus conversaciones desde el historial. El panel usa `ia/chat` con el contrato `{conversacion_id, mensaje}`, y el agente consulta la versión publicada de Fresura. Las pruebas del panel, el flujo SSE y la memoria están en `frontend/pruebas/agente-panel.test.tsx`.
 
 ## Movimiento
 

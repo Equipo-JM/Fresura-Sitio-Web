@@ -162,3 +162,18 @@ export function crearServicioConversaciones(cliente: SupabaseClient<Database>) {
 		},
 	};
 }
+
+/** Cuerpo del guion para leer y seleccionar directamente en el chat. */
+export function cuerpoGuion(guion: Guion) {
+	return [
+		`Gancho: ${guion.gancho}`,
+		...guion.escenas.map(
+			(e, i) =>
+				`Escena ${i + 1} (${e.inicio_s}–${e.fin_s} s)\nQué se ve: ${e.que_se_ve}\nTexto en pantalla: ${e.texto_pantalla}\nVoz o diálogo: ${e.voz}`,
+		),
+		`Llamado a la acción: ${guion.llamado_accion}`,
+		`Texto de la publicación: ${guion.texto_publicacion}`,
+		`Música sugerida: ${guion.musica_sugerida}`,
+		`Notas de producción: ${guion.notas_produccion}`,
+	].join("\n\n");
+}
