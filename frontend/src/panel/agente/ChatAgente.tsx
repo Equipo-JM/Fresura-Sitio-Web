@@ -1,11 +1,15 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	ENLACE_VIDEO_DID,
 	INICIO_CHAT,
 } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
+import { textoPieza } from "../../../../backend/supabase/functions/_shared/esquemas/pieza";
 import type { Database } from "../../tipos/database.types";
-import { cuerpoGuion, leerTarjeta } from "./servicioConversaciones";
+import { GuardarEnBiblioteca } from "../biblioteca/GuardarEnBiblioteca";
+import { crearServicioBiblioteca } from "../biblioteca/servicioBiblioteca";
+import { cuerpoGuion, leerPiezas, leerTarjeta } from "./servicioConversaciones";
+import { TarjetaPieza } from "./TarjetaPieza";
 import { useChatAgente } from "./useChatAgente";
 
 function TextoAgente({ texto }: { texto: string }) {
@@ -71,6 +75,7 @@ function CopiarRespuesta({ texto }: { texto: string }) {
 /** Chat de guiones con historial y entregas en el propio hilo. */
 export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 	const chat = useChatAgente(cliente);
+	const biblioteca = useMemo(() => crearServicioBiblioteca(cliente), [cliente]);
 	const [texto, setTexto] = useState("");
 	const hilo = useRef<HTMLDivElement>(null);
 	const seguirHilo = useRef(true);
@@ -97,7 +102,8 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 		chat.estado === "listo" &&
 		ultimo?.role === "assistant" &&
 		!ultimo.parts.some((p) => p.type === "text" && p.text.trim()) &&
-		!ultimo.metadata?.tarjetaGuion;
+		!ultimo.metadata?.tarjetaGuion &&
+		!ultimo.metadata?.piezas?.length;
 	function enviar() {
 		if (chat.ocupado || !texto.trim()) return;
 		seguirHilo.current = true;
@@ -244,6 +250,7 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 						)}
 						{chat.mensajes.map((m) => {
 							const tarjeta = leerTarjeta(m.metadata?.tarjetaGuion);
+							const piezas = leerPiezas(m.metadata?.piezas);
 							const partes = m.parts.filter((parte) => parte.type === "text");
 							const cuerpo = tarjeta ? cuerpoGuion(tarjeta.guion) : "";
 							const ficha = tarjeta
@@ -254,6 +261,7 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 								tarjeta?.guion.titulo,
 								ficha,
 								cuerpo,
+								...piezas.map(textoPieza),
 							]
 								.filter((parte) => parte?.trim())
 								.join("\n\n");
@@ -271,8 +279,34 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 											<h3>{tarjeta.guion.titulo}</h3>
 											<p>{ficha}</p>
 											<p className="agente-texto">{cuerpo}</p>
+											<div className="agente-acciones">
+												<GuardarEnBiblioteca
+													guardar={() =>
+														biblioteca.guardarGuion(
+															tarjeta,
+															chat.conversacionActiva,
+														)
+													}
+												/>
+											</div>
 										</div>
 									)}
+									{piezas.map((pieza) => (
+										<TarjetaPieza
+											key={pieza.tipo + pieza.titulo}
+											pieza={pieza}
+											acciones={
+												<GuardarEnBiblioteca
+													guardar={() =>
+														biblioteca.guardarPieza(
+															pieza,
+															chat.conversacionActiva,
+														)
+													}
+												/>
+											}
+										/>
+									))}
 									{m.role === "assistant" &&
 										textoCompleto &&
 										(!chat.ocupado || m.id !== ultimo?.id) && (

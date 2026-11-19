@@ -7,19 +7,25 @@ export const esquemaChat = z.strictObject({
 });
 
 /** Opciones de bienvenida, compartidas para que el agente pueda interpretar una respuesta numérica. */
-export const INICIO_CHAT = `¿Qué quieres mostrar en el video?
-1. Un producto
-2. Una sede
-3. Una temporada o campaña
-4. La marca Fresura
+export const INICIO_CHAT = `¡Hola! Soy tu asistente de redes y contenido de Fresura. ¿Qué creamos hoy?
+1. Guion de video (por escenas o con la presentadora en cámara)
+2. Publicación con texto y hashtags
+3. Carrusel para Instagram o Facebook
+4. Prompt para fotos con IA (Gemini)
+5. Prompt de video por escenas (HeyGen)
+6. Ideas o calendario de publicaciones
+7. Revisar un texto antes de publicarlo
 
 Responde con un número o cuéntame tu idea.`;
 
 const TITULOS_OPCIONES: Readonly<Record<string, string>> = {
-	"1": "Guion de producto",
-	"2": "Guion sobre una sede",
-	"3": "Guion de temporada o campaña",
-	"4": "Guion sobre la marca Fresura",
+	"1": "Guion de video",
+	"2": "Publicación para redes",
+	"3": "Carrusel",
+	"4": "Fotos con IA",
+	"5": "Video por escenas",
+	"6": "Ideas y calendario",
+	"7": "Revisión antes de publicar",
 };
 
 /** Indica si un primer mensaje todavía no describe un tema. */

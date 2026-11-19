@@ -116,6 +116,8 @@ function preparar(
 						}
 						if (url.pathname.endsWith("versiones_contenido"))
 							return Response.json({ json: ejemplo });
+						if (url.pathname.endsWith("referencias_estilo"))
+							return Response.json([]);
 						expect(url.searchParams.get("order")).toBe("creado_en.desc");
 						expect(url.searchParams.get("limit")).toBe("41");
 						return Response.json(

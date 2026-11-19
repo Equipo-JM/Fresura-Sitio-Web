@@ -148,6 +148,29 @@ begin
   perform pg_temp.probar('Memoria admin aal2 borra conversación', 'filas=1', 'authenticated', admin_aal2, format('delete from public.agente_conversaciones where id = %L', conversacion));
   perform pg_temp.probar('Memoria borrado en cascada del mensaje', 'filas=0', 'service_role', '{"role":"service_role"}', format('select id from public.agente_mensajes where id = %L', mensaje));
 
+  -- Biblioteca (RF-18): mismos claims que la memoria; guardar y aprobar son del administrador con aal2.
+  perform pg_temp.probar('Biblioteca admin aal2 guarda pieza', 'filas=1', 'authenticated', admin_aal2, $q$insert into public.biblioteca_piezas (id, tipo, titulo, contenido) values ('7e57b1b1-0000-4000-8000-000000000001', 'publicacion', 'Prueba de biblioteca', '{}')$q$);
+  perform pg_temp.probar('Biblioteca anon lee', 'error 42501', 'anon', anonimo, $q$select id from public.biblioteca_piezas$q$);
+  perform pg_temp.probar('Biblioteca anon guarda', 'error 42501', 'anon', anonimo, $q$insert into public.biblioteca_piezas (tipo, titulo, contenido) values ('ideas', 'Prohibido', '{}')$q$);
+  perform pg_temp.probar('Biblioteca sin rol lee', 'filas=0', 'authenticated', sin_rol, $q$select id from public.biblioteca_piezas where id = '7e57b1b1-0000-4000-8000-000000000001'$q$);
+  perform pg_temp.probar('Biblioteca sin rol guarda', 'error 42501', 'authenticated', sin_rol, $q$insert into public.biblioteca_piezas (tipo, titulo, contenido) values ('ideas', 'Prohibido', '{}')$q$);
+  perform pg_temp.probar('Biblioteca admin aal1 lee', 'filas=0', 'authenticated', admin_aal1, $q$select id from public.biblioteca_piezas where id = '7e57b1b1-0000-4000-8000-000000000001'$q$);
+  perform pg_temp.probar('Biblioteca admin aal1 aprueba', 'filas=0', 'authenticated', admin_aal1, $q$update public.biblioteca_piezas set estado = 'aprobada' where id = '7e57b1b1-0000-4000-8000-000000000001'$q$);
+  perform pg_temp.probar('Biblioteca tipo inválido', 'error 23514', 'authenticated', admin_aal2, $q$insert into public.biblioteca_piezas (tipo, titulo, contenido) values ('otro', 'Inválido', '{}')$q$);
+  perform pg_temp.probar('Biblioteca estado inválido', 'error 23514', 'authenticated', admin_aal2, $q$update public.biblioteca_piezas set estado = 'publicada' where id = '7e57b1b1-0000-4000-8000-000000000001'$q$);
+  perform pg_temp.probar('Biblioteca admin aal2 aprueba', 'filas=1', 'authenticated', admin_aal2, $q$update public.biblioteca_piezas set estado = 'aprobada' where id = '7e57b1b1-0000-4000-8000-000000000001'$q$);
+  perform pg_temp.probar('Biblioteca admin aal2 borra', 'filas=1', 'authenticated', admin_aal2, $q$delete from public.biblioteca_piezas where id = '7e57b1b1-0000-4000-8000-000000000001'$q$);
+
+  -- Referencias de estilo: solo el administrador con aal2; el enlace debe ser HTTPS.
+  perform pg_temp.probar('Estilo admin aal2 guarda', 'filas=1', 'authenticated', admin_aal2, $q$insert into public.referencias_estilo (id, red, formato, texto) values ('7e57e57e-0000-4000-8000-000000000001', 'tiktok', 'video', 'Prueba de estilo')$q$);
+  perform pg_temp.probar('Estilo anon lee', 'error 42501', 'anon', anonimo, $q$select id from public.referencias_estilo$q$);
+  perform pg_temp.probar('Estilo sin rol lee', 'filas=0', 'authenticated', sin_rol, $q$select id from public.referencias_estilo where id = '7e57e57e-0000-4000-8000-000000000001'$q$);
+  perform pg_temp.probar('Estilo admin aal1 lee', 'filas=0', 'authenticated', admin_aal1, $q$select id from public.referencias_estilo where id = '7e57e57e-0000-4000-8000-000000000001'$q$);
+  perform pg_temp.probar('Estilo admin aal1 guarda', 'error 42501', 'authenticated', admin_aal1, $q$insert into public.referencias_estilo (red, formato, texto) values ('tiktok', 'video', 'Prohibido')$q$);
+  perform pg_temp.probar('Estilo enlace sin https', 'error 23514', 'authenticated', admin_aal2, $q$insert into public.referencias_estilo (red, formato, enlace, texto) values ('tiktok', 'video', 'http://ejemplo.com', 'Inválido')$q$);
+  perform pg_temp.probar('Estilo origen inválido', 'error 23514', 'authenticated', admin_aal2, $q$insert into public.referencias_estilo (red, formato, texto, origen) values ('tiktok', 'video', 'Inválido', 'otro')$q$);
+  perform pg_temp.probar('Estilo admin aal2 borra', 'filas=1', 'authenticated', admin_aal2, $q$delete from public.referencias_estilo where id = '7e57e57e-0000-4000-8000-000000000001'$q$);
+
   -- PU-08: publicar y restaurar con service_role, como la función `panel` (sección 21.1).
   perform pg_temp.probar('PU-08 admin crea borrador', 'filas=1', 'authenticated', admin_aal2, $q$insert into public.versiones_contenido (estado, version_contrato, json) values ('borrador', '1.0.1', '{"marca":"pu08"}')$q$);
   perform pg_temp.probar('PU-08 revisión distinta no publica', 'error P0001', 'service_role', '{"role":"service_role"}', format('select public.publicar_borrador(99, %L)', admin));

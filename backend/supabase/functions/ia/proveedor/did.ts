@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { FondoPresentadora } from "../../_shared/esquemas/guion.ts";
 
 const API_DID = "https://api.d-id.com";
 
@@ -24,6 +25,9 @@ export type EnvioDid =
 /** Consulta autenticada de un video que ya tiene identificador de D-ID. */
 export type EstadoDid = z.infer<typeof estado>;
 
+/** Estilo de un video: fondo del catálogo y expresión animada para promociones y lanzamientos. */
+export type EstiloVideo = { fondo: FondoPresentadora; animado: boolean };
+
 /** Perfil fijo seleccionado por el operador en los secretos de Supabase. */
 export type PerfilDid =
 	| { tipo: "foto"; imagen: string; voz: string }
@@ -33,6 +37,13 @@ export type PerfilDid =
 			sentimiento: string;
 			voz: string;
 			modeloVoz: string;
+			/**
+			 * Carpeta HTTPS con fondo-presentadora-{fondo}.jpg (1920 × 1080); sin
+			 * ella D-ID usa su fondo liso.
+			 */
+			fondos?: string;
+			/** Expresión de D-ID para promociones y lanzamientos; sin ella se usa `sentimiento`. */
+			sentimientoAnimado?: string;
 	  };
 
 /** Llama a D-ID desde el servidor con el perfil fijo de Fresura. */
@@ -44,9 +55,27 @@ export function crearProveedorDid(config: {
 	const { perfil } = config;
 	const recurso: RecursoDid =
 		perfil.tipo === "expresivo" ? "expressives" : "talks";
-	const presentadora =
+	// Solo /expressives documenta `background` y `sentiment_id`; /talks usa la foto tal cual.
+	const presentadora = (estilo: EstiloVideo) =>
 		perfil.tipo === "expresivo"
-			? { avatar_id: perfil.avatar, sentiment_id: perfil.sentimiento }
+			? {
+					avatar_id: perfil.avatar,
+					sentiment_id:
+						estilo.animado && perfil.sentimientoAnimado
+							? perfil.sentimientoAnimado
+							: perfil.sentimiento,
+					...(perfil.fondos
+						? {
+								background: {
+									type: "image_url",
+									value: new URL(
+										`fondo-presentadora-${estilo.fondo}.jpg`,
+										perfil.fondos,
+									).href,
+								},
+							}
+						: {}),
+				}
 			: { source_url: perfil.imagen };
 	const voz =
 		perfil.tipo === "expresivo"
@@ -55,7 +84,10 @@ export function crearProveedorDid(config: {
 	const pedir = config.pedir ?? fetch;
 	const headers = { Authorization: `Basic ${config.clave}` };
 	return {
-		async generar(dialogo: string): Promise<EnvioDid> {
+		async generar(
+			dialogo: string,
+			estilo: EstiloVideo = { fondo: "cafeteria", animado: false },
+		): Promise<EnvioDid> {
 			try {
 				const respuesta = await pedir(`${API_DID}/${recurso}`, {
 					method: "POST",
@@ -64,7 +96,7 @@ export function crearProveedorDid(config: {
 					signal: AbortSignal.timeout(15_000),
 					body: JSON.stringify({
 						name: "Presentadora Fresura",
-						...presentadora,
+						...presentadora(estilo),
 						script: {
 							type: "text",
 							input: dialogo,

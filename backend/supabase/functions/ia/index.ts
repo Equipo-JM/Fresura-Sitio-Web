@@ -30,6 +30,10 @@ const vozDid = entorno.opcional("DID_VOICE_ID");
 const avatarDid = entorno.opcional("DID_AVATAR_ID");
 const sentimientoDid = entorno.opcional("DID_SENTIMENT_ID");
 const modeloVozDid = entorno.opcional("DID_VOICE_MODEL_ID");
+const fondosDid = entorno.opcional("DID_BACKGROUNDS_URL");
+const sentimientoAnimadoDid = entorno.opcional("DID_SENTIMENT_ID_ANIMATED");
+const esUrlHttps = (valor: string | undefined): valor is string =>
+	!!valor && URL.canParse(valor) && new URL(valor).protocol === "https:";
 
 let perfilDid: PerfilDid | undefined;
 if (avatarDid || sentimientoDid || modeloVozDid) {
@@ -40,13 +44,15 @@ if (avatarDid || sentimientoDid || modeloVozDid) {
 			sentimiento: sentimientoDid,
 			voz: vozDid,
 			modeloVoz: modeloVozDid,
+			// La carpeta termina en «/» para que new URL conserve la ruta al resolver cada fondo.
+			...(esUrlHttps(fondosDid)
+				? { fondos: fondosDid.endsWith("/") ? fondosDid : `${fondosDid}/` }
+				: {}),
+			...(sentimientoAnimadoDid
+				? { sentimientoAnimado: sentimientoAnimadoDid }
+				: {}),
 		};
-} else if (
-	imagenDid &&
-	vozDid &&
-	URL.canParse(imagenDid) &&
-	new URL(imagenDid).protocol === "https:"
-) {
+} else if (imagenDid && vozDid && esUrlHttps(imagenDid)) {
 	perfilDid = { tipo: "foto", imagen: imagenDid, voz: vozDid };
 }
 

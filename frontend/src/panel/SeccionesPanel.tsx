@@ -104,7 +104,7 @@ export function SeccionesPanel({
 					aria-pressed={false}
 					onClick={() => abrir("guiones")}
 				>
-					Guiones
+					Agente
 				</button>
 			</nav>
 			{seccion === "versiones" ? (

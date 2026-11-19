@@ -10,6 +10,7 @@ import {
 import { crearRutaChat } from "../../supabase/functions/ia/skills/chat";
 import {
 	accionVideoDid,
+	estiloVideo,
 	procesarVideoDid,
 } from "../../supabase/functions/ia/skills/video-did";
 import { guionDePrueba } from "../datos/guion";
@@ -276,6 +277,57 @@ describe("video de Fresura con D-ID", () => {
 		expect(pedir).toHaveBeenCalledTimes(2);
 		expect(crearModelo).not.toHaveBeenCalled();
 	});
+	it("usa el fondo que eligió el agente, la cafetería si no eligió, y la expresión animada en promociones", () => {
+		const base = {
+			producto_id: null,
+			campana: null,
+			objetivo: "dar_a_conocer",
+			tono: "Cercano",
+			red: "tiktok",
+			duracion_s: 15,
+		} as const;
+		expect(estiloVideo(base)).toEqual({ fondo: "cafeteria", animado: false });
+		expect(estiloVideo({ ...base, fondo: null }).fondo).toBe("cafeteria");
+		expect(estiloVideo({ ...base, fondo: "flores" }).fondo).toBe("flores");
+		expect(estiloVideo({ ...base, objetivo: "promocion" }).animado).toBe(true);
+	});
+	it("envía fondo y expresión del estilo solo si están configurados en el perfil Expressive", async () => {
+		const pedir = vi.fn<typeof fetch>(async () =>
+			Response.json({ id: "exp_ficticio" }, { status: 201 }),
+		);
+		const perfil = {
+			tipo: "expresivo" as const,
+			avatar: "avatar@de-prueba",
+			sentimiento: "snt_amable",
+			voz: "voz-ficticia",
+			modeloVoz: "eleven_flash_v2_5",
+		};
+		await crearProveedorDid({
+			clave: "c",
+			perfil: {
+				...perfil,
+				fondos: "https://fresura.example/marca/",
+				sentimientoAnimado: "snt_animado",
+			},
+			pedir,
+		}).generar("Hola", { fondo: "vitrina", animado: true });
+		await crearProveedorDid({ clave: "c", perfil, pedir }).generar("Hola", {
+			fondo: "vitrina",
+			animado: true,
+		});
+		const cuerpos = pedir.mock.calls.map(([, o]) =>
+			JSON.parse(String(o?.body)),
+		);
+		expect(cuerpos[0]).toMatchObject({
+			sentiment_id: "snt_animado",
+			background: {
+				type: "image_url",
+				value: "https://fresura.example/marca/fondo-presentadora-vitrina.jpg",
+			},
+		});
+		expect(cuerpos[1].sentiment_id).toBe("snt_amable");
+		expect(cuerpos[1]).not.toHaveProperty("background");
+	});
 	it("conserva avatar, sentimiento y voz privada en Expressive y consulta ese mismo recurso", async () => {
 		const { procesar, pedir } = preparar({
 			tipo: "expresivo",
@@ -283,6 +335,7 @@ describe("video de Fresura con D-ID", () => {
 			sentimiento: "snt_ficticio",
 			voz: "voz-privada-ficticia",
 			modeloVoz: "eleven_flash_v2_5",
+			fondos: "https://fresura.example/marca/",
 		});
 		pedir.mockResolvedValueOnce(
 			Response.json({ id: "exp_ficticio" }, { status: 201 }),
@@ -294,6 +347,10 @@ describe("video de Fresura con D-ID", () => {
 		expect(JSON.parse(String(opciones?.body))).toMatchObject({
 			avatar_id: "avatar@de-prueba",
 			sentiment_id: "snt_ficticio",
+			// El guion de prueba no eligió fondo: se usa la cafetería.
+			background: {
+				value: "https://fresura.example/marca/fondo-presentadora-cafeteria.jpg",
+			},
 			script: {
 				provider: {
 					type: "elevenlabs",

@@ -16,6 +16,11 @@ import {
 } from "../../_shared/esquemas/chat.ts";
 import { esquemaContenido } from "../../_shared/esquemas/contenido.ts";
 import {
+	esquemaReferenciaEstilo,
+	MAXIMO_REFERENCIAS_AGENTE,
+	type ReferenciaEstilo,
+} from "../../_shared/esquemas/referencia.ts";
+import {
 	leerCuerpoJson,
 	responderCuerpoInvalido,
 	responderError,
@@ -81,7 +86,8 @@ function clasificarFallo(error: unknown): ErrorIa {
 
 /**
  * POST /chat (IF-20). El chunk finish lleva messageMetadata.tarjetaGuion =
- * {instruccion, guion} y messageMetadata.aviso = {tipo, mensaje} cuando el texto
+ * {instruccion, guion}, messageMetadata.piezas = las piezas de `entregar_pieza`
+ * y messageMetadata.aviso = {tipo, mensaje} cuando el texto
  * contiene precios o nombres explícitos de sedes no publicados. El panel debe leer ambos en message.metadata.
  * Cada paso del agente pasa al modelo de respaldo si el principal responde 503
  * o cupo agotado, aunque la respuesta ya haya empezado (ver `modeloConRespaldo`).
@@ -118,6 +124,29 @@ export function modeloConRespaldo(
 	});
 }
 
+/**
+ * Publicaciones recientes para imitar el estilo. Un fallo al leerlas no
+ * detiene el chat: el agente sigue con el perfil de marca.
+ */
+async function leerReferenciasEstilo(
+	cliente: SupabaseClient,
+): Promise<ReferenciaEstilo[]> {
+	const { data, error } = await cliente
+		.from("referencias_estilo")
+		.select("red,formato,enlace,texto,publicada_en")
+		.order("publicada_en", { ascending: false, nullsFirst: false })
+		.order("creado_en", { ascending: false })
+		.limit(MAXIMO_REFERENCIAS_AGENTE);
+	if (error) {
+		console.error(JSON.stringify(datosRegistroFallo("lectura_referencias")));
+		return [];
+	}
+	return (data ?? []).flatMap((fila) => {
+		const leida = esquemaReferenciaEstilo.safeParse(fila);
+		return leida.success ? [leida.data] : [];
+	});
+}
+
 export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 	const crearModelo =
 		opciones.crearModelo ??
@@ -145,8 +174,10 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			);
 		const accion = accionVideoDid(mensaje);
 		if (accion) {
+			// Confirmar también lee el guion entregado para elegir fondo y expresión;
+			// si quedó fuera de los mensajes recientes, se usa el fondo de marca.
 			const historial =
-				accion === "preparar" && opciones.videoDid
+				accion !== "consultar" && opciones.videoDid
 					? await cargarMensajes(cliente, id)
 					: [];
 			const texto = await procesarVideoDid(
@@ -192,13 +223,17 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 		const estado: EstadoAgente = {
 			productosConsultados: new Set(),
 		};
+		const hoy = fechaColombia(new Date());
 		const herramientas = crearHerramientasAgente(
 			contenido.data,
-			fechaColombia(new Date()),
+			hoy,
 			estado,
+			await leerReferenciasEstilo(cliente),
 		);
 		const instrucciones = [
 			INSTRUCCIONES_AGENTE,
+			// El calendario y las fechas especiales se cuentan desde hoy en Colombia.
+			`Hoy es ${hoy} (hora de Colombia).`,
 			...(contenido.data.estado === "ejemplo"
 				? [
 						"La versión publicada es de ejemplo. Puedes usarla para la demo. Si el guion se apoya en estos datos, avisa a la persona administradora en el chat para que los verifique antes de usar el guion.",
@@ -312,6 +347,9 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 													guion: entrega.guion,
 												},
 											}
+										: {}),
+									...(estado.piezasEntregadas?.length
+										? { piezas: estado.piezasEntregadas }
 										: {}),
 									...(errores.length
 										? {
