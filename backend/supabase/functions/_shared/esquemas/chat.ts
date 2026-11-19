@@ -14,3 +14,29 @@ export const INICIO_CHAT = `¿Qué quieres mostrar en el video?
 4. La marca Fresura
 
 Responde con un número o cuéntame tu idea.`;
+
+const TITULOS_OPCIONES: Readonly<Record<string, string>> = {
+	"1": "Guion de producto",
+	"2": "Guion sobre una sede",
+	"3": "Guion de temporada o campaña",
+	"4": "Guion sobre la marca Fresura",
+};
+
+/** Indica si un primer mensaje todavía no describe un tema. */
+export function esTituloProvisional(mensaje: string): boolean {
+	return /^(?:\d+|hola|sí|si|no|ok|dale|listo|gracias)[.!?)]*$/iu.test(
+		mensaje.trim(),
+	);
+}
+
+/** Resume un tema en una línea y convierte las respuestas cortas en títulos legibles. */
+export function tituloConversacion(mensaje: string): string {
+	const texto = mensaje.trim().replace(/\s+/g, " ");
+	if (!texto || esTituloProvisional(texto))
+		return (
+			TITULOS_OPCIONES[texto.replace(/[.)]$/, "")] ?? "Conversación de Fresura"
+		);
+	if (texto.length <= 60) return texto;
+	const corte = texto.lastIndexOf(" ", 60);
+	return texto.slice(0, corte > 0 ? corte : 60);
+}

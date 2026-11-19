@@ -79,6 +79,7 @@ function preparar(
 	historial: ModelMessage[] = [],
 ) {
 	const guardados: ReturnType<typeof filasDeMensajes> = [];
+	const titulos: string[] = [];
 	let existe = true;
 	const crearModelo = vi.fn(() => modelo);
 	const ruta = crearRutaChat({
@@ -100,8 +101,15 @@ function preparar(
 							guardados.push(...JSON.parse(String(opciones.body)));
 							return new Response(null, { status: 201 });
 						}
-						if (url.pathname.endsWith("agente_conversaciones"))
-							return Response.json(existe ? { id } : null);
+						if (url.pathname.endsWith("agente_conversaciones")) {
+							if (opciones?.method === "PATCH") {
+								expect(url.searchParams.get("id")).toBe(`eq.${id}`);
+								expect(url.searchParams.get("titulo")).toBe("eq.1");
+								titulos.push(JSON.parse(String(opciones.body)).titulo);
+								return new Response(null, { status: 204 });
+							}
+							return Response.json(existe ? { id, titulo: "1" } : null);
+						}
 						if (url.pathname.endsWith("versiones_contenido"))
 							return Response.json({ json: ejemplo });
 						expect(url.searchParams.get("order")).toBe("creado_en.desc");
@@ -115,6 +123,7 @@ function preparar(
 	});
 	return {
 		guardados,
+		titulos,
 		crearModelo,
 		sinConversacion: () => {
 			existe = false;
@@ -317,6 +326,7 @@ describe("POST /chat", () => {
 		const texto = await (await p.pedir()).text();
 		expect(texto).toContain('"tarjetaGuion":{"instruccion":');
 		expect(p.guardados.filter((f) => f.rol === "herramienta")).toHaveLength(2);
+		expect(p.titulos).toEqual([guionDePrueba().titulo]);
 	});
 	it("entrega en el flujo una tarjeta sobre una sede sin producto", async () => {
 		const general = { ...instruccion, producto_id: null };
@@ -342,6 +352,7 @@ describe("POST /chat", () => {
 		expect(texto).toContain('"tarjetaGuion"');
 		expect(texto).toContain('"producto_id":null');
 		expect(texto).toContain("Visita la sede U Nacional");
+		expect(p.titulos).toEqual(["Visita la sede U Nacional"]);
 	});
 	it("exige datos actuales aunque el producto esté en el historial", async () => {
 		const p = preparar(

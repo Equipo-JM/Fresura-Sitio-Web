@@ -5,7 +5,7 @@ import { type ModelMessage, modelMessageSchema } from "ai";
 export async function leerConversacion(cliente: SupabaseClient, id: string) {
 	const { data, error } = await cliente
 		.from("agente_conversaciones")
-		.select("id")
+		.select("id,titulo")
 		.eq("id", id)
 		.maybeSingle();
 	if (error) throw new Error("lectura_conversacion");

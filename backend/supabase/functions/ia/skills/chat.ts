@@ -8,7 +8,11 @@ import {
 	streamText,
 	wrapLanguageModel,
 } from "ai";
-import { esquemaChat } from "../../_shared/esquemas/chat.ts";
+import {
+	esquemaChat,
+	esTituloProvisional,
+	tituloConversacion,
+} from "../../_shared/esquemas/chat.ts";
 import { esquemaContenido } from "../../_shared/esquemas/contenido.ts";
 import {
 	leerCuerpoJson,
@@ -124,7 +128,8 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			);
 		const { conversacion_id: id, mensaje } = entrada.data;
 		const cliente = opciones.crearCliente(jwt);
-		if (!(await leerConversacion(cliente, id)))
+		const conversacion = await leerConversacion(cliente, id);
+		if (!conversacion)
 			return responderError(
 				404,
 				"conversacion_no_encontrada",
@@ -192,8 +197,23 @@ La versión publicada es de ejemplo. Puedes usarla para la demo. Si el guion se 
 						fallo = error;
 					},
 					onFinish: async ({ responseMessages }) => {
-						if (fallo === undefined)
-							await guardarMensajes(cliente, id, responseMessages);
+						if (fallo !== undefined) return;
+						await guardarMensajes(cliente, id, responseMessages);
+						const entrega = estado.guionEntregado;
+						if (!entrega || esTituloProvisional(entrega.guion.titulo)) return;
+						const titulo = tituloConversacion(entrega.guion.titulo);
+						if (titulo === conversacion.titulo) return;
+						const { error } = await cliente
+							.from("agente_conversaciones")
+							.update({ titulo })
+							.eq("id", id)
+							.eq("titulo", conversacion.titulo);
+						if (error)
+							console.error(
+								JSON.stringify(
+									datosRegistroFallo("escritura_titulo_conversacion"),
+								),
+							);
 					},
 				});
 				const lector = resultado

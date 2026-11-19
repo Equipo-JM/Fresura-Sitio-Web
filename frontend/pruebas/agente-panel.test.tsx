@@ -9,10 +9,8 @@ import {
 import { createUIMessageStreamResponse, type UIMessageChunk } from "ai";
 import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-	convertirHistorial,
-	tituloConversacion,
-} from "../src/panel/agente/servicioConversaciones";
+import { tituloConversacion } from "../../backend/supabase/functions/_shared/esquemas/chat";
+import { convertirHistorial } from "../src/panel/agente/servicioConversaciones";
 import { GuionesPanel } from "../src/panel/guiones/GuionesPanel";
 import type { Database } from "../src/tipos/database.types";
 
@@ -68,7 +66,10 @@ function respuesta(metadata = {}) {
 		{ type: "finish", finishReason: "stop", messageMetadata: metadata },
 	]);
 }
-function simular(iniciales: boolean | (typeof conversacion)[] = false) {
+function simular(
+	iniciales: boolean | (typeof conversacion)[] = false,
+	historial: { id: string; contenido: unknown }[] = [],
+) {
 	let filas = Array.isArray(iniciales)
 		? iniciales
 		: iniciales
@@ -89,8 +90,12 @@ function simular(iniciales: boolean | (typeof conversacion)[] = false) {
 			}
 			if (url.includes("agente_conversaciones")) {
 				if (opciones?.method === "POST") {
-					filas = [conversacion];
-					return Response.json(conversacion);
+					const fila = {
+						...conversacion,
+						titulo: JSON.parse(String(opciones.body)).titulo,
+					};
+					filas = [fila];
+					return Response.json(fila);
 				}
 				if (opciones?.method === "DELETE") {
 					const id = new URL(url).searchParams.get("id");
@@ -102,7 +107,10 @@ function simular(iniciales: boolean | (typeof conversacion)[] = false) {
 				const limite = Number(parametros.get("limit") ?? filas.length);
 				return Response.json(filas.slice(desde, desde + limite));
 			}
-			if (url.includes("agente_mensajes")) return Response.json([]);
+			if (url.includes("agente_mensajes"))
+				return Response.json(
+					url.includes("creado_en.desc") ? [...historial].reverse() : historial,
+				);
 			throw new Error(`Petición inesperada: ${url}`);
 		},
 	);
@@ -220,6 +228,58 @@ describe("conversión de memoria", () => {
 	});
 });
 describe("chat del panel", () => {
+	it("asigna un nombre legible al iniciar con una respuesta numérica", async () => {
+		simular();
+		enviar("2");
+		expect(
+			await screen.findByRole("button", { name: "Guion sobre una sede" }),
+		).toBeVisible();
+		expect(screen.queryByRole("button", { name: /^2$/ })).toBeNull();
+	});
+	it("recupera el título del guion para conversaciones que antes se llamaban 1", async () => {
+		simular(
+			[{ ...conversacion, titulo: "1" }],
+			[
+				{ id: "u", contenido: { role: "user", content: "1" } },
+				{
+					id: "a",
+					contenido: {
+						role: "assistant",
+						content: [
+							{
+								type: "tool-call",
+								toolCallId: "tema",
+								toolName: "entregar_guion",
+								input: tarjeta,
+							},
+						],
+					},
+				},
+				{
+					id: "t",
+					contenido: {
+						role: "tool",
+						content: [
+							{
+								type: "tool-result",
+								toolCallId: "tema",
+								toolName: "entregar_guion",
+								output: { type: "json", value: { ok: true } },
+							},
+						],
+					},
+				},
+			],
+		);
+		const antigua = await screen.findByRole("button", {
+			name: tarjeta.guion.titulo,
+		});
+		fireEvent.click(antigua);
+		expect(
+			await screen.findByRole("heading", { name: tarjeta.guion.titulo }),
+		).toBeVisible();
+		expect(antigua).toHaveAttribute("aria-current", "true");
+	});
 	it("pagina el historial, permite abrir conversaciones anteriores y vuelve si queda una página vacía", async () => {
 		const filas = Array.from({ length: 6 }, (_, i) => ({
 			...conversacion,

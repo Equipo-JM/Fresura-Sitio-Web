@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { modelMessageSchema, type UIMessage } from "ai";
 import {
+	esTituloProvisional,
+	tituloConversacion,
+} from "../../../../backend/supabase/functions/_shared/esquemas/chat";
+import {
 	crearEsquemaGuion,
 	esquemaInstruccionGuion,
 	type Guion,
@@ -30,14 +34,6 @@ export type PaginaConversaciones = {
 	hayAnteriores: boolean;
 };
 
-/** Conserva palabras completas salvo si la primera supera por sí sola el máximo. */
-export function tituloConversacion(mensaje: string) {
-	const texto = mensaje.trim().replace(/\s+/g, " ");
-	if (texto.length <= 60) return texto;
-	const corte = texto.lastIndexOf(" ", 60);
-	return texto.slice(0, corte > 0 ? corte : 60);
-}
-
 /** Valida también las entregas recuperadas de la memoria antes de ofrecer guardarlas. */
 export function leerTarjeta(valor: unknown): TarjetaGuion | undefined {
 	if (
@@ -66,8 +62,9 @@ export function convertirHistorial(
 		{ mensaje: MensajeAgente; tarjeta: TarjetaGuion }
 	>();
 	for (const fila of filas) {
-		const modelo = modelMessageSchema.parse(fila.contenido);
-		if (modelo.role === "system") continue;
+		const resultado = modelMessageSchema.safeParse(fila.contenido);
+		if (!resultado.success || resultado.data.role === "system") continue;
+		const modelo = resultado.data;
 		const partes =
 			typeof modelo.content === "string"
 				? [{ type: "text" as const, text: modelo.content }]
@@ -106,6 +103,37 @@ export function convertirHistorial(
 	return mensajes.filter((m) => m.parts.length || m.metadata?.tarjetaGuion);
 }
 
+/** Recupera un tema para conversaciones antiguas guardadas como un número o saludo. */
+async function titularConversacionAnterior(
+	cliente: SupabaseClient<Database>,
+	fila: Conversacion,
+): Promise<Conversacion> {
+	if (!esTituloProvisional(fila.titulo)) return fila;
+	const { data, error } = await cliente
+		.from("agente_mensajes")
+		.select("id,contenido")
+		.eq("conversacion_id", fila.id)
+		.order("creado_en", { ascending: false })
+		.limit(40);
+	const mensajes =
+		error || !data ? [] : convertirHistorial([...data].reverse());
+	const guion = mensajes.findLast((m) => m.metadata?.tarjetaGuion)?.metadata
+		?.tarjetaGuion;
+	const tema = mensajes
+		.filter((m) => m.role === "user")
+		.flatMap((m) => m.parts)
+		.find(
+			(p) => p.type === "text" && p.text.trim() && !esTituloProvisional(p.text),
+		);
+	const titulo =
+		guion && !esTituloProvisional(guion.guion.titulo)
+			? guion.guion.titulo
+			: tema?.type === "text"
+				? tema.text
+				: fila.titulo;
+	return { ...fila, titulo: tituloConversacion(titulo) };
+}
+
 /** CRUD bajo RLS; el servidor es el único que escribe los mensajes del chat. */
 export function crearServicioConversaciones(cliente: SupabaseClient<Database>) {
 	return {
@@ -124,7 +152,11 @@ export function crearServicioConversaciones(cliente: SupabaseClient<Database>) {
 			const filas = data ?? [];
 			return {
 				numero,
-				filas: filas.slice(0, CONVERSACIONES_POR_PAGINA),
+				filas: await Promise.all(
+					filas
+						.slice(0, CONVERSACIONES_POR_PAGINA)
+						.map((fila) => titularConversacionAnterior(cliente, fila)),
+				),
 				hayAnteriores: filas.length > CONVERSACIONES_POR_PAGINA,
 			};
 		},
