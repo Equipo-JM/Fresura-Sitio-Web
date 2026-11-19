@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { FondoPresentadora } from "../../_shared/esquemas/guion.ts";
 
 const API_DID = "https://api.d-id.com";
 
@@ -24,11 +25,8 @@ export type EnvioDid =
 /** Consulta autenticada de un video que ya tiene identificador de D-ID. */
 export type EstadoDid = z.infer<typeof estado>;
 
-/** Tema del fondo, según el guion: producto, temporada o campaña, o la marca en general. */
-export type TemaFondo = "producto" | "temporada" | "marca";
-
-/** Estilo de un video: fondo por tema y expresión animada para promociones y lanzamientos. */
-export type EstiloVideo = { tema: TemaFondo; animado: boolean };
+/** Estilo de un video: fondo del catálogo y expresión animada para promociones y lanzamientos. */
+export type EstiloVideo = { fondo: FondoPresentadora; animado: boolean };
 
 /** Perfil fijo seleccionado por el operador en los secretos de Supabase. */
 export type PerfilDid =
@@ -40,7 +38,7 @@ export type PerfilDid =
 			voz: string;
 			modeloVoz: string;
 			/**
-			 * Carpeta HTTPS con fondo-presentadora-{tema}.jpg (1920 × 1080); sin
+			 * Carpeta HTTPS con fondo-presentadora-{fondo}.jpg (1920 × 1080); sin
 			 * ella D-ID usa su fondo liso.
 			 */
 			fondos?: string;
@@ -71,7 +69,7 @@ export function crearProveedorDid(config: {
 								background: {
 									type: "image_url",
 									value: new URL(
-										`fondo-presentadora-${estilo.tema}.jpg`,
+										`fondo-presentadora-${estilo.fondo}.jpg`,
 										perfil.fondos,
 									).href,
 								},
@@ -88,7 +86,7 @@ export function crearProveedorDid(config: {
 	return {
 		async generar(
 			dialogo: string,
-			estilo: EstiloVideo = { tema: "marca", animado: false },
+			estilo: EstiloVideo = { fondo: "cafeteria", animado: false },
 		): Promise<EnvioDid> {
 			try {
 				const respuesta = await pedir(`${API_DID}/${recurso}`, {

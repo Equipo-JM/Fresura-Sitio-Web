@@ -82,17 +82,13 @@ const entregaValida = z.object({ ok: z.literal(true) });
 type InstruccionEntregada = z.infer<typeof esquemaInstruccionGuion>;
 
 /**
- * Fondo por tema y expresión según la instrucción del guion: un producto lleva
- * el fondo de producto; una campaña, el de temporada; lo demás, el de marca.
- * Promociones y lanzamientos usan la expresión animada si está configurada.
+ * Fondo y expresión según la instrucción del guion. Usa el fondo que eligió el
+ * agente; si no eligió (guiones anteriores), la cafetería, que sirve casi
+ * siempre. Promociones y lanzamientos usan la expresión animada si está configurada.
  */
 export function estiloVideo(instruccion: InstruccionEntregada): EstiloVideo {
 	return {
-		tema: instruccion.producto_id
-			? "producto"
-			: instruccion.campana
-				? "temporada"
-				: "marca",
+		fondo: instruccion.fondo ?? "cafeteria",
 		animado:
 			instruccion.objetivo === "promocion" ||
 			instruccion.objetivo === "lanzamiento",

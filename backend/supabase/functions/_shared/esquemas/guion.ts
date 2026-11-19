@@ -12,10 +12,27 @@ export const DURACIONES_VIDEO = [15, 30, 60] as const;
 export type DuracionVideo = (typeof DURACIONES_VIDEO)[number];
 
 /**
+ * Fondos reales para el video de la presentadora en D-ID
+ * (`/marca/fondo-presentadora-{clave}.jpg`). `cafeteria` es el general.
+ */
+export const FONDOS_PRESENTADORA = [
+	"cafeteria",
+	"vitrina",
+	"fresas",
+	"festivo",
+	"flores",
+] as const;
+
+/** Clave de un fondo de la presentadora. */
+export type FondoPresentadora = (typeof FONDOS_PRESENTADORA)[number];
+
+/**
  * Instrucción de un guion guardado o entregado por el chat.
- * Un producto nulo representa un tema general.
+ * Un producto nulo representa un tema general. `fondo` es opcional: lo elige
+ * el agente para el video de la presentadora; los guiones anteriores no lo traen.
  */
 export const esquemaInstruccionGuion = z.strictObject({
+	fondo: z.enum(FONDOS_PRESENTADORA).nullable().optional(),
 	producto_id: z.string().min(1).max(80).nullable(),
 	campana: z.string().trim().max(120).nullable(),
 	objetivo: z.enum([

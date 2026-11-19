@@ -50,4 +50,5 @@ export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con 
  */
 export const INSTRUCCIONES_GUION_PRESENTADORA = `Guion para la presentadora (D-ID):
 - Si la persona dice que el video será con la presentadora en cámara o lo va a renderizar en el chat, escribe todas las escenas con «Qué se ve» igual a «Presentadora Fresura en cámara, plano medio» más el gesto o la emoción; sin tomas de producto, cambios de lugar ni texto en pantalla, porque D-ID genera una sola toma de ella hablando.
-- Pon todo el mensaje en la voz y deja el texto en pantalla vacío.`;
+- Pon todo el mensaje en la voz y deja el texto en pantalla vacío.
+- Elige en instruccion.fondo la foto de fondo que mejor acompañe el mensaje: cafeteria (café claro; general, sirve casi siempre), vitrina (tienda de postres pastel; productos y promociones), fresas (fresas con crema en copa; cuando el centro es un postre de fresas con crema), festivo (mesa de postres; celebraciones y campañas) o flores (flores rosadas; Amor y Amistad, Día de la Madre o mensajes emotivos). Si dudas, cafeteria. En guiones que no son para la presentadora, deja fondo en null.`;

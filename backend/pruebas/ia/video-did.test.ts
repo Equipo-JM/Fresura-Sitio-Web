@@ -277,7 +277,7 @@ describe("video de Fresura con D-ID", () => {
 		expect(pedir).toHaveBeenCalledTimes(2);
 		expect(crearModelo).not.toHaveBeenCalled();
 	});
-	it("elige el fondo por tema y la expresión animada según la instrucción del guion", () => {
+	it("usa el fondo que eligió el agente, la cafetería si no eligió, y la expresión animada en promociones", () => {
 		const base = {
 			producto_id: null,
 			campana: null,
@@ -286,13 +286,9 @@ describe("video de Fresura con D-ID", () => {
 			red: "tiktok",
 			duracion_s: 15,
 		} as const;
-		expect(estiloVideo(base)).toEqual({ tema: "marca", animado: false });
-		expect(estiloVideo({ ...base, producto_id: "fresas" }).tema).toBe(
-			"producto",
-		);
-		expect(estiloVideo({ ...base, campana: "Amor y amistad" }).tema).toBe(
-			"temporada",
-		);
+		expect(estiloVideo(base)).toEqual({ fondo: "cafeteria", animado: false });
+		expect(estiloVideo({ ...base, fondo: null }).fondo).toBe("cafeteria");
+		expect(estiloVideo({ ...base, fondo: "flores" }).fondo).toBe("flores");
 		expect(estiloVideo({ ...base, objetivo: "promocion" }).animado).toBe(true);
 	});
 	it("envía fondo y expresión del estilo solo si están configurados en el perfil Expressive", async () => {
@@ -314,9 +310,9 @@ describe("video de Fresura con D-ID", () => {
 				sentimientoAnimado: "snt_animado",
 			},
 			pedir,
-		}).generar("Hola", { tema: "producto", animado: true });
+		}).generar("Hola", { fondo: "vitrina", animado: true });
 		await crearProveedorDid({ clave: "c", perfil, pedir }).generar("Hola", {
-			tema: "producto",
+			fondo: "vitrina",
 			animado: true,
 		});
 		const cuerpos = pedir.mock.calls.map(([, o]) =>
@@ -326,7 +322,7 @@ describe("video de Fresura con D-ID", () => {
 			sentiment_id: "snt_animado",
 			background: {
 				type: "image_url",
-				value: "https://fresura.example/marca/fondo-presentadora-producto.jpg",
+				value: "https://fresura.example/marca/fondo-presentadora-vitrina.jpg",
 			},
 		});
 		expect(cuerpos[1].sentiment_id).toBe("snt_amable");
@@ -351,9 +347,9 @@ describe("video de Fresura con D-ID", () => {
 		expect(JSON.parse(String(opciones?.body))).toMatchObject({
 			avatar_id: "avatar@de-prueba",
 			sentiment_id: "snt_ficticio",
-			// El guion de prueba no tiene producto ni campaña: fondo de marca.
+			// El guion de prueba no eligió fondo: se usa la cafetería.
 			background: {
-				value: "https://fresura.example/marca/fondo-presentadora-marca.jpg",
+				value: "https://fresura.example/marca/fondo-presentadora-cafeteria.jpg",
 			},
 			script: {
 				provider: {

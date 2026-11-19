@@ -99,6 +99,7 @@ describe("piezas de contenido del agente", () => {
 			"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain("«Prompt para Canva IA»");
+		expect(INSTRUCCIONES_AGENTE).toContain("Elige en instruccion.fondo");
 	});
 
 	it("entrega piezas válidas y rechaza precios no publicados salvo en una revisión", async () => {
