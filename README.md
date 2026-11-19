@@ -62,7 +62,7 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 | `backend/supabase/functions/_shared/`          | Código común de las funciones: esqueleto de la petición, acceso de administrador, variables y respuestas                                   |
 | `backend/supabase/functions/panel/`            | Función `panel`: publica el borrador validado con control de revisión y restaura la versión anterior                                       |
 | `backend/supabase/functions/ia/`               | Función `ia` (agente de IA): `index.ts` solo une el entorno, el proveedor y las rutas                                                      |
-| `backend/supabase/functions/ia/skills/`        | Una skill por ruta: `chat.ts` (`POST /chat`), `guion.ts` (`POST /guion`) y `prompt-video.ts` (`POST /prompt-video`), con sus instrucciones |
+| `backend/supabase/functions/ia/skills/`        | Una skill por ruta: `chat.ts` (`POST /chat`), `video-did.ts` (`POST /estado-video`), `guion.ts` (`POST /guion`) y `prompt-video.ts` (`POST /prompt-video`), con sus instrucciones |
 | `backend/supabase/functions/ia/proveedor/`     | Llamada a Gemini (`gemini.ts`) y cadena de modelos con reintento, respaldo y errores (`generar.ts`)                                        |
 | `backend/supabase/functions/ia/agente/`        | Agente conversacional (ADR-002): herramientas de solo lectura, validadores contra lo publicado, memoria con RLS y definición con el AI SDK |
 | `backend/supabase/migrations/`                 | Tablas, permisos (RLS), bucket de fotos y semilla del contenido                                                                            |
@@ -155,7 +155,7 @@ npm run functions:deploy -- panel
 
 ## Render de Presentadora Fresura con D-ID
 
-El administrador usa «crear video», «confirmar video» y «estado del video» en el mismo chat. La Edge Function `ia` envía únicamente la voz del último guion entregado a D-ID, con el avatar y la voz fijos que se configuren. La generación empieza después de la confirmación. Para probar, basta un guion de unos 15 segundos.
+El administrador usa «crear video» y «confirmar video» en el mismo chat. Después de confirmar, el panel consulta `POST /estado-video` cada 15 s, hasta unos 10 minutos, y muestra **Abrir video** cuando D-ID termina; «estado del video» queda como consulta manual. La Edge Function `ia` envía únicamente la voz del último guion entregado a D-ID, con el avatar y la voz fijos que se configuren. La generación empieza después de la confirmación. Para probar, basta un guion de unos 15 segundos.
 
 1. En el proyecto Supabase de prueba, revisa y aplica la migración `20261118210000_videos_agente_did.sql` con `npm run db:push -- --dry-run` y `npm run db:push`. La tabla solo permite acceso desde el servidor con la clave de servicio.
 2. En **D-ID Studio → Account Settings**, crea una clave de API y verifica el cupo de la prueba. En **Supabase → Edge Functions → Secrets**, configura:

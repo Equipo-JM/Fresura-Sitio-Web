@@ -1,11 +1,23 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModelMessage } from "ai";
 import { z } from "zod";
-import { ENLACE_VIDEO_DID } from "../../_shared/esquemas/chat.ts";
+import {
+	AVISO_VIDEO_EN_CURSO,
+	ENLACE_VIDEO_DID,
+	esquemaEstadoVideo,
+} from "../../_shared/esquemas/chat.ts";
 import {
 	crearEsquemaGuion,
 	esquemaInstruccionGuion,
 } from "../../_shared/esquemas/guion.ts";
+import {
+	leerCuerpoJson,
+	responderCuerpoInvalido,
+	responderError,
+	responderJson,
+} from "../../_shared/http.ts";
+import type { ManejadorRuta } from "../../_shared/servidor.ts";
+import { guardarMensajes, leerConversacion } from "../agente/memoria.ts";
 import type { crearProveedorDid } from "../proveedor/did.ts";
 
 /** Dependencias privadas. El navegador nunca recibe la configuración de D-ID. */
@@ -109,10 +121,8 @@ const INCIERTO =
 	"No pude confirmar si D-ID recibió el video. Revisa tus creaciones en D-ID antes de volver a solicitarlo.";
 const ESTADOS: Record<Trabajo["estado"], string> = {
 	pendiente: CONFIRMAR,
-	enviando:
-		"Estoy enviando el video a D-ID. Escribe «estado del video» para consultar.",
-	enviado:
-		"El video ya se envió a D-ID. Escribe «estado del video» para consultar.",
+	enviando: `Estoy enviando el video a D-ID. ${AVISO_VIDEO_EN_CURSO}`,
+	enviado: `El video ya se envió a D-ID. ${AVISO_VIDEO_EN_CURSO}`,
 	rechazado:
 		"D-ID rechazó el envío. Tras revisar la configuración o el cupo, escribe «crear video» para preparar otro intento.",
 	indeterminado: INCIERTO,
@@ -126,6 +136,124 @@ function describirTrabajo(trabajo: Trabajo): string {
 	)
 		return INCIERTO;
 	return ESTADOS[trabajo.estado];
+}
+
+const SIN_SOLICITUD =
+	"Todavía no hay una solicitud en esta conversación. Escribe «crear video» para empezar.";
+
+/** Resultado de consultar un video: `preparando` es el único estado que pide volver a consultar. */
+export type EstadoVideo = {
+	estado: "preparando" | "listo" | "detenido";
+	mensaje: string;
+};
+
+async function leerUltimoTrabajo(video: VideoDid, conversacionId: string) {
+	const { data, error } = await video
+		.cliente()
+		.from("agente_videos")
+		.select(COLUMNAS)
+		.eq("conversacion_id", conversacionId)
+		.order("creado_en", { ascending: false })
+		.order("id", { ascending: false })
+		.limit(1)
+		.maybeSingle();
+	if (error) throw new Error("video_did_lectura");
+	return leerTrabajo(data);
+}
+
+async function consultarTrabajo(
+	actual: Trabajo,
+	video: VideoDid,
+): Promise<EstadoVideo> {
+	if (!actual.did_id || !actual.did_recurso) {
+		const mensaje = describirTrabajo(actual);
+		// Solo un envío reciente sigue en curso; pendiente espera la confirmación
+		// de la persona y los demás estados ya no cambian solos.
+		return {
+			estado: mensaje === ESTADOS.enviando ? "preparando" : "detenido",
+			mensaje,
+		};
+	}
+	const consulta = await video.proveedor.consultar(
+		actual.did_recurso,
+		actual.did_id,
+	);
+	// Un fallo al consultar no afecta el render: se vuelve a intentar.
+	if (!consulta)
+		return {
+			estado: "preparando",
+			mensaje: `No pude consultar D-ID en este momento. ${AVISO_VIDEO_EN_CURSO}`,
+		};
+	if (consulta.status === "done" && consulta.result_url)
+		return {
+			estado: "listo",
+			mensaje: `${ENLACE_VIDEO_DID}\n${consulta.result_url}`,
+		};
+	if (["error", "failed", "rejected"].includes(consulta.status))
+		return {
+			estado: "detenido",
+			mensaje:
+				"D-ID informó un error de renderizado. Revisa el trabajo en tu cuenta antes de pedir otro video.",
+		};
+	return {
+		estado: "preparando",
+		mensaje: `D-ID todavía está preparando el video. ${AVISO_VIDEO_EN_CURSO}`,
+	};
+}
+
+/** Consulta el último video de la conversación sin escribir en ella. */
+export async function consultarVideoDid(
+	conversacionId: string,
+	video?: VideoDid,
+): Promise<EstadoVideo> {
+	if (!video)
+		return {
+			estado: "detenido",
+			mensaje: "D-ID todavía no está configurado para Fresura.",
+		};
+	const actual = await leerUltimoTrabajo(video, conversacionId);
+	if (!actual) return { estado: "detenido", mensaje: SIN_SOLICITUD };
+	return consultarTrabajo(actual, video);
+}
+
+/**
+ * POST /estado-video: el panel lo llama solo mientras un video está en curso.
+ * Con `listo` o `detenido` guarda el mensaje final en la conversación, para que
+ * el historial muestre el resultado y el panel deje de consultar al recargar.
+ */
+export function crearRutaEstadoVideo(opciones: {
+	crearCliente: (jwt: string) => SupabaseClient;
+	videoDid?: VideoDid;
+}): ManejadorRuta {
+	return async ({ peticion, jwt, cors }) => {
+		const cuerpo = await leerCuerpoJson(peticion);
+		if (!cuerpo.valido) return responderCuerpoInvalido(cuerpo.motivo, cors);
+		const entrada = esquemaEstadoVideo.safeParse(cuerpo.datos);
+		if (!entrada.success)
+			return responderError(
+				400,
+				"datos_no_validos",
+				"No se pudo consultar el video.",
+				cors,
+			);
+		const id = entrada.data.conversacion_id;
+		const cliente = opciones.crearCliente(jwt);
+		// La tabla de videos se lee con la clave secreta: el acceso a la
+		// conversación se comprueba antes con RLS y el JWT del administrador.
+		if (!(await leerConversacion(cliente, id)))
+			return responderError(
+				404,
+				"conversacion_no_encontrada",
+				"Esa conversación no existe.",
+				cors,
+			);
+		const resultado = await consultarVideoDid(id, opciones.videoDid);
+		if (resultado.estado !== "preparando")
+			await guardarMensajes(cliente, id, [
+				{ role: "assistant", content: resultado.mensaje },
+			]);
+		return responderJson(200, resultado, cors);
+	};
 }
 
 /** Ejecuta la acción del chat después de validar sesión y acceso a la conversación. */
@@ -173,31 +301,10 @@ export async function procesarVideoDid(
 			? CONFIRMAR
 			: "La solicitud cambió. Escribe «estado del video».";
 	}
-	const { data, error } = await tabla()
-		.select(COLUMNAS)
-		.eq("conversacion_id", conversacionId)
-		.order("creado_en", { ascending: false })
-		.order("id", { ascending: false })
-		.limit(1)
-		.maybeSingle();
-	if (error) throw new Error("video_did_lectura");
-	const actual = leerTrabajo(data);
-	if (!actual)
-		return "Todavía no hay una solicitud en esta conversación. Escribe «crear video» para empezar.";
-	if (accion === "consultar") {
-		if (!actual.did_id || !actual.did_recurso) return describirTrabajo(actual);
-		const consulta = await video.proveedor.consultar(
-			actual.did_recurso,
-			actual.did_id,
-		);
-		if (!consulta)
-			return "No pude consultar D-ID. Vuelve a escribir «estado del video» en un momento.";
-		if (consulta.status === "done" && consulta.result_url)
-			return `${ENLACE_VIDEO_DID}\n${consulta.result_url}`;
-		if (["error", "failed", "rejected"].includes(consulta.status))
-			return "D-ID informó un error de renderizado. Revisa el trabajo en tu cuenta antes de pedir otro video.";
-		return "D-ID todavía está preparando el video. Escribe «estado del video» en un momento.";
-	}
+	const actual = await leerUltimoTrabajo(video, conversacionId);
+	if (!actual) return SIN_SOLICITUD;
+	if (accion === "consultar")
+		return (await consultarTrabajo(actual, video)).mensaje;
 	if (actual.estado !== "pendiente") return describirTrabajo(actual);
 	const reservado = await tabla()
 		.update({ estado: "enviando", confirmado_en: new Date().toISOString() })

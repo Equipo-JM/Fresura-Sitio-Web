@@ -44,3 +44,24 @@ export function tituloConversacion(mensaje: string): string {
 /** Texto que precede al enlace temporal devuelto por D-ID. */
 export const ENLACE_VIDEO_DID =
 	"Tu video de Presentadora Fresura está listo. Este enlace es temporal:";
+
+/**
+ * Cierre de los mensajes de un video en curso. El panel lo busca al final de la
+ * última respuesta para consultar el estado por su cuenta, sin que la persona escriba.
+ */
+export const AVISO_VIDEO_EN_CURSO =
+	"Te muestro el enlace aquí cuando esté listo.";
+
+/** Petición de `POST /estado-video`: consulta el último video de la conversación. */
+export const esquemaEstadoVideo = z.strictObject({
+	conversacion_id: z.uuid(),
+});
+
+/**
+ * Respuesta de `POST /estado-video`. `preparando` pide volver a consultar; con
+ * `listo` o `detenido` el servidor ya guardó `mensaje` en la conversación.
+ */
+export const esquemaRespuestaEstadoVideo = z.object({
+	estado: z.enum(["preparando", "listo", "detenido"]),
+	mensaje: z.string(),
+});

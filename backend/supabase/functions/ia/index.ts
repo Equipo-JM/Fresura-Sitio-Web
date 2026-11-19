@@ -9,6 +9,7 @@ import { datosRegistroFallo } from "./proveedor/generar.ts";
 import { crearRutaChat } from "./skills/chat.ts";
 import { crearRutaGuion } from "./skills/guion.ts";
 import { crearRutaPromptVideo } from "./skills/prompt-video.ts";
+import { crearRutaEstadoVideo } from "./skills/video-did.ts";
 
 // Solo cableado: entorno, proveedor y rutas. Cada ruta es una skill en `skills/`
 // y la llamada a Gemini con su cadena de modelos está en `proveedor/`.
@@ -94,6 +95,10 @@ Deno.serve(
 				claveGemini,
 				videoDid,
 				modeloAgente: entorno.opcional("IA_MODELO_AGENTE") ?? modeloPrincipal,
+			}),
+			"estado-video": crearRutaEstadoVideo({
+				crearCliente: opcionesRuta.crearCliente,
+				videoDid,
 			}),
 			guion: crearRutaGuion(opcionesRuta),
 			"prompt-video": crearRutaPromptVideo(opcionesRuta),
