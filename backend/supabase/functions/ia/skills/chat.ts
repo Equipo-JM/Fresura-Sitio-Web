@@ -81,7 +81,8 @@ function clasificarFallo(error: unknown): ErrorIa {
 
 /**
  * POST /chat (IF-20). El chunk finish lleva messageMetadata.tarjetaGuion =
- * {instruccion, guion} y messageMetadata.aviso = {tipo, mensaje} cuando el texto
+ * {instruccion, guion}, messageMetadata.piezas = las piezas de `entregar_pieza`
+ * y messageMetadata.aviso = {tipo, mensaje} cuando el texto
  * contiene precios o nombres explícitos de sedes no publicados. El panel debe leer ambos en message.metadata.
  * Cada paso del agente pasa al modelo de respaldo si el principal responde 503
  * o cupo agotado, aunque la respuesta ya haya empezado (ver `modeloConRespaldo`).
@@ -192,13 +193,12 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 		const estado: EstadoAgente = {
 			productosConsultados: new Set(),
 		};
-		const herramientas = crearHerramientasAgente(
-			contenido.data,
-			fechaColombia(new Date()),
-			estado,
-		);
+		const hoy = fechaColombia(new Date());
+		const herramientas = crearHerramientasAgente(contenido.data, hoy, estado);
 		const instrucciones = [
 			INSTRUCCIONES_AGENTE,
+			// El calendario y las fechas especiales se cuentan desde hoy en Colombia.
+			`Hoy es ${hoy} (hora de Colombia).`,
 			...(contenido.data.estado === "ejemplo"
 				? [
 						"La versión publicada es de ejemplo. Puedes usarla para la demo. Si el guion se apoya en estos datos, avisa a la persona administradora en el chat para que los verifique antes de usar el guion.",
@@ -312,6 +312,9 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 													guion: entrega.guion,
 												},
 											}
+										: {}),
+									...(estado.piezasEntregadas?.length
+										? { piezas: estado.piezasEntregadas }
 										: {}),
 									...(errores.length
 										? {

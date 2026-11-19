@@ -235,7 +235,7 @@ describe("chat del panel", () => {
 		simular();
 		enviar("2");
 		expect(
-			await screen.findByRole("button", { name: "Guion sobre una sede" }),
+			await screen.findByRole("button", { name: "Publicación para redes" }),
 		).toBeVisible();
 		expect(screen.queryByRole("button", { name: /^2$/ })).toBeNull();
 	});
@@ -530,9 +530,9 @@ describe("chat del panel", () => {
 	});
 	it("ofrece opciones de bienvenida y permite responder con un número por el mismo chat", async () => {
 		const simulado = simular();
-		expect(
-			screen.getByText(/¿Qué quieres mostrar en el video\?/),
-		).toHaveTextContent("2. Una sede");
+		expect(screen.getByText(/¿Qué creamos hoy\?/)).toHaveTextContent(
+			"3. Carrusel para Instagram o Facebook",
+		);
 		simulado.responder(() =>
 			flujo([
 				{ type: "start", messageId: "eleccion" },

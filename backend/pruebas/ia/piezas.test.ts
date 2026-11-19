@@ -1,0 +1,119 @@
+import { describe, expect, it } from "vitest";
+import { esquemaContenido } from "../../supabase/functions/_shared/esquemas/contenido";
+import {
+	erroresPieza,
+	type Pieza,
+	promptPieza,
+} from "../../supabase/functions/_shared/esquemas/pieza";
+import {
+	crearHerramientasAgente,
+	type EstadoAgente,
+	INSTRUCCIONES_AGENTE,
+} from "../../supabase/functions/ia/agente/agente";
+import ejemplo from "../datos/contenido-1.0.1.ejemplo.json";
+
+const opciones = { toolCallId: "1", messages: [], context: {} };
+
+function preparar() {
+	const estado: EstadoAgente = { productosConsultados: new Set() };
+	const contenido = esquemaContenido.parse(structuredClone(ejemplo));
+	return {
+		estado,
+		entregar: crearHerramientasAgente(contenido, "2026-11-19", estado)
+			.entregar_pieza,
+	};
+}
+
+const promptFoto: Pieza = {
+	tipo: "prompt_imagen",
+	titulo: "Vaso de fresas en la mesa",
+	red: "instagram",
+	bloques: [
+		{ etiqueta: "Prompt", texto: "Usa la foto adjunta del producto…" },
+		{ etiqueta: "Cómo usar", texto: "Abre Gemini y adjunta la foto." },
+	],
+};
+
+function carrusel(laminas: number): Pieza {
+	return {
+		tipo: "carrusel",
+		titulo: "Arma tu Fresita",
+		red: "instagram",
+		bloques: [
+			...Array.from({ length: laminas }, (_, i) => ({
+				etiqueta: `Lámina ${i + 1}`,
+				texto: "Título: Tu antojo\nTexto: Elige tu base.\nVisual: vaso.",
+			})),
+			{ etiqueta: "Descripción", texto: "Arma la tuya #Fresura" },
+		],
+	};
+}
+
+describe("piezas de contenido del agente", () => {
+	it("el saludo y las instrucciones cubren cada pieza con su herramienta", () => {
+		for (const texto of [
+			"publicacion",
+			"carrusel (se arma en Canva)",
+			"prompt_imagen (foto con IA en Gemini",
+			"prompt_clip (clips cortos en Google Vids",
+			"prompt_heygen (video por escenas en HeyGen",
+			"Guion para la presentadora (D-ID)",
+			"Si la persona saluda o conversa",
+		])
+			expect(INSTRUCCIONES_AGENTE).toContain(texto);
+	});
+
+	it("aplica los límites de cada tipo", () => {
+		expect(erroresPieza(carrusel(5))).toEqual([]);
+		expect(erroresPieza(carrusel(2)).join(" ")).toContain("de 3 a 10");
+		expect(erroresPieza({ ...carrusel(5), red: null })).toContain(
+			"Indica la red de la publicación.",
+		);
+		expect(
+			erroresPieza({
+				...promptFoto,
+				tipo: "variantes_gancho",
+				bloques: [promptFoto.bloques[0]],
+			})[0],
+		).toContain("entre 2 y 3 bloques");
+	});
+
+	it("copia solo el prompt, sin las indicaciones para la administradora", () => {
+		expect(promptPieza(promptFoto)).toBe("Usa la foto adjunta del producto…");
+	});
+
+	it("entrega piezas válidas y rechaza precios no publicados salvo en una revisión", async () => {
+		const { estado, entregar } = preparar();
+		expect(await entregar.execute?.(promptFoto, opciones)).toEqual({
+			ok: true,
+		});
+		const conPrecio: Pieza = {
+			tipo: "publicacion",
+			titulo: "Promo",
+			red: "tiktok",
+			bloques: [{ etiqueta: "Texto", texto: "Hoy a solo $1.000. ¡Ven!" }],
+		};
+		const rechazo = await entregar.execute?.(conPrecio, opciones);
+		expect(rechazo).toMatchObject({ ok: false });
+		expect(
+			await entregar.execute?.(
+				{
+					...conPrecio,
+					tipo: "revision",
+					red: null,
+					bloques: ["Datos", "Tono de marca", "Recomendación"].map(
+						(etiqueta) => ({
+							etiqueta,
+							texto: "El precio $1.000 no coincide con lo publicado.",
+						}),
+					),
+				},
+				opciones,
+			),
+		).toEqual({ ok: true });
+		expect(estado.piezasEntregadas?.map((p) => p.tipo)).toEqual([
+			"prompt_imagen",
+			"revision",
+		]);
+	});
+});

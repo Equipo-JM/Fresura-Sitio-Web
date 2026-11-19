@@ -10,6 +10,10 @@ import {
 	type Guion,
 	type InstruccionGuion,
 } from "../../../../backend/supabase/functions/_shared/esquemas/guion";
+import {
+	esquemaPieza,
+	type Pieza,
+} from "../../../../backend/supabase/functions/_shared/esquemas/pieza";
 import type { Database } from "../../tipos/database.types";
 
 /** Entrega validada; guardarla sigue siendo una acción explícita de la administradora. */
@@ -17,6 +21,7 @@ export type TarjetaGuion = { instruccion: InstruccionGuion; guion: Guion };
 /** Metadatos enviados al terminar el flujo, nunca texto de herramientas internas. */
 export type MensajeAgente = UIMessage<{
 	tarjetaGuion?: TarjetaGuion;
+	piezas?: Pieza[];
 	aviso?: { tipo: string; mensaje: string };
 }>;
 /** Resumen suficiente para seleccionar una conversación sin cargar sus mensajes. */
@@ -52,6 +57,15 @@ export function leerTarjeta(valor: unknown): TarjetaGuion | undefined {
 		return { instruccion: instruccion.data, guion: guion.data };
 }
 
+/** Valida las piezas del flujo o de la memoria; descarta las que no cumplen el contrato. */
+export function leerPiezas(valor: unknown): Pieza[] {
+	if (!Array.isArray(valor)) return [];
+	return valor.flatMap((pieza) => {
+		const leida = esquemaPieza.safeParse(pieza);
+		return leida.success ? [leida.data] : [];
+	});
+}
+
 /** Une resultados exitosos a su llamada por ID; omite razonamiento, herramientas y archivos. */
 export function convertirHistorial(
 	filas: readonly { id: string; contenido: unknown }[],
@@ -60,6 +74,10 @@ export function convertirHistorial(
 	const llamadas = new Map<
 		string,
 		{ mensaje: MensajeAgente; tarjeta: TarjetaGuion }
+	>();
+	const llamadasPieza = new Map<
+		string,
+		{ mensaje: MensajeAgente; pieza: Pieza }
 	>();
 	for (const fila of filas) {
 		const resultado = modelMessageSchema.safeParse(fila.contenido);
@@ -78,6 +96,33 @@ export function convertirHistorial(
 		};
 		if (modelo.role !== "tool") mensajes.push(mensaje);
 		for (const parte of partes) {
+			if (parte.type === "tool-call" && parte.toolName === "entregar_pieza") {
+				const pieza = esquemaPieza.safeParse(parte.input);
+				if (pieza.success)
+					llamadasPieza.set(parte.toolCallId, { mensaje, pieza: pieza.data });
+			}
+			if (
+				parte.type === "tool-result" &&
+				parte.toolName === "entregar_pieza" &&
+				parte.output.type === "json"
+			) {
+				const valor = parte.output.value;
+				const llamada = llamadasPieza.get(parte.toolCallId);
+				if (
+					llamada &&
+					valor &&
+					typeof valor === "object" &&
+					"ok" in valor &&
+					valor.ok === true
+				)
+					llamada.mensaje.metadata = {
+						...llamada.mensaje.metadata,
+						piezas: [
+							...(llamada.mensaje.metadata?.piezas ?? []),
+							llamada.pieza,
+						],
+					};
+			}
 			if (parte.type === "tool-call" && parte.toolName === "entregar_guion") {
 				const tarjeta = leerTarjeta(parte.input);
 				if (tarjeta) llamadas.set(parte.toolCallId, { mensaje, tarjeta });
@@ -96,11 +141,17 @@ export function convertirHistorial(
 					"ok" in valor &&
 					valor.ok === true
 				)
-					llamada.mensaje.metadata = { tarjetaGuion: llamada.tarjeta };
+					llamada.mensaje.metadata = {
+						...llamada.mensaje.metadata,
+						tarjetaGuion: llamada.tarjeta,
+					};
 			}
 		}
 	}
-	return mensajes.filter((m) => m.parts.length || m.metadata?.tarjetaGuion);
+	return mensajes.filter(
+		(m) =>
+			m.parts.length || m.metadata?.tarjetaGuion || m.metadata?.piezas?.length,
+	);
 }
 
 /** Recupera un tema para conversaciones antiguas guardadas como un número o saludo. */

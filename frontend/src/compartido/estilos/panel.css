@@ -382,6 +382,14 @@
 .agente-copia button {
 	justify-self: start;
 }
+.agente-acciones {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.agente-pieza h4 {
+	margin-block-end: 4px;
+}
 .agente-tarjeta h3 {
 	font-family: "Restora Neue", serif;
 }

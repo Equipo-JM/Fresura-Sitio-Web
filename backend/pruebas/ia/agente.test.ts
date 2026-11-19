@@ -34,6 +34,7 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 	it("expone solo la lista cerrada de herramientas de lectura más la entrega", () => {
 		expect(Object.keys(preparar().h).sort()).toEqual([
 			"entregar_guion",
+			"entregar_pieza",
 			"listar_productos",
 			"ver_negocio",
 			"ver_producto",
