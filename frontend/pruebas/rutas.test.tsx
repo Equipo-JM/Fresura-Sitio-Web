@@ -25,7 +25,9 @@ describe("rutas del sitio", () => {
 			screen.getByRole("heading", { level: 1, name: /política de datos/i }),
 		).toBeInTheDocument();
 		expect(screen.getByText(/está en revisión/i)).toBeInTheDocument();
-		expect(screen.getByText(/este sitio no los guarda/i)).toBeInTheDocument();
+		expect(
+			screen.getByText(/el sitio no guarda tus datos de contacto/i),
+		).toHaveTextContent(/dirección y barrio/);
 	});
 
 	it("muestra en el inicio la presentación leída del contenido", async () => {

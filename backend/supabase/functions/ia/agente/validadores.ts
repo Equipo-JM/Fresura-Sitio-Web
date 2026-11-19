@@ -55,7 +55,7 @@ export function validarTextoContraDatos(
 	const erroresSedes = sedes
 		? [
 				...texto.matchAll(
-					/\b[Ss]ede\s+(?:(?:de|en|del)\s+)?[«“"]?([\p{Lu}][\p{L}\p{N}-]*(?:\s+[\p{Lu}][\p{L}\p{N}-]*)*)/gu,
+					/\b[Ss]ede[ \t]+(?:(?:de|en|del)[ \t]+)?[«“"]?([\p{Lu}][\p{L}\p{N}-]*(?:[ \t]+[\p{Lu}][\p{L}\p{N}-]*)*)/gu,
 				),
 			]
 				.filter(
@@ -78,11 +78,12 @@ export function validarTextoContraDatos(
 	];
 }
 
-/** Valida el guion entregado: que nombre el producto y que sus precios estén publicados. */
+/** Valida el guion entregado: producto cuando aplica, precios y sedes publicados. */
 export function validarGuionContraDatos(
 	guion: Guion,
-	nombreProducto: string,
+	nombreProducto: string | null,
 	precios: ReadonlySet<number>,
+	sedes?: readonly string[],
 ): string[] {
 	const texto = [
 		guion.titulo,
@@ -90,10 +91,14 @@ export function validarGuionContraDatos(
 		...guion.escenas.flatMap((e) => [e.que_se_ve, e.texto_pantalla, e.voz]),
 		guion.llamado_accion,
 		guion.texto_publicacion,
+		guion.musica_sugerida,
 		guion.notas_produccion,
 	].join("\n");
-	const errores = validarTextoContraDatos(texto, precios);
-	if (!nombraPalabra(normalizar(texto), normalizar(nombreProducto))) {
+	const errores = validarTextoContraDatos(texto, precios, sedes);
+	if (
+		nombreProducto &&
+		!nombraPalabra(normalizar(texto), normalizar(nombreProducto))
+	) {
 		errores.unshift(`El guion no nombra el producto «${nombreProducto}».`);
 	}
 	return errores;

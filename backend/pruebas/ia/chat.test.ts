@@ -4,7 +4,6 @@ import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	filasDeMensajes,
-	productosConsultadosEnHistorial,
 	reconstruirMensajes,
 } from "../../supabase/functions/ia/agente/memoria";
 import { crearRutaChat } from "../../supabase/functions/ia/skills/chat";
@@ -80,6 +79,7 @@ function preparar(
 	historial: ModelMessage[] = [],
 ) {
 	const guardados: ReturnType<typeof filasDeMensajes> = [];
+	const titulos: string[] = [];
 	let existe = true;
 	const crearModelo = vi.fn(() => modelo);
 	const ruta = crearRutaChat({
@@ -101,18 +101,29 @@ function preparar(
 							guardados.push(...JSON.parse(String(opciones.body)));
 							return new Response(null, { status: 201 });
 						}
-						if (url.pathname.endsWith("agente_conversaciones"))
-							return Response.json(existe ? { id } : null);
+						if (url.pathname.endsWith("agente_conversaciones")) {
+							if (opciones?.method === "PATCH") {
+								expect(url.searchParams.get("id")).toBe(`eq.${id}`);
+								expect(url.searchParams.get("titulo")).toBe("eq.1");
+								titulos.push(JSON.parse(String(opciones.body)).titulo);
+								return new Response(null, { status: 204 });
+							}
+							return Response.json(existe ? { id, titulo: "1" } : null);
+						}
 						if (url.pathname.endsWith("versiones_contenido"))
 							return Response.json({ json: ejemplo });
-						expect(url.searchParams.get("order")).toBe("creado_en.asc");
-						return Response.json(filasDeMensajes(id, historial));
+						expect(url.searchParams.get("order")).toBe("creado_en.desc");
+						expect(url.searchParams.get("limit")).toBe("41");
+						return Response.json(
+							filasDeMensajes(id, historial).reverse().slice(0, 41),
+						);
 					},
 				},
 			}),
 	});
 	return {
 		guardados,
+		titulos,
 		crearModelo,
 		sinConversacion: () => {
 			existe = false;
@@ -315,8 +326,35 @@ describe("POST /chat", () => {
 		const texto = await (await p.pedir()).text();
 		expect(texto).toContain('"tarjetaGuion":{"instruccion":');
 		expect(p.guardados.filter((f) => f.rol === "herramienta")).toHaveLength(2);
+		expect(p.titulos).toEqual([guionDePrueba().titulo]);
 	});
-	it("precarga fichas de turnos anteriores para entregar", async () => {
+	it("entrega en el flujo una tarjeta sobre una sede sin producto", async () => {
+		const general = { ...instruccion, producto_id: null };
+		const guion = { ...guionDePrueba(), titulo: "Visita la sede U Nacional" };
+		const modelo = new MockLanguageModelV3({
+			doStream: [
+				respuestaHerramienta("ver_sedes", {}, "sede"),
+				respuestaHerramienta(
+					"entregar_guion",
+					{ instruccion: general, guion },
+					"guion",
+				),
+				respuestaTexto(),
+			],
+		});
+		const p = preparar(modelo);
+		const texto = await (
+			await p.pedir({
+				conversacion_id: id,
+				mensaje: "Un video de la sede U Nacional",
+			})
+		).text();
+		expect(texto).toContain('"tarjetaGuion"');
+		expect(texto).toContain('"producto_id":null');
+		expect(texto).toContain("Visita la sede U Nacional");
+		expect(p.titulos).toEqual(["Visita la sede U Nacional"]);
+	});
+	it("exige datos actuales aunque el producto esté en el historial", async () => {
 		const p = preparar(
 			new MockLanguageModelV3({
 				doStream: [
@@ -330,7 +368,7 @@ describe("POST /chat", () => {
 			}),
 			historialProducto(),
 		);
-		expect(await (await p.pedir()).text()).toContain('"tarjetaGuion"');
+		expect(await (await p.pedir()).text()).not.toContain('"tarjetaGuion"');
 	});
 });
 function historialProducto(): ModelMessage[] {
@@ -375,9 +413,6 @@ describe("memoria del SDK", () => {
 			"agente",
 		]);
 		expect(new Set(filas.map((f) => f.creado_en)).size).toBe(4);
-		expect(productosConsultadosEnHistorial(reconstruirMensajes(filas))).toEqual(
-			new Set([instruccion.producto_id]),
-		);
 	});
 	it("descarta del historial filas inválidas, mensajes system y resultados sin llamada", () => {
 		const validos = historialProducto();
@@ -401,22 +436,16 @@ describe("memoria del SDK", () => {
 		];
 		expect(reconstruirMensajes(filas)).toEqual(validos);
 	});
-	it("no acredita llamadas sin resultado ni resultados fallidos", () => {
-		expect(
-			productosConsultadosEnHistorial(historialProducto().slice(0, 1)).size,
-		).toBe(0);
-		const mensajes = historialProducto();
-		mensajes[1] = {
-			role: "tool",
-			content: [
-				{
-					type: "tool-result",
-					toolName: "ver_producto",
-					toolCallId: "a",
-					output: { type: "json", value: { error: "no existe" } },
-				},
-			],
-		};
-		expect(productosConsultadosEnHistorial(mensajes).size).toBe(0);
+	it("envía solo turnos recientes completos al modelo", async () => {
+		const historial: ModelMessage[] = Array.from({ length: 22 }, (_, i) => [
+			{ role: "user" as const, content: `pregunta ${i}` },
+			{ role: "assistant" as const, content: `respuesta ${i}` },
+		]).flat();
+		const modelo = new MockLanguageModelV3({ doStream: respuestaTexto() });
+		await (await preparar(modelo, historial).pedir()).text();
+		const prompt = JSON.stringify(modelo.doStreamCalls[0].prompt);
+		expect(prompt).not.toContain('"text":"pregunta 1"');
+		expect(prompt).toContain('"text":"pregunta 2"');
+		expect(prompt).toContain('"text":"respuesta 21"');
 	});
 });

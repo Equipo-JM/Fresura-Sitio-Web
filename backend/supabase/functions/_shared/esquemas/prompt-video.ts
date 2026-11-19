@@ -41,6 +41,45 @@ export type SalidaPromptVideo =
 	| z.infer<typeof formaAvatar>
 	| z.infer<typeof formaEscenas>;
 
+/** Valida los campos de un prompt guardado, incluidos los guardados con el texto corto. */
+export function leerSalidaPromptVideo(
+	herramienta: HerramientaVideo,
+	valor: unknown,
+) {
+	return (herramienta === "avatar" ? formaAvatar : formaEscenas).safeParse(
+		valor,
+	);
+}
+
+/** Identidad editorial de la presentadora que el equipo reutiliza en cada video. */
+export const PERFIL_AVATAR_FRESURA = `Presentadora Fresura
+Apariencia: mujer adulta, cabello castaño oscuro recogido, blusa crema y delantal rosa suave.
+Voz: femenina, cálida y clara, en español de Colombia, con tuteo y velocidad normal (1×).
+Reutiliza el mismo avatar, look, voz y motor de voz guardados para Fresura en todas las escenas y videos. El estilo y las indicaciones de escena solo ajustan luz, fondo, gesto y encuadre. Lee en voz alta únicamente el texto del avatar.`;
+
+/** Reúne en un solo bloque el estilo y todo el contenido de cada escena. */
+export function textoCompletoPromptVideo(
+	salida: SalidaPromptVideo,
+	duracion: DuracionVideo,
+) {
+	return [
+		`Video vertical 9:16 de ${duracion} segundos`,
+		...(salida.escenas.some((escena) => "texto_avatar" in escena)
+			? [PERFIL_AVATAR_FRESURA]
+			: []),
+		`Estilo general
+${salida.estilo_general}`,
+		...salida.escenas.map((escena) =>
+			"texto_avatar" in escena
+				? `Escena ${escena.orden}
+Texto del avatar: ${escena.texto_avatar}
+Indicaciones: ${escena.indicaciones}`
+				: `Escena ${escena.orden}
+${escena.descripcion}`,
+		),
+	].join("\n\n");
+}
+
 /** Comprueba cantidad y orden de escenas y el límite hablado total de 20 caracteres/s. */
 export function crearEsquemaPromptVideo(
 	herramienta: HerramientaVideo,

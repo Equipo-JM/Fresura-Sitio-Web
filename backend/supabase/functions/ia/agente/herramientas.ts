@@ -5,8 +5,13 @@ import {
 	type InstruccionGuion,
 	maximoCaracteresVoz,
 } from "../../_shared/esquemas/guion.ts";
+import { NOSOTROS } from "../../_shared/presentacion.ts";
 import { datosDelProducto } from "../skills/instrucciones.ts";
-import { preciosDelProducto, validarGuionContraDatos } from "./validadores.ts";
+import {
+	preciosDelProducto,
+	preciosPublicados,
+	validarGuionContraDatos,
+} from "./validadores.ts";
 
 /**
  * Lógica de las herramientas del agente conversacional (DT-01, 25.6): funciones
@@ -57,11 +62,21 @@ export function verProducto(
 	productoId: string,
 	hoy: string,
 ) {
-	return (
-		datosDelProducto(contenido, productoId, hoy) ?? {
-			error: "Ese producto no existe o no está vigente. Usa listar_productos.",
-		}
+	const producto = contenido.productos.find(
+		(p) => p.id === productoId && p.vigente,
 	);
+	const ficha = datosDelProducto(contenido, productoId, hoy);
+	if (!producto || !ficha)
+		return {
+			error: "Ese producto no existe o no está vigente. Usa listar_productos.",
+		};
+	const { opciones: _, ...datos } = ficha;
+	return {
+		...datos,
+		destacado: producto.destacado,
+		foto_alt: producto.imagen.alt,
+		opciones: producto.grupos_opciones,
+	};
 }
 
 /**
@@ -95,20 +110,31 @@ export function verSedes(contenido: Contenido) {
 		direccion: s.direccion,
 		horarios: s.horarios,
 		atiende_pedidos: s.atiende_pedidos,
+		radio_domicilio_km: s.radio_domicilio_km,
 	}));
 }
 
-/** Título y texto de presentación del negocio. */
+/** Datos comerciales y de ayuda que el sitio pone a disposición del público. */
 export function verNegocio(contenido: Contenido) {
-	// Campos elegidos uno por uno: un campo nuevo del contrato no llega al modelo por accidente.
-	const { titulo, texto } = contenido.negocio.presentacion;
-	return { titulo, texto };
+	const { presentacion, whatsapp, redes } = contenido.negocio;
+	const { mostrar, calificacion, numero_opiniones, fecha_corte } =
+		contenido.opiniones;
+	return {
+		estado_contenido: contenido.estado,
+		presentacion,
+		nosotros: NOSOTROS,
+		whatsapp,
+		redes,
+		categorias: contenido.categorias,
+		preguntas_frecuentes: contenido.preguntas_frecuentes,
+		opiniones: mostrar ? { calificacion, numero_opiniones, fecha_corte } : null,
+	};
 }
 
 /** Lo que `entregarGuion` necesita saber de la conversación en curso. */
 export type ContextoEntrega = {
 	contenido: Contenido;
-	/** Ids que el agente consultó con `ver_producto` en este turno o antes. */
+	/** Ids que el agente consultó con `ver_producto` en este turno. */
 	productosConsultados: ReadonlySet<string>;
 };
 
@@ -119,29 +145,31 @@ export type ResultadoEntrega =
 
 /**
  * Valida el guion que entrega el agente. Exige haber consultado la ficha del
- * producto (NT-12) y reúne todos los errores (tiempos, máximo de voz, producto y
+ * producto cuando el guion tiene uno y reúne todos los errores (tiempos, máximo de voz, producto y
  * precios) para que el agente los corrija de una vez. No escribe en ninguna tabla.
  */
 export function entregarGuion(
 	{ instruccion, guion }: { instruccion: InstruccionGuion; guion: Guion },
 	{ contenido, productosConsultados }: ContextoEntrega,
 ): ResultadoEntrega {
-	if (!productosConsultados.has(instruccion.producto_id)) {
-		return {
-			ok: false,
-			errores: [
-				`Antes de entregar, consulta el producto ${instruccion.producto_id} con ver_producto.`,
-			],
-		};
-	}
-	const producto = contenido.productos.find(
-		(p) => p.id === instruccion.producto_id && p.vigente,
-	);
-	if (!producto) {
+	const id = instruccion.producto_id;
+	const producto =
+		id === null
+			? undefined
+			: contenido.productos.find((p) => p.id === id && p.vigente);
+	if (id !== null && !producto) {
 		return {
 			ok: false,
 			errores: [
 				"Ese producto no existe o no está vigente. Usa listar_productos.",
+			],
+		};
+	}
+	if (id !== null && !productosConsultados.has(id)) {
+		return {
+			ok: false,
+			errores: [
+				`Antes de entregar, consulta el producto ${id} con ver_producto.`,
 			],
 		};
 	}
@@ -163,8 +191,9 @@ export function entregarGuion(
 	errores.push(
 		...validarGuionContraDatos(
 			guion,
-			producto.nombre,
-			preciosDelProducto(producto),
+			producto?.nombre ?? null,
+			producto ? preciosDelProducto(producto) : preciosPublicados(contenido),
+			contenido.negocio.sedes.map((sede) => sede.nombre),
 		),
 	);
 	return errores.length > 0

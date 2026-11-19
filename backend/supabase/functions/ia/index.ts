@@ -3,6 +3,7 @@ import { type ConjuntoClaves, crearVerificadorJwt } from "../_shared/acceso.ts";
 import { crearLectorEntorno } from "../_shared/entorno.ts";
 import { leerOrigenesPermitidos } from "../_shared/http.ts";
 import { crearServidor } from "../_shared/servidor.ts";
+import { crearProveedorDid, type PerfilDid } from "./proveedor/did.ts";
 import { crearLlamadaGemini } from "./proveedor/gemini.ts";
 import { datosRegistroFallo } from "./proveedor/generar.ts";
 import { crearRutaChat } from "./skills/chat.ts";
@@ -21,6 +22,45 @@ const claveGemini = entorno.obligatoria("GEMINI_API_KEY");
 const llamarGemini = crearLlamadaGemini(claveGemini);
 
 const opcionesAuth = { persistSession: false, autoRefreshToken: false };
+
+const claveDid = entorno.opcional("DID_API_KEY");
+const imagenDid = entorno.opcional("DID_AVATAR_IMAGE_URL");
+const vozDid = entorno.opcional("DID_VOICE_ID");
+const avatarDid = entorno.opcional("DID_AVATAR_ID");
+const sentimientoDid = entorno.opcional("DID_SENTIMENT_ID");
+const modeloVozDid = entorno.opcional("DID_VOICE_MODEL_ID");
+
+let perfilDid: PerfilDid | undefined;
+if (avatarDid || sentimientoDid || modeloVozDid) {
+	if (avatarDid && sentimientoDid && vozDid && modeloVozDid)
+		perfilDid = {
+			tipo: "expresivo",
+			avatar: avatarDid,
+			sentimiento: sentimientoDid,
+			voz: vozDid,
+			modeloVoz: modeloVozDid,
+		};
+} else if (
+	imagenDid &&
+	vozDid &&
+	URL.canParse(imagenDid) &&
+	new URL(imagenDid).protocol === "https:"
+) {
+	perfilDid = { tipo: "foto", imagen: imagenDid, voz: vozDid };
+}
+
+const videoDid =
+	claveDid && perfilDid
+		? {
+				cliente: () =>
+					createClient(
+						urlSupabase,
+						entorno.clavePorDefecto("SUPABASE_SECRET_KEYS"),
+						{ auth: opcionesAuth },
+					),
+				proveedor: crearProveedorDid({ clave: claveDid, perfil: perfilDid }),
+			}
+		: undefined;
 
 // Ambas rutas usan el JWT del administrador para que las lecturas y escrituras apliquen RLS.
 const opcionesRuta = {
@@ -52,6 +92,7 @@ Deno.serve(
 			chat: crearRutaChat({
 				...opcionesRuta,
 				claveGemini,
+				videoDid,
 				modeloAgente: entorno.opcional("IA_MODELO_AGENTE") ?? modeloPrincipal,
 			}),
 			guion: crearRutaGuion(opcionesRuta),

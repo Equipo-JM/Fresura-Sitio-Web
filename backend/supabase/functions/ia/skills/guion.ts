@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { esquemaContenido } from "../../_shared/esquemas/contenido.ts";
-import { esquemaInstruccionGuion } from "../../_shared/esquemas/guion.ts";
+import { esquemaInstruccionGuionProducto } from "../../_shared/esquemas/guion.ts";
 import {
 	leerCuerpoJson,
 	responderCuerpoInvalido,
@@ -39,7 +39,7 @@ export function crearRutaGuion(opciones: OpcionesRutaGuion): ManejadorRuta {
 		const cuerpo = await leerCuerpoJson(peticion);
 		if (!cuerpo.valido) return responderCuerpoInvalido(cuerpo.motivo, cors);
 
-		const instruccion = esquemaInstruccionGuion.safeParse(cuerpo.datos);
+		const instruccion = esquemaInstruccionGuionProducto.safeParse(cuerpo.datos);
 		if (!instruccion.success) {
 			return responderError(
 				400,

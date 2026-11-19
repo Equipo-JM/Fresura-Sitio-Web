@@ -1,27 +1,87 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+	ENLACE_VIDEO_DID,
+	INICIO_CHAT,
+} from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import type { Database } from "../../tipos/database.types";
-import { EditorGuion } from "../guiones/EditorGuion";
-import type { GuionGuardado } from "../guiones/servicioGuiones";
-import { leerTarjeta } from "./servicioConversaciones";
-import { useBorradoresAgente } from "./useBorradoresAgente";
+import { cuerpoGuion, leerTarjeta } from "./servicioConversaciones";
 import { useChatAgente } from "./useChatAgente";
 
-/** Chat accesible con historial y guardado explícito; el formulario sigue disponible como respaldo. */
-export function ChatAgente({
-	cliente,
-	abrirGuion,
-	usarFormulario,
-	productos,
-}: {
-	cliente: SupabaseClient<Database>;
-	abrirGuion: (fila: GuionGuardado) => void;
-	usarFormulario: () => void;
-	productos: { id: string; nombre: string }[];
-}) {
+function TextoAgente({ texto }: { texto: string }) {
+	const prefijo = `${ENLACE_VIDEO_DID}\n`;
+	const enlace = texto.startsWith(prefijo) ? texto.slice(prefijo.length) : "";
+	if (enlace && URL.canParse(enlace) && new URL(enlace).protocol === "https:") {
+		return (
+			<p>
+				{ENLACE_VIDEO_DID}{" "}
+				<a href={enlace} target="_blank" rel="noreferrer">
+					Abrir video
+					<span className="oculto"> (se abre en otra pestaña)</span>
+				</a>
+			</p>
+		);
+	}
+	return <p className="agente-texto">{texto}</p>;
+}
+
+function CopiarRespuesta({ texto }: { texto: string }) {
+	const [estado, setEstado] = useState<"copiado" | "manual" | null>(null);
+
+	async function copiar() {
+		try {
+			await navigator.clipboard.writeText(texto);
+			setEstado("copiado");
+		} catch {
+			setEstado("manual");
+		}
+	}
+
+	return (
+		<div className="agente-copia">
+			<button
+				className="boton secundario compacto"
+				type="button"
+				onClick={() => void copiar()}
+			>
+				Copiar respuesta completa
+			</button>
+			<div role="status">
+				{estado === "copiado" && "Respuesta copiada."}
+				{estado === "manual" && "Usa la opción Copiar de tu dispositivo."}
+			</div>
+			{estado === "manual" && (
+				<label>
+					Texto completo para copiar
+					<textarea
+						readOnly
+						value={texto}
+						rows={5}
+						ref={(campo) => {
+							campo?.focus();
+							campo?.select();
+						}}
+					/>
+				</label>
+			)}
+		</div>
+	);
+}
+
+/** Chat de guiones con historial y entregas en el propio hilo. */
+export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 	const chat = useChatAgente(cliente);
-	const borradores = useBorradoresAgente(cliente, abrirGuion, productos);
 	const [texto, setTexto] = useState("");
+	const hilo = useRef<HTMLDivElement>(null);
+	const seguirHilo = useRef(true);
+	useEffect(() => {
+		if (
+			(chat.mensajes.length > 0 || chat.ocupado) &&
+			seguirHilo.current &&
+			hilo.current
+		)
+			hilo.current.scrollTop = hilo.current.scrollHeight;
+	}, [chat.mensajes, chat.ocupado]);
 	const [confirmacion, setConfirmacion] = useState<string | null>(null);
 	const ultimo = chat.mensajes.at(-1);
 	const consultando =
@@ -40,6 +100,7 @@ export function ChatAgente({
 		!ultimo.metadata?.tarjetaGuion;
 	function enviar() {
 		if (chat.ocupado || !texto.trim()) return;
+		seguirHilo.current = true;
 		void chat.enviar(texto);
 		setTexto("");
 	}
@@ -47,26 +108,33 @@ export function ChatAgente({
 		<section className="panel-seccion" aria-labelledby="chat-titulo">
 			<h2 id="chat-titulo">Conversar con el agente</h2>
 			<div className="agente-distribucion">
-				<nav aria-label="Conversaciones">
+				<nav className="agente-historial" aria-label="Conversaciones">
+					<h3>Historial</h3>
 					<button
 						className="boton secundario"
 						type="button"
 						disabled={chat.ocupado}
-						onClick={chat.nuevaConversacion}
+						onClick={() => {
+							seguirHilo.current = true;
+							chat.nuevaConversacion();
+						}}
 					>
 						Nueva conversación
 					</button>
-					<ul className="guiones-lista">
-						{chat.conversaciones.map((c) => (
+					<ul className="agente-conversaciones">
+						{chat.historial.filas.map((c) => (
 							<li key={c.id}>
 								<button
-									className="boton-texto"
+									className="boton-texto agente-conversacion"
 									type="button"
 									aria-current={
 										chat.conversacionActiva === c.id ? "true" : undefined
 									}
 									disabled={chat.ocupado}
-									onClick={() => void chat.cambiarConversacion(c.id)}
+									onClick={() => {
+										seguirHilo.current = true;
+										void chat.cambiarConversacion(c.id);
+									}}
 								>
 									{c.titulo}
 								</button>
@@ -80,7 +148,10 @@ export function ChatAgente({
 									Borrar
 								</button>
 								{confirmacion === c.id && (
-									<fieldset aria-label="Confirmar borrado">
+									<fieldset
+										className="agente-confirmar-borrado"
+										aria-label="Confirmar borrado"
+									>
 										<p>
 											¿Borrar esta conversación y sus mensajes? No podrás
 											recuperarlos.
@@ -108,58 +179,105 @@ export function ChatAgente({
 							</li>
 						))}
 					</ul>
+					{(chat.historial.numero > 0 || chat.historial.hayAnteriores) && (
+						<div className="agente-paginacion">
+							<button
+								className="boton-texto"
+								type="button"
+								disabled={chat.ocupado || chat.historial.numero === 0}
+								onClick={() => {
+									setConfirmacion(null);
+									void chat.cambiarPagina(chat.historial.numero - 1);
+								}}
+							>
+								Más recientes
+							</button>
+							<span role="status">Página {chat.historial.numero + 1}</span>
+							<button
+								className="boton-texto"
+								type="button"
+								disabled={chat.ocupado || !chat.historial.hayAnteriores}
+								onClick={() => {
+									setConfirmacion(null);
+									void chat.cambiarPagina(chat.historial.numero + 1);
+								}}
+							>
+								Anteriores
+							</button>
+						</div>
+					)}
+					{chat.errorHistorial && (
+						<div>
+							<p role="alert">{chat.errorHistorial}</p>
+							<button
+								className="boton-texto"
+								type="button"
+								disabled={chat.ocupado}
+								onClick={() => void chat.cambiarPagina(chat.historial.numero)}
+							>
+								Recargar historial
+							</button>
+						</div>
+					)}
 				</nav>
 				<div className="agente-chat">
 					<div
+						className="agente-hilo"
+						ref={hilo}
+						onScroll={({ currentTarget }) => {
+							seguirHilo.current =
+								currentTarget.scrollHeight -
+									currentTarget.scrollTop -
+									currentTarget.clientHeight <
+								48;
+						}}
 						role="log"
 						aria-live="polite"
 						aria-relevant="additions text"
 						aria-label="Mensajes del agente"
 					>
+						{!chat.conversacionActiva && chat.mensajes.length === 0 && (
+							<article className="panel-bloque agente-mensaje">
+								<strong>Agente</strong>
+								<p className="agente-texto">{INICIO_CHAT}</p>
+							</article>
+						)}
 						{chat.mensajes.map((m) => {
 							const tarjeta = leerTarjeta(m.metadata?.tarjetaGuion);
+							const partes = m.parts.filter((parte) => parte.type === "text");
+							const cuerpo = tarjeta ? cuerpoGuion(tarjeta.guion) : "";
+							const ficha = tarjeta
+								? `${tarjeta.instruccion.red} · ${tarjeta.instruccion.duracion_s} segundos`
+								: "";
+							const textoCompleto = [
+								...partes.map((parte) => parte.text),
+								tarjeta?.guion.titulo,
+								ficha,
+								cuerpo,
+							]
+								.filter((parte) => parte?.trim())
+								.join("\n\n");
 							return (
 								<article className="panel-bloque agente-mensaje" key={m.id}>
 									<strong>{m.role === "user" ? "Tú" : "Agente"}</strong>
-									{m.parts
-										.filter((p) => p.type === "text")
-										.map((p) => (
-											<p className="agente-texto" key={p.type + p.text}>
-												{p.text}
-											</p>
-										))}
+									{partes.map((p) => (
+										<TextoAgente key={p.type + p.text} texto={p.text} />
+									))}
 									{m.metadata?.aviso && (
 										<p className="panel-aviso">{m.metadata.aviso.mensaje}</p>
 									)}
 									{tarjeta && (
 										<div className="agente-tarjeta">
 											<h3>{tarjeta.guion.titulo}</h3>
-											<p>
-												{tarjeta.instruccion.red} ·{" "}
-												{tarjeta.instruccion.duracion_s} segundos
-											</p>
-											<details>
-												<summary>Ver escenas y contenido del guion</summary>
-												<EditorGuion
-													guion={tarjeta.guion}
-													cambiar={() => {}}
-													bloqueado
-												/>
-											</details>
-											{borradores.guardados.has(m.id) ? (
-												<p>Guardado como borrador</p>
-											) : (
-												<button
-													className="boton"
-													type="button"
-													disabled={chat.ocupado || borradores.guardando}
-													onClick={() => void borradores.guardar(m.id, tarjeta)}
-												>
-													Guardar como borrador
-												</button>
-											)}
+											<p>{ficha}</p>
+											<p className="agente-texto">{cuerpo}</p>
 										</div>
 									)}
+									{m.role === "assistant" &&
+										textoCompleto &&
+										(!chat.ocupado || m.id !== ultimo?.id) && (
+											<CopiarRespuesta texto={textoCompleto} />
+										)}
 								</article>
 							);
 						})}
@@ -167,7 +285,6 @@ export function ChatAgente({
 							<p>{consultando ? "Consultando datos…" : "Escribiendo…"}</p>
 						)}
 					</div>
-					{borradores.error && <p role="alert">{borradores.error}</p>}
 					{chat.error && (
 						<div className="panel-aviso" role="alert">
 							<p>{chat.error}</p>
@@ -179,25 +296,12 @@ export function ChatAgente({
 							>
 								Intentar de nuevo
 							</button>
-							<button
-								className="boton-texto"
-								type="button"
-								onClick={usarFormulario}
-							>
-								Usar el formulario
-							</button>
 						</div>
 					)}
 					{sinRespuesta && (
-						<p>
-							El agente no pudo completar la respuesta.{" "}
-							<button
-								className="boton-texto"
-								type="button"
-								onClick={usarFormulario}
-							>
-								Usar el formulario
-							</button>
+						<p role="status">
+							El agente no pudo completar la respuesta. Envía otro mensaje para
+							continuar.
 						</p>
 					)}
 					<form
@@ -206,7 +310,9 @@ export function ChatAgente({
 							enviar();
 						}}
 					>
-						<p id="chat-privacidad">No escribas datos personales de clientes</p>
+						<p id="chat-privacidad">
+							Evita incluir datos personales en el chat.
+						</p>
 						<label htmlFor="chat-mensaje">Mensaje para el agente</label>
 						<textarea
 							id="chat-mensaje"

@@ -121,6 +121,7 @@ describe("herramientas de solo lectura del agente (DT-01, 25.6)", () => {
 			direccion: "Calle 45 # 28-10",
 			horarios: contenido.negocio.sedes[0].horarios,
 			atiende_pedidos: true,
+			radio_domicilio_km: 5,
 		});
 		const texto = JSON.stringify(sedes);
 		expect(texto).not.toContain("573001234567");
@@ -129,11 +130,37 @@ describe("herramientas de solo lectura del agente (DT-01, 25.6)", () => {
 
 	it("ver_negocio devuelve la presentación publicada", () => {
 		const contenido = contenidoDePrueba();
-		expect(verNegocio(contenido)).toEqual(contenido.negocio.presentacion);
+		expect(verNegocio(contenido)).toMatchObject({
+			presentacion: contenido.negocio.presentacion,
+			whatsapp: contenido.negocio.whatsapp,
+			redes: contenido.negocio.redes,
+			preguntas_frecuentes: contenido.preguntas_frecuentes,
+		});
 	});
 });
 
 describe("entregar_guion", () => {
+	it("entrega guiones de marca sin producto y verifica los precios y sedes mencionados", () => {
+		const contexto = {
+			contenido: contenidoDePrueba(),
+			productosConsultados: new Set<string>(),
+		};
+		const general = { ...instruccion, producto_id: null };
+		const guion = { ...guionDePrueba(), titulo: "Conoce Fresura" };
+		expect(
+			entregarGuion({ instruccion: general, guion }, contexto),
+		).toMatchObject({ ok: true });
+		const inventado = { ...guion, gancho: "Ven a la sede Inventada por $123" };
+		expect(
+			entregarGuion({ instruccion: general, guion: inventado }, contexto),
+		).toMatchObject({
+			ok: false,
+			errores: [
+				expect.stringContaining("La sede"),
+				expect.stringContaining("$123"),
+			],
+		});
+	});
 	const contenido = contenidoDePrueba();
 
 	it("exige haber consultado la ficha del producto (NT-12)", () => {

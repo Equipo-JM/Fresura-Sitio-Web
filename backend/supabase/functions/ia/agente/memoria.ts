@@ -5,7 +5,7 @@ import { type ModelMessage, modelMessageSchema } from "ai";
 export async function leerConversacion(cliente: SupabaseClient, id: string) {
 	const { data, error } = await cliente
 		.from("agente_conversaciones")
-		.select("id")
+		.select("id,titulo")
 		.eq("id", id)
 		.maybeSingle();
 	if (error) throw new Error("lectura_conversacion");
@@ -44,7 +44,9 @@ export function reconstruirMensajes(
 	return mensajes;
 }
 
-/** Carga en orden cronológico; las escrituras asignan fechas distintas dentro de cada turno. */
+const MAXIMO_FILAS_CONTEXTO = 40;
+
+/** Carga los turnos recientes completos, sin cambiar lo que se guarda en la base. */
 export async function cargarMensajes(
 	cliente: SupabaseClient,
 	id: string,
@@ -53,9 +55,16 @@ export async function cargarMensajes(
 		.from("agente_mensajes")
 		.select("contenido")
 		.eq("conversacion_id", id)
-		.order("creado_en", { ascending: true });
+		.order("creado_en", { ascending: false })
+		.limit(MAXIMO_FILAS_CONTEXTO + 1);
 	if (error) throw new Error("lectura_mensajes");
-	return reconstruirMensajes(data ?? []);
+	const filas = data ?? [];
+	const mensajes = reconstruirMensajes(
+		filas.slice(0, MAXIMO_FILAS_CONTEXTO).reverse(),
+	);
+	if (filas.length <= MAXIMO_FILAS_CONTEXTO) return mensajes;
+	const primerTurno = mensajes.findIndex((mensaje) => mensaje.role === "user");
+	return primerTurno < 0 ? [] : mensajes.slice(primerTurno);
 }
 
 /** Serializa sin perder la estructura del SDK; nunca admite instrucciones system en la memoria. */
@@ -91,43 +100,4 @@ export async function guardarMensajes(
 		.from("agente_mensajes")
 		.insert(filasDeMensajes(id, mensajes));
 	if (error) throw new Error("escritura_mensajes");
-}
-
-/** Solo acredita fichas cuyo resultado exitoso corresponde a una llamada ver_producto del historial. */
-export function productosConsultadosEnHistorial(
-	mensajes: readonly ModelMessage[],
-): Set<string> {
-	const llamadas = new Map<string, string>();
-	const productos = new Set<string>();
-	for (const mensaje of mensajes) {
-		if (typeof mensaje.content === "string") continue;
-		for (const parte of mensaje.content) {
-			if (
-				parte.type === "tool-call" &&
-				parte.toolName === "ver_producto" &&
-				typeof parte.input === "object" &&
-				parte.input !== null &&
-				"producto_id" in parte.input &&
-				typeof parte.input.producto_id === "string"
-			)
-				llamadas.set(parte.toolCallId, parte.input.producto_id);
-			if (
-				parte.type === "tool-result" &&
-				parte.toolName === "ver_producto" &&
-				parte.output.type === "json"
-			) {
-				const valor = parte.output.value;
-				const producto = llamadas.get(parte.toolCallId);
-				if (
-					producto &&
-					typeof valor === "object" &&
-					valor !== null &&
-					!Array.isArray(valor) &&
-					!("error" in valor)
-				)
-					productos.add(producto);
-			}
-		}
-	}
-	return productos;
 }

@@ -294,22 +294,12 @@
 	border: 1px solid var(--texto);
 	border-radius: var(--radio-chico);
 }
-/* Guiones reutiliza superficies, medidas y controles del panel existente. */
-.guiones-formulario,
-.guiones-editor,
-.guiones-editor fieldset,
-.guiones-prompt {
-	display: grid;
-	gap: 16px;
-	max-width: 760px;
-}
+/* Controles del chat de Guiones. */
 .guiones-panel label {
 	display: grid;
 	gap: 8px;
 	min-width: 0;
 }
-.guiones-panel input,
-.guiones-panel select,
 .guiones-panel textarea {
 	width: 100%;
 	min-width: 0;
@@ -324,11 +314,6 @@
 .guiones-panel textarea {
 	min-height: 100px;
 	resize: vertical;
-}
-.guiones-editor fieldset {
-	padding: 16px;
-	border: 1px solid var(--texto);
-	border-radius: var(--radio-chico);
 }
 .panel-editor .campo input,
 .panel-editor .campo textarea,
@@ -358,20 +343,6 @@
 .panel-editor [id^="error-"] {
 	scroll-margin-top: calc(var(--objetivo-tactil) * 3);
 }
-.guiones-editor legend {
-	font-weight: 700;
-}
-.guiones-lista {
-	padding: 0;
-	list-style: none;
-}
-.guiones-lista li {
-	padding-block: 16px;
-	border-bottom: 1px solid var(--color-dust-storm);
-}
-.guiones-lista button {
-	margin: 8px;
-}
 .guiones-panel button {
 	max-width: 100%;
 	white-space: normal;
@@ -379,11 +350,6 @@
 .guiones-panel :is(input, textarea, select, button, a) {
 	scroll-margin-block: 100px;
 }
-.guiones-lista li {
-	content-visibility: auto;
-	contain-intrinsic-size: auto 100px;
-}
-
 /* El chat conserva las superficies y medidas ya usadas en el panel. */
 .agente-distribucion {
 	display: grid;
@@ -393,6 +359,10 @@
 .agente-chat,
 .agente-tarjeta {
 	min-width: 0;
+}
+.agente-hilo {
+	max-block-size: 55dvh;
+	overflow: auto;
 }
 .agente-mensaje {
 	background: var(--color-we-peep);
@@ -405,14 +375,15 @@
 	display: grid;
 	gap: 16px;
 }
+.agente-copia {
+	display: grid;
+	gap: 8px;
+}
+.agente-copia button {
+	justify-self: start;
+}
 .agente-tarjeta h3 {
 	font-family: "Restora Neue", serif;
-}
-.agente-tarjeta details {
-	max-width: 100%;
-}
-.agente-tarjeta .guiones-editor {
-	min-width: 0;
 }
 @media (min-width: 768px) {
 	.agente-distribucion {
@@ -422,6 +393,87 @@
 .agente-chat .panel-aviso {
 	flex-wrap: wrap;
 }
-.agente-tarjeta .guiones-editor fieldset {
+
+.panel-versiones {
+	display: grid;
+	gap: 16px;
+	max-width: 960px;
+}
+.panel-versiones-cabecera {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px 16px;
+}
+.panel-versiones-cabecera {
+	justify-content: space-between;
+	padding-block: 16px;
+}
+.panel-versiones-cabecera h1 {
+	margin: 0;
+}
+.panel-versiones-resumen {
+	display: grid;
+	gap: 24px;
+}
+.panel-versiones-tarjeta {
+	display: grid;
+	justify-items: start;
+	gap: 12px;
+	padding: clamp(16px, 4vw, 32px);
+	border: 1px solid var(--color-porcini);
+	border-radius: var(--radio);
+	background: var(--fondo);
+}
+.panel-versiones-tarjeta h2 {
+	margin: 0 0 4px;
+}
+.panel-versiones-tarjeta .panel-versiones-acciones {
+	margin-block: 0;
+}
+
+.agente-historial {
+	align-self: start;
+	padding: 16px;
+	border: 1px solid var(--color-porcini);
+	border-radius: var(--radio);
+}
+.agente-historial h3 {
+	margin: 0 0 12px;
+}
+.agente-conversaciones {
+	max-block-size: min(38dvh, 320px);
+	margin: 8px 0 0;
+	padding: 4px;
+	list-style: none;
+	overflow: auto;
+}
+.agente-conversaciones li {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 8px;
+	align-items: center;
+	border-bottom: 1px solid var(--color-dust-storm);
+}
+.agente-confirmar-borrado {
+	grid-column: 1 / -1;
 	min-width: 0;
+	margin-block-end: 8px;
+}
+.agente-conversacion {
+	justify-self: start;
+	text-align: start;
+	overflow-wrap: anywhere;
+}
+.agente-conversacion[aria-current="true"] {
+	font-weight: 700;
+	background: var(--color-we-peep);
+}
+.agente-paginacion {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+	margin-block-start: 8px;
+	font-size: var(--texto-chico);
 }

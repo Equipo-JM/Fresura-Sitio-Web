@@ -7,8 +7,8 @@ import {
 	crearEsquemaPromptVideo,
 	esquemaJsonPromptVideo,
 	esquemaPeticionPromptVideo,
-	type HerramientaVideo,
 	type SalidaPromptVideo,
+	textoCompletoPromptVideo,
 } from "../../_shared/esquemas/prompt-video.ts";
 import {
 	leerCuerpoJson,
@@ -87,8 +87,7 @@ export function crearRutaPromptVideo(
 			const prompt = {
 				herramienta,
 				...salida,
-				texto_copiar: textoParaCopiar(
-					herramienta,
+				texto_copiar: textoCompletoPromptVideo(
 					salida,
 					instruccion.data.duracion_s,
 				),
@@ -145,21 +144,4 @@ function noAprobado(cors: Record<string, string>) {
 		"Primero aprueba el guion.",
 		cors,
 	);
-}
-
-function textoParaCopiar(
-	herramienta: HerramientaVideo,
-	salida: SalidaPromptVideo,
-	duracion: number,
-): string {
-	const textos = salida.escenas.map((escena) =>
-		"texto_avatar" in escena ? escena.texto_avatar : escena.descripcion,
-	);
-	return herramienta === "avatar"
-		? textos.join("\n\n")
-		: [
-				`Video vertical 9:16 de ${duracion} segundos`,
-				salida.estilo_general,
-				...textos,
-			].join("\n\n");
 }

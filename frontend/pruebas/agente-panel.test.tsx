@@ -7,12 +7,14 @@ import {
 	waitFor,
 } from "@testing-library/react";
 import { createUIMessageStreamResponse, type UIMessageChunk } from "ai";
+import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ChatAgente } from "../src/panel/agente/ChatAgente";
 import {
-	convertirHistorial,
+	ENLACE_VIDEO_DID,
 	tituloConversacion,
-} from "../src/panel/agente/servicioConversaciones";
+} from "../../backend/supabase/functions/_shared/esquemas/chat";
+import { convertirHistorial } from "../src/panel/agente/servicioConversaciones";
+import { GuionesPanel } from "../src/panel/guiones/GuionesPanel";
 import type { Database } from "../src/tipos/database.types";
 
 const id = "a0a0a0a0-1111-4111-8111-111111111111";
@@ -67,9 +69,15 @@ function respuesta(metadata = {}) {
 		{ type: "finish", finishReason: "stop", messageMetadata: metadata },
 	]);
 }
-function simular(iniciales = false) {
-	let filas = iniciales ? [conversacion] : [];
-	const guardados: unknown[] = [];
+function simular(
+	iniciales: boolean | (typeof conversacion)[] = false,
+	historial: { id: string; contenido: unknown }[] = [],
+) {
+	let filas = Array.isArray(iniciales)
+		? iniciales
+		: iniciales
+			? [conversacion]
+			: [];
 	let token = "token-inicial-ficticio";
 	let responder = () => respuesta();
 	const peticiones: { cuerpo: unknown; autorizacion: string | null }[] = [];
@@ -83,31 +91,29 @@ function simular(iniciales = false) {
 				});
 				return responder();
 			}
-			const cuerpo = opciones?.body
-				? JSON.parse(String(opciones.body))
-				: undefined;
 			if (url.includes("agente_conversaciones")) {
 				if (opciones?.method === "POST") {
-					filas = [conversacion];
-					return Response.json(conversacion);
+					const fila = {
+						...conversacion,
+						titulo: JSON.parse(String(opciones.body)).titulo,
+					};
+					filas = [fila];
+					return Response.json(fila);
 				}
 				if (opciones?.method === "DELETE") {
-					filas = [];
+					const id = new URL(url).searchParams.get("id");
+					filas = filas.filter((fila) => `eq.${fila.id}` !== id);
 					return new Response(null, { status: 204 });
 				}
-				return Response.json(filas);
+				const parametros = new URL(url).searchParams;
+				const desde = Number(parametros.get("offset") ?? "0");
+				const limite = Number(parametros.get("limit") ?? filas.length);
+				return Response.json(filas.slice(desde, desde + limite));
 			}
-			if (url.includes("agente_mensajes")) return Response.json([]);
-			if (url.includes("guiones") && opciones?.method === "POST") {
-				guardados.push(cuerpo);
-				return Response.json({
-					...cuerpo,
-					id: "borrador",
-					creado_en: conversacion.actualizado_en,
-					actualizado_en: conversacion.actualizado_en,
-					creado_por: "admin",
-				});
-			}
+			if (url.includes("agente_mensajes"))
+				return Response.json(
+					url.includes("creado_en.desc") ? [...historial].reverse() : historial,
+				);
 			throw new Error(`Petición inesperada: ${url}`);
 		},
 	);
@@ -130,23 +136,13 @@ function simular(iniciales = false) {
 				ReturnType<typeof cliente.auth.getSession>
 			>,
 	);
-	const abrir = vi.fn();
-	const formulario = vi.fn();
 	render(
-		<div className="panel guiones-panel">
-			<ChatAgente
-				cliente={cliente}
-				abrirGuion={abrir}
-				usarFormulario={formulario}
-				productos={[{ id: "fresas", nombre: "Fresas" }]}
-			/>
-		</div>,
+		<MemoryRouter>
+			<GuionesPanel cliente={cliente} irVersiones={vi.fn()} />
+		</MemoryRouter>,
 	);
 	return {
 		peticiones,
-		abrir,
-		formulario,
-		guardados,
 		fetchSimulado,
 		cambiarToken: () => {
 			token = "token-renovado-ficticio";
@@ -162,7 +158,10 @@ function enviar(texto = "Quiero un guion") {
 	});
 	fireEvent.click(screen.getByRole("button", { name: "Enviar" }));
 }
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+	vi.restoreAllMocks();
+	vi.unstubAllGlobals();
+});
 describe("conversión de memoria", () => {
 	it("muestra solo texto visible de ambos roles", () => {
 		expect(
@@ -232,6 +231,90 @@ describe("conversión de memoria", () => {
 	});
 });
 describe("chat del panel", () => {
+	it("asigna un nombre legible al iniciar con una respuesta numérica", async () => {
+		simular();
+		enviar("2");
+		expect(
+			await screen.findByRole("button", { name: "Guion sobre una sede" }),
+		).toBeVisible();
+		expect(screen.queryByRole("button", { name: /^2$/ })).toBeNull();
+	});
+	it("recupera el título del guion para conversaciones que antes se llamaban 1", async () => {
+		simular(
+			[{ ...conversacion, titulo: "1" }],
+			[
+				{ id: "u", contenido: { role: "user", content: "1" } },
+				{
+					id: "a",
+					contenido: {
+						role: "assistant",
+						content: [
+							{
+								type: "tool-call",
+								toolCallId: "tema",
+								toolName: "entregar_guion",
+								input: tarjeta,
+							},
+						],
+					},
+				},
+				{
+					id: "t",
+					contenido: {
+						role: "tool",
+						content: [
+							{
+								type: "tool-result",
+								toolCallId: "tema",
+								toolName: "entregar_guion",
+								output: { type: "json", value: { ok: true } },
+							},
+						],
+					},
+				},
+			],
+		);
+		const antigua = await screen.findByRole("button", {
+			name: tarjeta.guion.titulo,
+		});
+		fireEvent.click(antigua);
+		expect(
+			await screen.findByRole("heading", { name: tarjeta.guion.titulo }),
+		).toBeVisible();
+		expect(antigua).toHaveAttribute("aria-current", "true");
+	});
+	it("pagina el historial, permite abrir conversaciones anteriores y vuelve si queda una página vacía", async () => {
+		const filas = Array.from({ length: 6 }, (_, i) => ({
+			...conversacion,
+			id: `a0a0a0a0-1111-4111-8111-${String(i).padStart(12, "0")}`,
+			titulo: `Conversación ${i + 1}`,
+		}));
+		simular(filas);
+		const anteriores = await screen.findByRole("button", {
+			name: "Anteriores",
+		});
+		expect(
+			screen.getByRole("button", { name: "Conversación 5" }),
+		).toBeVisible();
+		expect(screen.queryByRole("button", { name: "Conversación 6" })).toBeNull();
+		fireEvent.click(anteriores);
+		const antigua = await screen.findByRole("button", {
+			name: "Conversación 6",
+		});
+		expect(anteriores).toBeDisabled();
+		fireEvent.click(antigua);
+		await waitFor(() =>
+			expect(antigua).toHaveAttribute("aria-current", "true"),
+		);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Borrar Conversación 6" }),
+		);
+		fireEvent.click(screen.getByRole("button", { name: "Confirmar borrado" }));
+		expect(
+			await screen.findByRole("button", { name: "Conversación 1" }),
+		).toBeVisible();
+		expect(screen.queryByRole("button", { name: "Anteriores" })).toBeNull();
+	});
 	it("envía únicamente el contrato y calcula Authorization otra vez en cada envío", async () => {
 		const simulado = simular();
 		enviar();
@@ -342,11 +425,14 @@ describe("chat del panel", () => {
 		);
 	});
 
-	it("muestra tarjeta, aviso y guarda mediante el servicio de guiones para abrir el editor", async () => {
+	it("muestra el guion completo y el aviso dentro del chat, sin acciones de revisión", async () => {
 		const simulado = simular();
 		simulado.responder(() =>
 			respuesta({
-				tarjetaGuion: tarjeta,
+				tarjetaGuion: {
+					...tarjeta,
+					instruccion: { ...tarjeta.instruccion, producto_id: null },
+				},
 				aviso: {
 					tipo: "precio_no_publicado",
 					mensaje: "Revisa los datos no publicados.",
@@ -356,34 +442,127 @@ describe("chat del panel", () => {
 		enviar();
 		expect(
 			await screen.findByRole("heading", { name: "Antojo Fresura" }),
-		).toBeInTheDocument();
-		expect(
-			screen.getByText("Revisa los datos no publicados."),
-		).toBeInTheDocument();
-		await waitFor(() =>
-			expect(
-				screen.getByRole("button", { name: "Guardar como borrador" }),
-			).toBeEnabled(),
+		).toBeVisible();
+		expect(screen.getByText(/Escena 1.*0.*30 s/)).toHaveTextContent(
+			tarjeta.guion.escenas[0].voz,
 		);
-		fireEvent.click(
-			screen.getByRole("button", { name: "Guardar como borrador" }),
-		);
+		expect(screen.getByText("Revisa los datos no publicados.")).toBeVisible();
+		expect(screen.queryByText(/Guiones guardados|Revisar guion/)).toBeNull();
 		expect(
-			await screen.findByText("Guardado como borrador"),
-		).toBeInTheDocument();
-		expect(simulado.guardados).toEqual([
-			{
-				instruccion: { ...tarjeta.instruccion, producto_nombre: "Fresas" },
-				generado: tarjeta.guion,
-				editado: tarjeta.guion,
-				estado: "borrador",
-			},
-		]);
-		expect(simulado.abrir).toHaveBeenCalledWith(
-			expect.objectContaining({ id: "borrador", estado: "borrador" }),
+			screen.queryByRole("button", {
+				name: /Guardar como borrador|Generar prompt|Generar guion/i,
+			}),
+		).toBeNull();
+		expect(
+			simulado.fetchSimulado.mock.calls.every(
+				([url]) => !String(url).includes("/rest/v1/guiones"),
+			),
+		).toBe(true);
+		const copiar = vi.fn().mockResolvedValue(undefined);
+		vi.stubGlobal(
+			"navigator",
+			Object.create(navigator, { clipboard: { value: { writeText: copiar } } }),
+		);
+		const boton = await screen.findByRole("button", {
+			name: "Copiar respuesta completa",
+		});
+		fireEvent.click(boton);
+		expect(await screen.findByText("Respuesta copiada.")).toBeVisible();
+		expect(copiar).toHaveBeenCalledWith(
+			expect.stringContaining("Antojo Fresura"),
+		);
+		expect(copiar).toHaveBeenCalledWith(
+			expect.stringContaining(tarjeta.guion.escenas[0].voz),
+		);
+		expect(copiar).toHaveBeenCalledWith(
+			expect.stringContaining(tarjeta.guion.notas_produccion),
 		);
 	});
-	it("muestra el mensaje JSON de un 503 y ofrece reintentar o usar el formulario", async () => {
+	it("permite copiar un prompt escrito en el chat aunque el navegador bloquee el portapapeles", async () => {
+		const simulado = simular();
+		const prompt =
+			"Video vertical 9:16\nEscena 1: plano medio\nVoz: Conoce Fresura";
+		simulado.responder(() =>
+			flujo([
+				{ type: "start", messageId: "prompt" },
+				{ type: "text-start", id: "texto" },
+				{ type: "text-delta", id: "texto", delta: prompt },
+				{ type: "text-end", id: "texto" },
+				{ type: "finish", finishReason: "stop" },
+			]),
+		);
+		const copiar = vi.fn().mockRejectedValue(new Error("Permiso denegado"));
+		vi.stubGlobal(
+			"navigator",
+			Object.create(navigator, { clipboard: { value: { writeText: copiar } } }),
+		);
+		enviar("Dame las indicaciones para HeyGen");
+		fireEvent.click(
+			await screen.findByRole("button", { name: "Copiar respuesta completa" }),
+		);
+		const campo = await screen.findByRole("textbox", {
+			name: "Texto completo para copiar",
+		});
+		expect(copiar).toHaveBeenCalledWith(prompt);
+		expect(campo).toHaveValue(prompt);
+		expect(campo).toHaveFocus();
+		expect(campo).toHaveProperty("selectionEnd", prompt.length);
+	});
+	it("ofrece opciones de bienvenida y permite responder con un número por el mismo chat", async () => {
+		const simulado = simular();
+		expect(
+			screen.getByText(/¿Qué quieres mostrar en el video\?/),
+		).toHaveTextContent("2. Una sede");
+		simulado.responder(() =>
+			flujo([
+				{ type: "start", messageId: "eleccion" },
+				{ type: "text-start", id: "opciones" },
+				{
+					type: "text-delta",
+					id: "opciones",
+					delta: "¿Qué sede? 1. U Nacional 2. U Javeriana",
+				},
+				{ type: "text-end", id: "opciones" },
+				{ type: "finish", finishReason: "stop" },
+			]),
+		);
+		enviar("2");
+		expect(await screen.findByText(/¿Qué sede/)).toBeVisible();
+		await waitFor(() =>
+			expect(
+				screen.getByRole("button", { name: "Nueva conversación" }),
+			).toBeEnabled(),
+		);
+		simulado.responder(() => respuesta());
+		enviar("1");
+		await screen.findByText("Vamos a preparar tu guion");
+		expect(simulado.peticiones.map((p) => p.cuerpo)).toEqual([
+			{ conversacion_id: id, mensaje: "2" },
+			{ conversacion_id: id, mensaje: "1" },
+		]);
+	});
+	it("ofrece abrir el enlace temporal de D-ID dentro del chat", async () => {
+		const enlace = "https://result.d-id.com/fresura.mp4";
+		simular(
+			[{ ...conversacion, titulo: "Demo con D-ID" }],
+			[
+				{
+					id: "video",
+					contenido: {
+						role: "assistant",
+						content: `${ENLACE_VIDEO_DID}\n${enlace}`,
+					},
+				},
+			],
+		);
+		fireEvent.click(
+			await screen.findByRole("button", { name: "Demo con D-ID" }),
+		);
+		expect(
+			await screen.findByRole("link", { name: /Abrir video/ }),
+		).toHaveAttribute("href", enlace);
+	});
+	it("muestra el mensaje JSON de un 503 y permite reintentar", async () => {
 		const simulado = simular();
 		simulado.responder(() =>
 			Response.json(
@@ -402,8 +581,6 @@ describe("chat del panel", () => {
 		expect(
 			screen.getByRole("button", { name: "Intentar de nuevo" }),
 		).toBeEnabled();
-		fireEvent.click(screen.getByRole("button", { name: "Usar el formulario" }));
-		expect(simulado.formulario).toHaveBeenCalledOnce();
 		simulado.responder(() => respuesta());
 		fireEvent.click(screen.getByRole("button", { name: "Intentar de nuevo" }));
 		expect(
@@ -438,7 +615,7 @@ describe("chat del panel", () => {
 		);
 		expect(confirmar).not.toHaveBeenCalled();
 	});
-	it("ofrece el formulario cuando termina sin texto ni tarjeta", async () => {
+	it("avisa cuando termina sin texto ni tarjeta", async () => {
 		const simulado = simular();
 		simulado.responder(() =>
 			flujo([
@@ -448,7 +625,7 @@ describe("chat del panel", () => {
 		);
 		enviar();
 		expect(
-			await screen.findByRole("button", { name: "Usar el formulario" }),
+			await screen.findByText(/El agente no pudo completar la respuesta/),
 		).toBeInTheDocument();
 	});
 });
