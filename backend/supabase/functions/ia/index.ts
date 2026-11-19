@@ -30,6 +30,9 @@ const vozDid = entorno.opcional("DID_VOICE_ID");
 const avatarDid = entorno.opcional("DID_AVATAR_ID");
 const sentimientoDid = entorno.opcional("DID_SENTIMENT_ID");
 const modeloVozDid = entorno.opcional("DID_VOICE_MODEL_ID");
+const fondoDid = entorno.opcional("DID_BACKGROUND_URL");
+const esUrlHttps = (valor: string | undefined): valor is string =>
+	!!valor && URL.canParse(valor) && new URL(valor).protocol === "https:";
 
 let perfilDid: PerfilDid | undefined;
 if (avatarDid || sentimientoDid || modeloVozDid) {
@@ -40,13 +43,9 @@ if (avatarDid || sentimientoDid || modeloVozDid) {
 			sentimiento: sentimientoDid,
 			voz: vozDid,
 			modeloVoz: modeloVozDid,
+			...(esUrlHttps(fondoDid) ? { fondo: fondoDid } : {}),
 		};
-} else if (
-	imagenDid &&
-	vozDid &&
-	URL.canParse(imagenDid) &&
-	new URL(imagenDid).protocol === "https:"
-) {
+} else if (imagenDid && vozDid && esUrlHttps(imagenDid)) {
 	perfilDid = { tipo: "foto", imagen: imagenDid, voz: vozDid };
 }
 

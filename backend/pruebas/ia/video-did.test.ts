@@ -276,6 +276,30 @@ describe("video de Fresura con D-ID", () => {
 		expect(pedir).toHaveBeenCalledTimes(2);
 		expect(crearModelo).not.toHaveBeenCalled();
 	});
+	it("envía el fondo de marca solo si está configurado en el perfil Expressive", async () => {
+		const pedir = vi.fn<typeof fetch>(async () =>
+			Response.json({ id: "exp_ficticio" }, { status: 201 }),
+		);
+		const perfil = {
+			tipo: "expresivo" as const,
+			avatar: "avatar@de-prueba",
+			sentimiento: "snt_ficticio",
+			voz: "voz-ficticia",
+			modeloVoz: "eleven_flash_v2_5",
+		};
+		const fondo = "https://fresura.example/marca/fondo-presentadora.png";
+		await crearProveedorDid({
+			clave: "c",
+			perfil: { ...perfil, fondo },
+			pedir,
+		}).generar("Hola");
+		await crearProveedorDid({ clave: "c", perfil, pedir }).generar("Hola");
+		const cuerpos = pedir.mock.calls.map(([, o]) =>
+			JSON.parse(String(o?.body)),
+		);
+		expect(cuerpos[0].background).toEqual({ type: "image_url", value: fondo });
+		expect(cuerpos[1]).not.toHaveProperty("background");
+	});
 	it("conserva avatar, sentimiento y voz privada en Expressive y consulta ese mismo recurso", async () => {
 		const { procesar, pedir } = preparar({
 			tipo: "expresivo",

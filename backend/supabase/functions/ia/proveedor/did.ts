@@ -33,6 +33,8 @@ export type PerfilDid =
 			sentimiento: string;
 			voz: string;
 			modeloVoz: string;
+			/** URL HTTPS de la imagen de fondo de marca; sin ella D-ID usa su fondo liso. */
+			fondo?: string;
 	  };
 
 /** Llama a D-ID desde el servidor con el perfil fijo de Fresura. */
@@ -44,9 +46,16 @@ export function crearProveedorDid(config: {
 	const { perfil } = config;
 	const recurso: RecursoDid =
 		perfil.tipo === "expresivo" ? "expressives" : "talks";
+	// Solo /expressives documenta `background`; /talks usa el fondo de la foto.
 	const presentadora =
 		perfil.tipo === "expresivo"
-			? { avatar_id: perfil.avatar, sentiment_id: perfil.sentimiento }
+			? {
+					avatar_id: perfil.avatar,
+					sentiment_id: perfil.sentimiento,
+					...(perfil.fondo
+						? { background: { type: "image_url", value: perfil.fondo } }
+						: {}),
+				}
 			: { source_url: perfil.imagen };
 	const voz =
 		perfil.tipo === "expresivo"
