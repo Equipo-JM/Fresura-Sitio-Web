@@ -1,7 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { useState } from "react";
 import { Link } from "react-router";
 import type { Database } from "../../tipos/database.types";
 import { ChatAgente } from "../agente/ChatAgente";
+import { BibliotecaPanel } from "../biblioteca/BibliotecaPanel";
 /** Acceso al chat de Guiones desde el panel administrativo. */
 export function GuionesPanel({
 	cliente,
@@ -10,6 +12,9 @@ export function GuionesPanel({
 	cliente: SupabaseClient<Database>;
 	irVersiones: () => void;
 }) {
+	const [vista, setVista] = useState<"chat" | "biblioteca">("chat");
+	// La biblioteca se monta de nuevo al abrirla para leer lo recién guardado.
+	const [aperturas, setAperturas] = useState(0);
 	return (
 		<div className="panel guiones-panel">
 			<a className="saltar" href="#guiones">
@@ -53,7 +58,35 @@ export function GuionesPanel({
 				</nav>
 				<main id="guiones" tabIndex={-1}>
 					<h1>Guiones</h1>
-					<ChatAgente cliente={cliente} />
+					<fieldset className="agente-vistas">
+						<legend className="oculto">Vista</legend>
+						<button
+							className={`boton compacto${vista === "chat" ? "" : " secundario"}`}
+							type="button"
+							aria-pressed={vista === "chat"}
+							onClick={() => setVista("chat")}
+						>
+							Chat
+						</button>
+						<button
+							className={`boton compacto${vista === "biblioteca" ? "" : " secundario"}`}
+							type="button"
+							aria-pressed={vista === "biblioteca"}
+							onClick={() => {
+								setVista("biblioteca");
+								setAperturas((n) => n + 1);
+							}}
+						>
+							Biblioteca
+						</button>
+					</fieldset>
+					{/* El chat queda montado para no perder la conversación abierta. */}
+					<div hidden={vista !== "chat"}>
+						<ChatAgente cliente={cliente} />
+					</div>
+					{vista === "biblioteca" && (
+						<BibliotecaPanel key={aperturas} cliente={cliente} />
+					)}
 				</main>
 			</div>
 		</div>

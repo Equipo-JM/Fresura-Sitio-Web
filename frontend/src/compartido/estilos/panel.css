@@ -485,3 +485,19 @@
 	margin-block-start: 8px;
 	font-size: var(--texto-chico);
 }
+.agente-vistas {
+	display: flex;
+	gap: 8px;
+	margin-block: 16px;
+}
+.biblioteca-lista {
+	list-style: none;
+	padding: 0;
+}
+.biblioteca-estado {
+	font-size: 0.875rem;
+}
+.agente-vistas {
+	border: 0;
+	padding: 0;
+}

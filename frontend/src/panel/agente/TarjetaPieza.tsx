@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import {
 	HERRAMIENTA_PIEZA,
 	NOMBRE_PIEZA,
@@ -17,7 +17,14 @@ const REDES = {
  * Pieza entregada por el agente. Si se usa en otra herramienta, ofrece copiar
  * solo el prompt y abrir esa herramienta en otra pestaña con el prompt copiado.
  */
-export function TarjetaPieza({ pieza }: { pieza: Pieza }) {
+export function TarjetaPieza({
+	pieza,
+	acciones,
+}: {
+	pieza: Pieza;
+	/** Acciones extra del contexto, como guardar en la biblioteca. */
+	acciones?: ReactNode;
+}) {
 	const [aviso, setAviso] = useState("");
 	const herramienta = HERRAMIENTA_PIEZA[pieza.tipo];
 
@@ -75,6 +82,7 @@ export function TarjetaPieza({ pieza }: { pieza: Pieza }) {
 						<span className="oculto"> (se abre en otra pestaña)</span>
 					</a>
 				)}
+				{acciones}
 			</div>
 			<div role="status">{aviso}</div>
 		</div>

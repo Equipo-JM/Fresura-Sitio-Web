@@ -81,6 +81,7 @@ function simular(
 	let token = "token-inicial-ficticio";
 	let responder = () => respuesta();
 	const peticiones: { cuerpo: unknown; autorizacion: string | null }[] = [];
+	const guardados: unknown[] = [];
 	const fetchSimulado = vi.fn(
 		async (entrada: RequestInfo | URL, opciones?: RequestInit) => {
 			const url = String(entrada);
@@ -90,6 +91,10 @@ function simular(
 					autorizacion: new Headers(opciones?.headers).get("Authorization"),
 				});
 				return responder();
+			}
+			if (url.includes("biblioteca_piezas")) {
+				guardados.push(JSON.parse(String(opciones?.body)));
+				return new Response(null, { status: 201 });
 			}
 			if (url.includes("agente_conversaciones")) {
 				if (opciones?.method === "POST") {
@@ -143,6 +148,7 @@ function simular(
 	);
 	return {
 		peticiones,
+		guardados,
 		fetchSimulado,
 		cambiarToken: () => {
 			token = "token-renovado-ficticio";
@@ -483,7 +489,7 @@ describe("chat del panel", () => {
 			"POST /functions/v1/ia/chat",
 		]);
 	});
-	it("RF-18: muestra el guion en el chat sin acciones para guardarlo, aprobarlo o descartarlo", async () => {
+	it("RF-18: guardar el guion es una acción explícita y aprobar ocurre en la biblioteca", async () => {
 		const simulado = simular();
 		simulado.responder(() => respuesta({ tarjetaGuion: tarjeta }));
 		enviar();
@@ -491,12 +497,27 @@ describe("chat del panel", () => {
 			await screen.findByRole("heading", { name: tarjeta.guion.titulo }),
 		).toBeVisible();
 		await screen.findByRole("button", { name: "Copiar respuesta completa" });
-
 		for (const rol of ["button", "link", "menuitem"]) {
 			expect(
-				screen.queryAllByRole(rol, { name: /guardar|aprobar|descartar/i }),
+				screen.queryAllByRole(rol, { name: /aprobar|descartar|publicar/i }),
 			).toHaveLength(0);
 		}
+		expect(simulado.guardados).toEqual([]);
+		fireEvent.click(
+			screen.getByRole("button", { name: "Guardar en biblioteca" }),
+		);
+		expect(
+			await screen.findByRole("button", { name: "Guardado en la biblioteca" }),
+		).toBeDisabled();
+		expect(simulado.guardados).toEqual([
+			{
+				tipo: "guion",
+				titulo: tarjeta.guion.titulo,
+				red: "instagram",
+				contenido: tarjeta,
+				conversacion_id: id,
+			},
+		]);
 	});
 	it("permite copiar un prompt escrito en el chat aunque el navegador bloquee el portapapeles", async () => {
 		const simulado = simular();

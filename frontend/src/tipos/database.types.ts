@@ -95,6 +95,53 @@ export type Database = {
 					},
 				];
 			};
+			biblioteca_piezas: {
+				Row: {
+					actualizado_en: string;
+					contenido: Json;
+					conversacion_id: string | null;
+					creado_en: string;
+					creado_por: string;
+					estado: string;
+					id: string;
+					red: string | null;
+					tipo: string;
+					titulo: string;
+				};
+				Insert: {
+					actualizado_en?: string;
+					contenido: Json;
+					conversacion_id?: string | null;
+					creado_en?: string;
+					creado_por?: string;
+					estado?: string;
+					id?: string;
+					red?: string | null;
+					tipo: string;
+					titulo: string;
+				};
+				Update: {
+					actualizado_en?: string;
+					contenido?: Json;
+					conversacion_id?: string | null;
+					creado_en?: string;
+					creado_por?: string;
+					estado?: string;
+					id?: string;
+					red?: string | null;
+					tipo?: string;
+					titulo?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "biblioteca_piezas_conversacion_id_fkey";
+						columns: ["conversacion_id"];
+						isOneToOne: false;
+						referencedRelation: "agente_conversaciones";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			guiones: {
 				Row: {
 					actualizado_en: string;
