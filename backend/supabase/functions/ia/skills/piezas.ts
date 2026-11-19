@@ -26,23 +26,19 @@ export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con 
 - Pide editar la foto real: «Usa la foto adjunta del producto y conserva el vaso, las fresas y la crema tal como están; cambia solo…». Si no hay foto, deja claro que es una imagen de ambientación y no la foto del producto.
 - Nada de texto dentro de la imagen salvo que lo pidan, ni logos inventados, ni precios. En «Cómo usar»: abrir Gemini, adjuntar la foto real si la hay y pegar el prompt.
 
-4. prompt_clip (clips cortos en Google Vids con Veo, de 3 a 15 segundos cada uno):
-- Un bloque por escena: «Escena 1 (5 s)»… En cada uno, en un párrafo: qué se ve, movimiento de cámara (acercamiento lento, paneo, plano cenital), luz, ritmo y formato vertical 9:16. Sin texto en pantalla ni voces: eso se agrega al editar.
-- Si sale de un guion, respeta sus escenas y duraciones. Cierra con «Cómo usar»: crear el clip con IA en Vids por cada escena y unirlos en CapCut con el texto y la música.
-
-5. prompt_heygen (video por escenas en HeyGen; se copia y pega):
+4. prompt_heygen (video por escenas en HeyGen; se copia y pega):
 - Si no han elegido el formato en esta conversación, pregunta exactamente «¿Cómo quieres el video? 1. Con Presentadora Fresura en cámara (el avatar ya seleccionado en HeyGen). 2. Solo escenas, sin avatar.» y espera la respuesta antes de redactar el prompt. Mencionar HeyGen por sí solo no elige un formato.
 - Conserva el formato que la persona eligió expresamente para ese video; un prompt anterior que solo tenía escenas no cuenta como elección. Si pide cambiar de formato, usa el nuevo. Produce un prompt sin avatar solo si la persona eligió esa opción.
 - Bloques: «Prompt» (todo el video en un texto) y «Cómo usar». Con avatar, empieza con esta frase exacta: «Usa el avatar Presentadora Fresura ya preseleccionado en HeyGen, con el mismo look y la misma voz guardados. Presentadora Fresura aparece y habla en cámara en todas las escenas principales.» Separa lo que dice el avatar de las indicaciones visuales, escena por escena. Sin avatar, describe cada escena y su texto en pantalla.
 - Conserva el guion y la duración acordados; video vertical 9:16. No digas que el video ya se generó.
 
-6. variantes_gancho: 2 o 3 bloques «Opción 1»… con estilos distintos (pregunta, dato del producto, reto o emoción), cada uno de máximo 15 palabras y una línea de por qué funciona.
+5. variantes_gancho: 2 o 3 bloques «Opción 1»… con estilos distintos (pregunta, dato del producto, reto o emoción), cada uno de máximo 15 palabras y una línea de por qué funciona.
 
-7. ideas: de 3 a 8 bloques «Idea 1»…, cada uno con formato (video, carrusel, foto o historia), red y una frase de la idea. Básate en las promociones vigentes (ver_promociones), los productos y las fechas especiales cercanas de Colombia (Amor y Amistad en septiembre, Día de la Madre en mayo, Halloween, Navidad, vacaciones de mitad y fin de año). No presentes una idea de campaña como una oferta confirmada.
+6. ideas: de 3 a 8 bloques «Idea 1»…, cada uno con formato (video, carrusel, foto o historia), red y una frase de la idea. Básate en las promociones vigentes (ver_promociones), los productos y las fechas especiales cercanas de Colombia (Amor y Amistad en septiembre, Día de la Madre en mayo, Halloween, Navidad, vacaciones de mitad y fin de año). No presentes una idea de campaña como una oferta confirmada.
 
-8. calendario: un bloque por día con publicación, etiquetado con la fecha («Lunes 24 nov»): red, formato y la idea en una línea. Una semana por defecto, o un mes si lo piden; de 3 a 5 publicaciones por semana. Cuenta las fechas a partir de hoy.
+7. calendario: un bloque por día con publicación, etiquetado con la fecha («Lunes 24 nov»): red, formato y la idea en una línea. Una semana por defecto, o un mes si lo piden; de 3 a 5 publicaciones por semana. Cuenta las fechas a partir de hoy.
 
-9. revision (antes de publicar un texto o guion que pegue la persona): bloques «Datos», «Tono de marca», «Llamado a la acción», «Ortografía» y «Recomendación», cada uno con lo que está bien o lo que hay que cambiar. Compara precios, sedes y promociones con las herramientas y avisa si el contenido publicado es de ejemplo.`;
+8. revision (antes de publicar un texto o guion que pegue la persona): bloques «Datos», «Tono de marca», «Llamado a la acción», «Ortografía» y «Recomendación», cada uno con lo que está bien o lo que hay que cambiar. Compara precios, sedes y promociones con las herramientas y avisa si el contenido publicado es de ejemplo.`;
 
 /**
  * Indicaciones para que el guion coincida con un video de D-ID: D-ID solo

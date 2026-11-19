@@ -11,7 +11,6 @@ export const TIPOS_PIEZA = [
 	"publicacion",
 	"carrusel",
 	"prompt_imagen",
-	"prompt_clip",
 	"prompt_heygen",
 	"variantes_gancho",
 	"ideas",
@@ -28,7 +27,6 @@ export const HERRAMIENTA_PIEZA: Partial<
 > = {
 	carrusel: { nombre: "Canva", url: "https://www.canva.com/" },
 	prompt_imagen: { nombre: "Gemini", url: "https://gemini.google.com/app" },
-	prompt_clip: { nombre: "Google Vids", url: "https://vids.google.com/" },
 	prompt_heygen: { nombre: "HeyGen", url: "https://app.heygen.com/" },
 };
 
@@ -37,7 +35,6 @@ export const NOMBRE_PIEZA: Record<TipoPieza, string> = {
 	publicacion: "Publicación",
 	carrusel: "Carrusel",
 	prompt_imagen: "Prompt de foto",
-	prompt_clip: "Prompts de clip",
 	prompt_heygen: "Prompt de HeyGen",
 	variantes_gancho: "Variantes de gancho",
 	ideas: "Ideas de contenido",
@@ -50,7 +47,6 @@ export const BLOQUES_PIEZA: Record<TipoPieza, readonly [number, number]> = {
 	publicacion: [1, 3],
 	carrusel: [5, 14],
 	prompt_imagen: [1, 4],
-	prompt_clip: [1, 8],
 	prompt_heygen: [1, 2],
 	variantes_gancho: [2, 3],
 	ideas: [3, 8],

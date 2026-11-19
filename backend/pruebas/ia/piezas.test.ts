@@ -60,7 +60,6 @@ describe("piezas de contenido del agente", () => {
 			"publicacion",
 			"carrusel (se arma en Canva)",
 			"prompt_imagen (foto con IA en Gemini",
-			"prompt_clip (clips cortos en Google Vids",
 			"prompt_heygen (video por escenas en HeyGen",
 			"Guion para la presentadora (D-ID)",
 			"Si la persona saluda o conversa",

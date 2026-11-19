@@ -154,7 +154,7 @@ npm run functions:deploy -- panel
 
 ## Piezas de contenido del chat
 
-Además del guion, el agente entrega con la herramienta `entregar_pieza` publicaciones por red, carruseles, prompts de foto (Gemini), prompts de clip (Google Vids), prompts de video por escenas (HeyGen), variantes de gancho, ideas, calendarios y revisiones. Cada tipo sigue el formato de su herramienta (`ia/skills/piezas.ts`), se valida con `_shared/esquemas/pieza.ts` y llega al panel en `message.metadata.piezas`. La tarjeta copia solo el prompt y abre la herramienta en otra pestaña; ninguna de estas herramientas se llama por API ni tiene costo para el proyecto.
+Además del guion, el agente entrega con la herramienta `entregar_pieza` publicaciones por red, carruseles, prompts de foto (Gemini), prompts de video por escenas (HeyGen), variantes de gancho, ideas, calendarios y revisiones. Cada tipo sigue el formato de su herramienta (`ia/skills/piezas.ts`), se valida con `_shared/esquemas/pieza.ts` y llega al panel en `message.metadata.piezas`. La tarjeta copia solo el prompt y abre la herramienta en otra pestaña; ninguna de estas herramientas se llama por API ni tiene costo para el proyecto.
 
 El panel tiene tres vistas: **Chat**, **Biblioteca** (tabla `biblioteca_piezas`: guardar desde el chat, aprobar, copiar y borrar; RF-18) y **Estilo de redes** (tabla `referencias_estilo`: publicaciones recientes de Fresura pegadas a mano). El agente lee las 12 referencias más recientes con `ver_estilo_redes` para imitar el estilo, sin tomar de ahí datos comerciales. La columna `origen` deja lista la importación con la API de Meta, que está pendiente.
 

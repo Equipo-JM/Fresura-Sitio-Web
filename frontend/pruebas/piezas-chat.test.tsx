@@ -8,13 +8,13 @@ import {
 import { TarjetaPieza } from "../src/panel/agente/TarjetaPieza";
 
 const pieza: Pieza = {
-	tipo: "prompt_clip",
-	titulo: "Clips de Arma tu Fresita",
-	red: "tiktok",
+	tipo: "prompt_imagen",
+	titulo: "Fotos de Arma tu Fresita",
+	red: "instagram",
 	bloques: [
-		{ etiqueta: "Escena 1 (5 s)", texto: "Fresas cayendo en crema, 9:16." },
-		{ etiqueta: "Escena 2 (5 s)", texto: "Topping sobre el vaso, 9:16." },
-		{ etiqueta: "Cómo usar", texto: "Crea un clip en Vids por escena." },
+		{ etiqueta: "Prompt", texto: "Usa la foto adjunta del vaso, formato 4:5." },
+		{ etiqueta: "Variante", texto: "Misma foto con fondo rosa claro." },
+		{ etiqueta: "Cómo usar", texto: "Abre Gemini y adjunta la foto real." },
 	],
 };
 
@@ -61,18 +61,18 @@ describe("piezas de contenido en el chat", () => {
 		const escribir = vi.fn(async () => {});
 		vi.stubGlobal("navigator", { clipboard: { writeText: escribir } });
 		render(<TarjetaPieza pieza={pieza} />);
-		expect(screen.getByText("Prompts de clip · TikTok")).toBeVisible();
+		expect(screen.getByText("Prompt de foto · Instagram")).toBeVisible();
 		const enlace = screen.getByRole("link", {
-			name: /Copiar y abrir Google Vids/,
+			name: /Copiar y abrir Gemini/,
 		});
-		expect(enlace).toHaveAttribute("href", "https://vids.google.com/");
+		expect(enlace).toHaveAttribute("href", "https://gemini.google.com/app");
 		expect(enlace).toHaveAttribute("target", "_blank");
 		fireEvent.click(enlace);
 		expect(escribir).toHaveBeenCalledWith(
-			"Escena 1 (5 s)\nFresas cayendo en crema, 9:16.\n\nEscena 2 (5 s)\nTopping sobre el vaso, 9:16.",
+			"Prompt\nUsa la foto adjunta del vaso, formato 4:5.\n\nVariante\nMisma foto con fondo rosa claro.",
 		);
 		expect(
-			await screen.findByText("Prompt copiado. Pégalo en Google Vids."),
+			await screen.findByText("Prompt copiado. Pégalo en Gemini."),
 		).toBeVisible();
 	});
 

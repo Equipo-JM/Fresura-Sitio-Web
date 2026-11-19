@@ -144,7 +144,7 @@ export function crearHerramientasAgente(
 		}),
 		entregar_pieza: tool({
 			description:
-				"Entrega una pieza de contenido distinta del guion: publicación, carrusel, prompt de foto, prompts de clip, prompt de HeyGen, variantes de gancho, ideas, calendario o revisión. Valida el formato y los precios y sedes mencionados; si devuelve errores, corrígelos y vuelve a llamarla. No guarda nada.",
+				"Entrega una pieza de contenido distinta del guion: publicación, carrusel, prompt de foto, prompt de HeyGen, variantes de gancho, ideas, calendario o revisión. Valida el formato y los precios y sedes mencionados; si devuelve errores, corrígelos y vuelve a llamarla. No guarda nada.",
 			inputSchema: esquemaPieza,
 			execute: async (pieza) => {
 				// La revisión cita los datos equivocados del texto revisado para señalarlos.

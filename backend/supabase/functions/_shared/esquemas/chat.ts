@@ -12,10 +12,9 @@ export const INICIO_CHAT = `¡Hola! Soy tu asistente de redes y contenido de Fre
 2. Publicación con texto y hashtags
 3. Carrusel para Instagram o Facebook
 4. Prompt para fotos con IA (Gemini)
-5. Prompts de clips cortos (Google Vids)
-6. Prompt de video por escenas (HeyGen)
-7. Ideas o calendario de publicaciones
-8. Revisar un texto antes de publicarlo
+5. Prompt de video por escenas (HeyGen)
+6. Ideas o calendario de publicaciones
+7. Revisar un texto antes de publicarlo
 
 Responde con un número o cuéntame tu idea.`;
 
@@ -24,10 +23,9 @@ const TITULOS_OPCIONES: Readonly<Record<string, string>> = {
 	"2": "Publicación para redes",
 	"3": "Carrusel",
 	"4": "Fotos con IA",
-	"5": "Clips cortos",
-	"6": "Video por escenas",
-	"7": "Ideas y calendario",
-	"8": "Revisión antes de publicar",
+	"5": "Video por escenas",
+	"6": "Ideas y calendario",
+	"7": "Revisión antes de publicar",
 };
 
 /** Indica si un primer mensaje todavía no describe un tema. */
