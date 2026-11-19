@@ -115,8 +115,21 @@ describe("piezas de contenido del agente", () => {
 				bloques: [avatar.bloques[0], avatar.bloques[2]],
 			}).join(" "),
 		).toContain("«Movimiento y cámara»");
-		expect(promptPieza(avatar)).toBe(
-			"Lo que dice\n¡Hola! Arma tu Fresita hoy.\n\nMovimiento y cámara\nSonríe y señala.",
+		// El botón principal copia solo lo hablado: va en el campo del guion de AI Avatar.
+		expect(promptPieza(avatar)).toBe("¡Hola! Arma tu Fresita hoy.");
+		const largo = {
+			...avatar,
+			bloques: [
+				{ etiqueta: "Lo que dice", texto: "a".repeat(241) },
+				...avatar.bloques.slice(1),
+			],
+		};
+		expect(erroresPieza(largo).join(" ")).toContain("240 caracteres");
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"Si el guion dura más de 15 segundos, resúmelo a 15",
+		);
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"El chat ya no genera videos: si en mensajes anteriores aparecen «crear video»",
 		);
 	});
 

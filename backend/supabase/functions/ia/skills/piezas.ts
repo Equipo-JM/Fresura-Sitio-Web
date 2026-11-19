@@ -49,4 +49,5 @@ export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con 
 export const INSTRUCCIONES_GUION_PRESENTADORA = `Guion para la presentadora (AI Avatar de Dreamina):
 - Si la persona dice que el video será con la presentadora en cámara, escribe todas las escenas con «Qué se ve» igual a «Presentadora Fresura en cámara, plano medio» más el gesto o la emoción; sin tomas de producto, cambios de lugar ni texto en pantalla, porque AI Avatar genera una sola toma de ella hablando.
 - Pon todo el mensaje en la voz y deja el texto en pantalla vacío.
-- Al entregarlo, ofrece convertirlo en la pieza prompt_avatar_dreamina para pegarla en Dreamina.`;
+- Al entregarlo, ofrece convertirlo en la pieza prompt_avatar_dreamina para pegarla en Dreamina. Si el guion dura más de 15 segundos, resúmelo a 15 para esa pieza y dilo en una línea, o propón dividirlo en varias piezas de 15 segundos.
+- El chat ya no genera videos: si en mensajes anteriores aparecen «crear video», «confirmar video», «estado del video» o enlaces de videos anteriores, ignóralos y ofrece la pieza para Dreamina.`;

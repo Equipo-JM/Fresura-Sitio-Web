@@ -107,9 +107,14 @@ describe("piezas de contenido en el chat", () => {
 			"https://dreamina.capcut.com/ai-tool/ai-video",
 		);
 		fireEvent.click(enlace);
-		expect(escribir).toHaveBeenCalledWith(
-			"Lo que dice\n¡Arma tu Fresita hoy!\n\nMovimiento y cámara\nSonríe.",
+		expect(escribir).toHaveBeenCalledWith("¡Arma tu Fresita hoy!");
+		fireEvent.click(
+			screen.getByRole("button", { name: "Copiar Movimiento y cámara" }),
 		);
+		expect(escribir).toHaveBeenLastCalledWith("Sonríe.");
+		expect(
+			screen.queryByRole("button", { name: "Copiar Cómo usar" }),
+		).toBeNull();
 	});
 
 	it("una publicación se copia completa y no abre ninguna herramienta", async () => {

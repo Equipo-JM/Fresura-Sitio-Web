@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { objetivoCaracteresVoz } from "./guion.ts";
 
 /**
  * Piezas de contenido que el agente entrega en el chat además del guion:
@@ -21,6 +22,12 @@ export const TIPOS_PIEZA = [
 
 /** Tipo de pieza. */
 export type TipoPieza = (typeof TIPOS_PIEZA)[number];
+
+/**
+ * Caracteres de «Lo que dice» en AI Avatar: 15 segundos, hasta confirmar en la
+ * cuenta de Dreamina cuánto puede durar cada video.
+ */
+export const MAXIMO_VOZ_AVATAR = objetivoCaracteresVoz(15);
 
 /** Dreamina (CapCut): AI Avatar para la presentadora y Seedance para escenas. No tiene API oficial. */
 const URL_DREAMINA = "https://dreamina.capcut.com/ai-tool/ai-video";
@@ -101,12 +108,18 @@ export function erroresPieza(pieza: Pieza): string[] {
 				"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
 			);
 	}
-	if (pieza.tipo === "prompt_avatar_dreamina")
+	if (pieza.tipo === "prompt_avatar_dreamina") {
 		for (const etiqueta of ["Lo que dice", "Movimiento y cámara"])
 			if (!pieza.bloques.some((b) => b.etiqueta === etiqueta))
 				errores.push(
 					`Agrega el bloque «${etiqueta}»: en AI Avatar va en su propio campo.`,
 				);
+		const voz = pieza.bloques.find((b) => b.etiqueta === "Lo que dice");
+		if (voz && voz.texto.length > MAXIMO_VOZ_AVATAR)
+			errores.push(
+				`«Lo que dice» lleva como máximo ${MAXIMO_VOZ_AVATAR} caracteres (15 segundos); tiene ${voz.texto.length}. Resúmelo.`,
+			);
+	}
 	if (
 		(pieza.tipo === "publicacion" || pieza.tipo === "carrusel") &&
 		pieza.red === null
@@ -129,6 +142,12 @@ export function textoPieza(pieza: Pieza): string {
  * no, los bloques de prompt sin la explicación «Cómo usar».
  */
 export function promptPieza(pieza: Pieza): string {
+	// En AI Avatar lo hablado y el movimiento van en campos distintos: el botón
+	// principal copia lo hablado y la tarjeta copia el movimiento aparte.
+	if (pieza.tipo === "prompt_avatar_dreamina") {
+		const voz = pieza.bloques.find((b) => b.etiqueta === "Lo que dice");
+		if (voz) return voz.texto;
+	}
 	const directo = pieza.bloques.find((b) => /^prompt para/i.test(b.etiqueta));
 	if (directo) return directo.texto;
 	const prompts = pieza.bloques.filter(
