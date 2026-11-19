@@ -1,6 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+	BOTONES_VIDEO,
+	type BotonVideo,
+	botonVideoDelTexto,
 	ENLACE_VIDEO_DID,
 	INICIO_CHAT,
 } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
@@ -110,6 +113,18 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 		void chat.enviar(texto);
 		setTexto("");
 	}
+	// Los botones de video envían la misma orden que se puede escribir.
+	function pulsarVideo(boton: BotonVideo) {
+		if (chat.ocupado || chat.esperandoVideo) return;
+		seguirHilo.current = true;
+		void chat.enviar(BOTONES_VIDEO[boton].orden);
+	}
+	const videoBloqueado = chat.ocupado || chat.esperandoVideo;
+	// D-ID siempre toma el último guion de la conversación: solo esa tarjeta ofrece el video.
+	const ultimoGuionId = chat.mensajes.findLast((m) => {
+		const tarjeta = leerTarjeta(m.metadata?.tarjetaGuion);
+		return tarjeta?.guion.escenas.some((escena) => escena.voz.trim());
+	})?.id;
 	return (
 		<section className="panel-seccion" aria-labelledby="chat-titulo">
 			<h2 id="chat-titulo">Conversar con el agente</h2>
@@ -253,6 +268,10 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 							const piezas = leerPiezas(m.metadata?.piezas);
 							const partes = m.parts.filter((parte) => parte.type === "text");
 							const cuerpo = tarjeta ? cuerpoGuion(tarjeta.guion) : "";
+							const botonVideo =
+								m.role === "assistant" && m.id === ultimo?.id
+									? botonVideoDelTexto(partes.map((p) => p.text).join("\n"))
+									: null;
 							const ficha = tarjeta
 								? `${tarjeta.instruccion.red} · ${tarjeta.instruccion.duracion_s} segundos`
 								: "";
@@ -271,6 +290,18 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 									{partes.map((p) => (
 										<TextoAgente key={p.type + p.text} texto={p.text} />
 									))}
+									{botonVideo && (
+										<div className="agente-acciones">
+											<button
+												className="boton"
+												type="button"
+												disabled={videoBloqueado}
+												onClick={() => pulsarVideo(botonVideo)}
+											>
+												{BOTONES_VIDEO[botonVideo].etiqueta}
+											</button>
+										</div>
+									)}
 									{m.metadata?.aviso && (
 										<p className="panel-aviso">{m.metadata.aviso.mensaje}</p>
 									)}
@@ -288,6 +319,16 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 														)
 													}
 												/>
+												{m.id === ultimoGuionId && (
+													<button
+														className="boton"
+														type="button"
+														disabled={videoBloqueado}
+														onClick={() => pulsarVideo("preparar")}
+													>
+														{BOTONES_VIDEO.preparar.etiqueta}
+													</button>
+												)}
 											</div>
 										</div>
 									)}

@@ -58,6 +58,35 @@ export const ENLACE_VIDEO_DID =
 export const AVISO_VIDEO_EN_CURSO =
 	"Te muestro el enlace aquí cuando esté listo.";
 
+/**
+ * Botones del flujo de video. Cada uno envía su `orden` como mensaje, la misma
+ * frase que el servidor reconoce si la persona la escribe.
+ */
+export const BOTONES_VIDEO = {
+	preparar: { orden: "crear video", etiqueta: "Crear video" },
+	confirmar: {
+		orden: "confirmar video",
+		etiqueta: "Confirmar y generar video",
+	},
+	consultar: { orden: "estado del video", etiqueta: "Consultar de nuevo" },
+} as const;
+
+/** Acción del flujo de video que se ofrece como botón. */
+export type BotonVideo = keyof typeof BOTONES_VIDEO;
+
+/** Indicación que cierra un mensaje del flujo de video y que el panel convierte en botón. */
+export function pulsarBotonVideo(boton: BotonVideo): string {
+	return `Pulsa «${BOTONES_VIDEO[boton].etiqueta}».`;
+}
+
+/** Botón que pide un mensaje del agente, o `null` si no pide ninguno. */
+export function botonVideoDelTexto(texto: string): BotonVideo | null {
+	const final = texto.trimEnd();
+	for (const boton of Object.keys(BOTONES_VIDEO) as BotonVideo[])
+		if (final.endsWith(pulsarBotonVideo(boton))) return boton;
+	return null;
+}
+
 /** Petición de `POST /estado-video`: consulta el último video de la conversación. */
 export const esquemaEstadoVideo = z.strictObject({
 	conversacion_id: z.uuid(),

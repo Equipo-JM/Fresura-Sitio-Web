@@ -3,8 +3,10 @@ import type { ModelMessage } from "ai";
 import { z } from "zod";
 import {
 	AVISO_VIDEO_EN_CURSO,
+	BOTONES_VIDEO,
 	ENLACE_VIDEO_DID,
 	esquemaEstadoVideo,
+	pulsarBotonVideo,
 } from "../../_shared/esquemas/chat.ts";
 import {
 	crearEsquemaGuion,
@@ -27,9 +29,9 @@ export type VideoDid = {
 };
 
 const acciones = {
-	"crear video": "preparar",
-	"confirmar video": "confirmar",
-	"estado del video": "consultar",
+	[BOTONES_VIDEO.preparar.orden]: "preparar",
+	[BOTONES_VIDEO.confirmar.orden]: "confirmar",
+	[BOTONES_VIDEO.consultar.orden]: "consultar",
 } as const;
 
 type Accion = (typeof acciones)[keyof typeof acciones];
@@ -141,16 +143,14 @@ function ultimoGuion(historial: ModelMessage[]) {
 }
 
 const COLUMNAS = "id,guion_llamada,voz,estado,did_id,did_recurso,confirmado_en";
-const CONFIRMAR =
-	"D-ID puede consumir créditos de tu cupo al renderizar con Presentadora Fresura. Escribe «confirmar video» para enviar el diálogo del guion.";
+const CONFIRMAR = `D-ID puede consumir créditos de tu cupo al renderizar el diálogo del guion con Presentadora Fresura. ${pulsarBotonVideo("confirmar")}`;
 const INCIERTO =
 	"No pude confirmar si D-ID recibió el video. Revisa tus creaciones en D-ID antes de volver a solicitarlo.";
 const ESTADOS: Record<Trabajo["estado"], string> = {
 	pendiente: CONFIRMAR,
 	enviando: `Estoy enviando el video a D-ID. ${AVISO_VIDEO_EN_CURSO}`,
 	enviado: `El video ya se envió a D-ID. ${AVISO_VIDEO_EN_CURSO}`,
-	rechazado:
-		"D-ID rechazó el envío. Tras revisar la configuración o el cupo, escribe «crear video» para preparar otro intento.",
+	rechazado: `D-ID rechazó el envío. Revisa la configuración o el cupo antes de otro intento. ${pulsarBotonVideo("preparar")}`,
 	indeterminado: INCIERTO,
 };
 
@@ -164,8 +164,7 @@ function describirTrabajo(trabajo: Trabajo): string {
 	return ESTADOS[trabajo.estado];
 }
 
-const SIN_SOLICITUD =
-	"Todavía no hay una solicitud en esta conversación. Escribe «crear video» para empezar.";
+const SIN_SOLICITUD = `Todavía no hay una solicitud en esta conversación. ${pulsarBotonVideo("preparar")}`;
 
 /** Resultado de consultar un video: `preparando` es el único estado que pide volver a consultar. */
 export type EstadoVideo = {
@@ -296,7 +295,7 @@ export async function procesarVideoDid(
 	if (accion === "preparar") {
 		const guion = ultimoGuion(historial);
 		if (!guion?.voz)
-			return "Pídeme un guion con diálogo en esta conversación y luego escribe «crear video».";
+			return "Pídeme un guion con diálogo en esta conversación y luego pulsa «Crear video» en su tarjeta.";
 		const { error } = await tabla().upsert(
 			{
 				conversacion_id: conversacionId,
@@ -314,7 +313,7 @@ export async function procesarVideoDid(
 		if (lectura) throw new Error("video_did_lectura");
 		const actual = leerTrabajo(data);
 		if (!actual)
-			return "No pude recuperar la solicitud. Vuelve a escribir «crear video».";
+			return `No pude recuperar la solicitud. ${pulsarBotonVideo("preparar")}`;
 		if (actual.estado !== "rechazado") return describirTrabajo(actual);
 		const reinicio = await tabla()
 			.update({ estado: "pendiente" })
@@ -325,7 +324,7 @@ export async function procesarVideoDid(
 		if (reinicio.error) throw new Error("video_did_reintento");
 		return reinicio.data
 			? CONFIRMAR
-			: "La solicitud cambió. Escribe «estado del video».";
+			: `La solicitud cambió. ${pulsarBotonVideo("consultar")}`;
 	}
 	const actual = await leerUltimoTrabajo(video, conversacionId);
 	if (!actual) return SIN_SOLICITUD;
@@ -340,7 +339,7 @@ export async function procesarVideoDid(
 		.maybeSingle();
 	if (reservado.error) throw new Error("video_did_confirmacion");
 	if (!reservado.data)
-		return "Esta solicitud ya fue atendida. Escribe «estado del video».";
+		return `Esta solicitud ya fue atendida. ${pulsarBotonVideo("consultar")}`;
 	const entregado = guionesEntregados(historial).get(actual.guion_llamada);
 	const envio = await video.proveedor.generar(
 		actual.voz,
@@ -357,5 +356,7 @@ export async function procesarVideoDid(
 		.select("id")
 		.maybeSingle();
 	if (resultado.error || !resultado.data) return INCIERTO;
-	return envio.tipo === "rechazado" ? envio.mensaje : ESTADOS[envio.tipo];
+	return envio.tipo === "rechazado"
+		? `${envio.mensaje} ${pulsarBotonVideo("preparar")}`
+		: ESTADOS[envio.tipo];
 }

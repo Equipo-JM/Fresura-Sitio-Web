@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
 import type { z } from "zod";
-import type { esquemaRespuestaEstadoVideo } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
+import {
+	type esquemaRespuestaEstadoVideo,
+	pulsarBotonVideo,
+} from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 
 type RespuestaEstadoVideo = z.infer<typeof esquemaRespuestaEstadoVideo>;
 
@@ -11,8 +14,7 @@ export const INTERVALO_ESTADO_VIDEO_MS = 15_000;
 export const MAXIMO_CONSULTAS_VIDEO = 40;
 
 /** Aviso local cuando D-ID tarda más que el tope; no se guarda en la conversación. */
-export const AVISO_VIDEO_DEMORADO =
-	"D-ID está tardando más de lo normal. Escribe «estado del video» para consultar de nuevo.";
+export const AVISO_VIDEO_DEMORADO = `D-ID está tardando más de lo normal. ${pulsarBotonVideo("consultar")}`;
 
 /**
  * Consulta el estado del video cada cierto tiempo mientras `activo` sea verdadero

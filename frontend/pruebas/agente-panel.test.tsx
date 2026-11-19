@@ -11,6 +11,7 @@ import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	ENLACE_VIDEO_DID,
+	pulsarBotonVideo,
 	tituloConversacion,
 } from "../../backend/supabase/functions/_shared/esquemas/chat";
 import { convertirHistorial } from "../src/panel/agente/servicioConversaciones";
@@ -581,6 +582,68 @@ describe("chat del panel", () => {
 			{ conversacion_id: id, mensaje: "2" },
 			{ conversacion_id: id, mensaje: "1" },
 		]);
+	});
+	it("ofrece Crear video en la tarjeta del último guion y envía la misma orden que se escribe", async () => {
+		const simulado = simular();
+		simulado.responder(() => respuesta({ tarjetaGuion: tarjeta }));
+		enviar();
+		const crear = await screen.findByRole("button", { name: "Crear video" });
+		await waitFor(() => expect(crear).toBeEnabled());
+		simulado.responder(() =>
+			flujo([
+				{ type: "start", messageId: "respuesta-2" },
+				{ type: "text-start", id: "texto" },
+				{
+					type: "text-delta",
+					id: "texto",
+					delta: `D-ID puede consumir créditos. ${pulsarBotonVideo("confirmar")}`,
+				},
+				{ type: "text-end", id: "texto" },
+				{ type: "finish", finishReason: "stop" },
+			]),
+		);
+		fireEvent.click(crear);
+		await waitFor(() =>
+			expect(simulado.peticiones.at(-1)?.cuerpo).toMatchObject({
+				mensaje: "crear video",
+			}),
+		);
+		const confirmar = await screen.findByRole("button", {
+			name: "Confirmar y generar video",
+		});
+		await waitFor(() => expect(confirmar).toBeEnabled());
+		fireEvent.click(confirmar);
+		await waitFor(() =>
+			expect(simulado.peticiones.at(-1)?.cuerpo).toMatchObject({
+				mensaje: "confirmar video",
+			}),
+		);
+		// Tras confirmar, el botón del mensaje anterior desaparece: no se puede enviar dos veces.
+		await waitFor(() =>
+			expect(
+				screen.queryByRole("button", { name: "Confirmar y generar video" }),
+			).toBeNull(),
+		);
+	});
+	it("no ofrece Crear video en un guion anterior al último", async () => {
+		const simulado = simular();
+		simulado.responder(() => respuesta({ tarjetaGuion: tarjeta }));
+		enviar();
+		await screen.findByRole("button", { name: "Crear video" });
+		simulado.responder(() =>
+			respuesta({
+				tarjetaGuion: {
+					...tarjeta,
+					guion: { ...tarjeta.guion, titulo: "Segundo guion" },
+				},
+			}),
+		);
+		await screen.findByRole("button", { name: "Copiar respuesta completa" });
+		enviar("Otro guion");
+		await screen.findByRole("heading", { name: "Segundo guion" });
+		expect(screen.getAllByRole("button", { name: "Crear video" })).toHaveLength(
+			1,
+		);
 	});
 	it("ofrece abrir el enlace temporal de D-ID dentro del chat", async () => {
 		const enlace = "https://result.d-id.com/fresura.mp4";

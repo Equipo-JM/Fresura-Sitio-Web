@@ -184,7 +184,7 @@ describe("video de Fresura con D-ID", () => {
 	it("reserva, exige confirmación, deduplica dos envíos y recupera el enlace", async () => {
 		const { procesar, pedir, reclamos } = preparar();
 		expect(await procesar("confirmar")).toContain("Todavía no hay");
-		expect(await procesar("preparar")).toContain("confirmar video");
+		expect(await procesar("preparar")).toContain("Confirmar y generar video");
 		expect(pedir).not.toHaveBeenCalled();
 		await Promise.all([procesar("confirmar"), procesar("confirmar")]);
 		expect(reclamos).toEqual(["guion-1"]);
@@ -262,8 +262,10 @@ describe("video de Fresura con D-ID", () => {
 
 		const aviso = await enviar("crear video");
 		expect(aviso).toContain("créditos de tu cupo");
-		expect(aviso).toContain("confirmar video");
-		expect(await enviar("estado del video")).toContain("confirmar video");
+		expect(aviso).toContain("Confirmar y generar video");
+		expect(await enviar("estado del video")).toContain(
+			"Confirmar y generar video",
+		);
 		expect(pedir).not.toHaveBeenCalled();
 
 		expect(await enviar("confirmar video")).toContain("ya se envió a D-ID");
@@ -390,7 +392,7 @@ describe("video de Fresura con D-ID", () => {
 		expect(await procesar("confirmar")).toContain("falta de créditos");
 		await procesar("confirmar");
 		expect(pedir).toHaveBeenCalledTimes(1);
-		expect(await procesar("preparar")).toContain("confirmar video");
+		expect(await procesar("preparar")).toContain("Confirmar y generar video");
 		expect(await procesar("confirmar")).toContain("ya se envió");
 		expect(pedir).toHaveBeenCalledTimes(2);
 	});

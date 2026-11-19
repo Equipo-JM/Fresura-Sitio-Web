@@ -241,7 +241,7 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 				: []),
 			...(opciones.videoDid
 				? [
-						"Cuando la persona quiera convertir un guion en video con Presentadora Fresura, indícale que escriba «crear video». El chat pedirá «confirmar video» y después mostrará el enlace por sí solo cuando el video esté listo; no hace falta escribir nada más. El render usa D-ID. Nunca afirmes haber dejado un trabajo en cola ni inventes un enlace.",
+						"Cuando la persona quiera convertir un guion en video con Presentadora Fresura, indícale que pulse el botón «Crear video» de la tarjeta del guion. El chat le pedirá confirmar con otro botón y después mostrará el enlace por sí solo cuando el video esté listo; no hace falta escribir nada. El render usa D-ID. Nunca afirmes haber dejado un trabajo en cola ni inventes un enlace.",
 					]
 				: []),
 		].join("\n\n");
@@ -269,7 +269,7 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 								? {
 										role: "assistant" as const,
 										content:
-											"El video está listo. Para renovar el enlace escribe «estado del video».",
+											"El video está listo. Para renovar el enlace, pulsa «Consultar de nuevo».",
 									}
 								: m,
 						),
