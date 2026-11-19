@@ -450,14 +450,9 @@ describe("chat del panel", () => {
 		expect(screen.queryByText(/Guiones guardados|Revisar guion/)).toBeNull();
 		expect(
 			screen.queryByRole("button", {
-				name: /Guardar como borrador|Generar prompt|Generar guion/i,
+				name: /Guardar como borrador|Aprobar|Generar prompt|Generar guion/i,
 			}),
 		).toBeNull();
-		expect(
-			simulado.fetchSimulado.mock.calls.every(
-				([url]) => !String(url).includes("/rest/v1/guiones"),
-			),
-		).toBe(true);
 		const copiar = vi.fn().mockResolvedValue(undefined);
 		vi.stubGlobal(
 			"navigator",
@@ -477,6 +472,31 @@ describe("chat del panel", () => {
 		expect(copiar).toHaveBeenCalledWith(
 			expect.stringContaining(tarjeta.guion.notas_produccion),
 		);
+		const escrituras = simulado.fetchSimulado.mock.calls
+			.filter(([, opciones]) => opciones?.method && opciones.method !== "GET")
+			.map(
+				([url, opciones]) =>
+					`${opciones?.method} ${new URL(String(url)).pathname}`,
+			);
+		expect(escrituras).toEqual([
+			"POST /rest/v1/agente_conversaciones",
+			"POST /functions/v1/ia/chat",
+		]);
+	});
+	it("RF-18: muestra el guion en el chat sin acciones para guardarlo, aprobarlo o descartarlo", async () => {
+		const simulado = simular();
+		simulado.responder(() => respuesta({ tarjetaGuion: tarjeta }));
+		enviar();
+		expect(
+			await screen.findByRole("heading", { name: tarjeta.guion.titulo }),
+		).toBeVisible();
+		await screen.findByRole("button", { name: "Copiar respuesta completa" });
+
+		for (const rol of ["button", "link", "menuitem"]) {
+			expect(
+				screen.queryAllByRole(rol, { name: /guardar|aprobar|descartar/i }),
+			).toHaveLength(0);
+		}
 	});
 	it("permite copiar un prompt escrito en el chat aunque el navegador bloquee el portapapeles", async () => {
 		const simulado = simular();
@@ -588,6 +608,42 @@ describe("chat del panel", () => {
 		).toBeInTheDocument();
 		expect(simulado.peticiones).toHaveLength(2);
 	});
+	it.each([
+		["cupo agotado", "Se alcanzó el límite de hoy. Inténtalo mañana."],
+		[
+			"503 del proveedor",
+			"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.",
+		],
+	])(
+		"muestra el error del flujo SSE por %s y reintenta el mismo mensaje",
+		async (_, mensaje) => {
+			const simulado = simular();
+			simulado.responder(() =>
+				flujo([
+					{ type: "start", messageId: "fallo-agente" },
+					{ type: "error", errorText: mensaje },
+				]),
+			);
+			enviar();
+			expect(await screen.findByRole("alert")).toHaveTextContent(mensaje);
+			const reintentar = screen.getByRole("button", {
+				name: "Intentar de nuevo",
+			});
+			await waitFor(() => expect(reintentar).toBeEnabled());
+			expect(simulado.peticiones).toHaveLength(1);
+
+			simulado.responder(() => respuesta());
+			fireEvent.click(reintentar);
+			expect(
+				await screen.findByText("Vamos a preparar tu guion"),
+			).toBeVisible();
+			expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+			expect(simulado.peticiones.map((peticion) => peticion.cuerpo)).toEqual([
+				{ conversacion_id: id, mensaje: "Quiero un guion" },
+				{ conversacion_id: id, mensaje: "Quiero un guion" },
+			]);
+		},
+	);
 	it("borrar exige confirmación dentro de la interfaz y permite cancelarla", async () => {
 		const simulado = simular(true);
 		const confirmar = vi.spyOn(window, "confirm");
