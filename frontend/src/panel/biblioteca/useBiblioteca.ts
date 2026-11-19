@@ -42,8 +42,6 @@ export function useBiblioteca(cliente: SupabaseClient<Database>) {
 		entradas,
 		cargando,
 		error,
-		cambiarEstado: (id: string, estado: "borrador" | "aprobada") =>
-			ejecutar(() => servicio.cambiarEstado(id, estado)),
 		borrar: (id: string) => ejecutar(() => servicio.borrar(id)),
 	};
 }

@@ -96,31 +96,23 @@ describe("biblioteca de piezas", () => {
 		);
 	});
 
-	it("lista, filtra, aprueba y borra con confirmación", async () => {
+	it("lista, filtra y borra con confirmación, sin estados de aprobación", async () => {
 		const { cambios } = montar();
 		expect(await screen.findByText("Antojo de jueves")).toBeVisible();
 		expect(screen.getByText("Fresura en 15 segundos")).toBeVisible();
 		expect(screen.getAllByRole("listitem")).toHaveLength(2);
+		expect(screen.getAllByText(/Guardada el/)).toHaveLength(2);
+		expect(
+			screen.queryByRole("button", { name: /Aprobar|borrador/i }),
+		).toBeNull();
 
 		fireEvent.change(screen.getByLabelText("Tipo de pieza"), {
 			target: { value: "guion" },
 		});
 		expect(screen.queryByText("Antojo de jueves")).toBeNull();
-		expect(
-			screen.getByRole("button", { name: "Volver a borrador" }),
-		).toBeVisible();
-
 		fireEvent.change(screen.getByLabelText("Tipo de pieza"), {
 			target: { value: "todas" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Aprobar" }));
-		await waitFor(() =>
-			expect(cambios[0]).toMatchObject({
-				metodo: "PATCH",
-				cuerpo: { estado: "aprobada" },
-			}),
-		);
-		expect(cambios[0].url).toContain("id=eq.1");
 
 		fireEvent.click(screen.getAllByRole("button", { name: "Borrar" })[0]);
 		expect(
@@ -130,5 +122,6 @@ describe("biblioteca de piezas", () => {
 		await waitFor(() =>
 			expect(cambios.at(-1)).toMatchObject({ metodo: "DELETE" }),
 		);
+		expect(cambios.map((c) => c.metodo)).toEqual(["DELETE"]);
 	});
 });

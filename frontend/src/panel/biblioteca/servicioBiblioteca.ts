@@ -11,7 +11,6 @@ import {
 export type EntradaBiblioteca = {
 	id: string;
 	titulo: string;
-	estado: "borrador" | "aprobada";
 	creadoEn: string;
 } & (
 	| { tipo: "guion"; tarjeta: TarjetaGuion }
@@ -25,14 +24,12 @@ export function leerEntrada(fila: {
 	id: string;
 	tipo: string;
 	titulo: string;
-	estado: string;
 	creado_en: string;
 	contenido: unknown;
 }): EntradaBiblioteca | undefined {
 	const base = {
 		id: fila.id,
 		titulo: fila.titulo,
-		estado: fila.estado === "aprobada" ? "aprobada" : "borrador",
 		creadoEn: fila.creado_en,
 	} as const;
 	if (fila.tipo === "guion") {
@@ -62,7 +59,7 @@ export function crearServicioBiblioteca(cliente: SupabaseClient<Database>) {
 	return {
 		async listar(): Promise<EntradaBiblioteca[]> {
 			const { data, error } = await tabla()
-				.select("id,tipo,titulo,estado,creado_en,contenido")
+				.select("id,tipo,titulo,creado_en,contenido")
 				.order("creado_en", { ascending: false })
 				.order("id", { ascending: false })
 				.limit(MAXIMO_ENTRADAS);
@@ -85,10 +82,6 @@ export function crearServicioBiblioteca(cliente: SupabaseClient<Database>) {
 				contenido: tarjeta,
 				conversacion_id: conversacion,
 			}),
-		async cambiarEstado(id: string, estado: "borrador" | "aprobada") {
-			const { error } = await tabla().update({ estado }).eq("id", id);
-			if (error) throw new Error("No pudimos cambiar el estado.");
-		},
 		async borrar(id: string) {
 			const { error } = await tabla().delete().eq("id", id);
 			if (error) throw new Error("No pudimos borrar la pieza.");

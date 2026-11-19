@@ -17,15 +17,12 @@ const NOMBRES: Record<EntradaBiblioteca["tipo"], string> = {
 
 function Acciones({
 	entrada,
-	cambiarEstado,
 	borrar,
 }: {
 	entrada: EntradaBiblioteca;
-	cambiarEstado: (id: string, estado: "borrador" | "aprobada") => void;
 	borrar: (id: string) => void;
 }) {
 	const [confirmar, setConfirmar] = useState(false);
-	const aprobada = entrada.estado === "aprobada";
 	if (confirmar)
 		return (
 			<>
@@ -47,28 +44,21 @@ function Acciones({
 			</>
 		);
 	return (
-		<>
-			<button
-				className="boton secundario compacto"
-				type="button"
-				onClick={() =>
-					cambiarEstado(entrada.id, aprobada ? "borrador" : "aprobada")
-				}
-			>
-				{aprobada ? "Volver a borrador" : "Aprobar"}
-			</button>
-			<button
-				className="boton-texto"
-				type="button"
-				onClick={() => setConfirmar(true)}
-			>
-				Borrar
-			</button>
-		</>
+		<button
+			className="boton-texto"
+			type="button"
+			onClick={() => setConfirmar(true)}
+		>
+			Borrar
+		</button>
 	);
 }
 
-/** Piezas guardadas desde el chat: filtrar, copiar, aprobar y borrar (RF-18). */
+/**
+ * Piezas guardadas desde el chat para tenerlas a mano: filtrar, copiar y
+ * borrar. Sin estados de aprobación: las decisiones siguen siendo de la
+ * administradora (RF-18).
+ */
 export function BibliotecaPanel({
 	cliente,
 }: {
@@ -116,16 +106,13 @@ export function BibliotecaPanel({
 						const acciones = (
 							<Acciones
 								entrada={entrada}
-								cambiarEstado={(id, estado) =>
-									void biblioteca.cambiarEstado(id, estado)
-								}
 								borrar={(id) => void biblioteca.borrar(id)}
 							/>
 						);
 						return (
 							<li key={entrada.id} className="panel-bloque">
 								<p className="biblioteca-estado">
-									{entrada.estado === "aprobada" ? "Aprobada" : "Borrador"} ·{" "}
+									Guardada el{" "}
 									{new Date(entrada.creadoEn).toLocaleDateString("es-CO")}
 								</p>
 								{"pieza" in entrada ? (
