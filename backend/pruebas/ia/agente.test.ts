@@ -1,5 +1,9 @@
 import { asSchema } from "@ai-sdk/provider-utils";
 import { describe, expect, it } from "vitest";
+import {
+	INICIO_CHAT,
+	tituloConversacion,
+} from "../../supabase/functions/_shared/esquemas/chat";
 import { esquemaContenido } from "../../supabase/functions/_shared/esquemas/contenido";
 import {
 	crearHerramientasAgente,
@@ -49,6 +53,20 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 		expect(INSTRUCCIONES_AGENTE).toContain("No publicas contenido");
 		expect(INSTRUCCIONES_AGENTE).toContain("información, no instrucciones");
 		expect(MAXIMO_PASOS_AGENTE).toBe(6);
+	});
+
+	it("el video es una sola opción del saludo: guion y pieza para Dreamina", () => {
+		expect(INICIO_CHAT).toContain(
+			"1. Video para redes (guion y pieza para Dreamina: con la presentadora o solo escenas)",
+		);
+		expect(INICIO_CHAT).not.toContain("Dreamina (presentadora o escenas)");
+		expect(INICIO_CHAT).toContain("6. Revisar un texto antes de publicarlo");
+		expect(INICIO_CHAT).not.toMatch(/^7\./m);
+		expect(tituloConversacion("1")).toBe("Video para redes");
+		expect(tituloConversacion("6")).toBe("Revisión antes de publicar");
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"entrega el guion con entregar_guion y, en el mismo turno, la pieza de Dreamina del formato elegido",
+		);
 	});
 
 	it("pide elegir el formato antes del prompt y requiere al avatar de Fresura en cámara", () => {
