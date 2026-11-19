@@ -199,6 +199,15 @@ describe("POST /chat", () => {
 		expect(p.guardados.map((f) => f.rol)).toEqual(["administrador", "agente"]);
 		expect(p.guardados[0].contenido.content).toBe("Hola");
 	});
+	it("«crear video» ya no tiene un flujo propio: lo responde el modelo", async () => {
+		const p = preparar();
+		const respuesta = await p.pedir({
+			conversacion_id: id,
+			mensaje: "crear video",
+		});
+		expect(await respuesta.text()).toContain('"delta":"Hola"');
+		expect(p.crearModelo).toHaveBeenCalled();
+	});
 	it("añade aviso de precio sin registrar el texto", async () => {
 		const registro = vi.spyOn(console, "error").mockImplementation(() => {});
 		const p = preparar(

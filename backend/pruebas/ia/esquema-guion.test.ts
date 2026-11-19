@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	crearEsquemaGuion,
+	esquemaInstruccionGuardada,
 	esquemaInstruccionGuion,
 	esquemaJsonGuion,
 } from "../../supabase/functions/_shared/esquemas/guion";
@@ -24,6 +25,14 @@ describe("instrucción del guion", () => {
 			esquemaInstruccionGuion.safeParse({ ...instruccionValida, campana: null })
 				.success,
 		).toBe(true);
+	});
+
+	it("abre guiones guardados antes con el fondo de D-ID y lo descarta", () => {
+		const anterior = esquemaInstruccionGuardada.parse({
+			...instruccionValida,
+			fondo: "vitrina",
+		});
+		expect(anterior).not.toHaveProperty("fondo");
 	});
 
 	it("PU-10: rechaza un campo adicional", () => {

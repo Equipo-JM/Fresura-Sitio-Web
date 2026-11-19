@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { esquemaContenido } from "../../supabase/functions/_shared/esquemas/contenido";
 import {
 	erroresPieza,
+	HERRAMIENTA_PIEZA,
 	type Pieza,
 	promptPieza,
+	TIPOS_PIEZA,
 } from "../../supabase/functions/_shared/esquemas/pieza";
 import {
 	crearHerramientasAgente,
@@ -60,8 +62,9 @@ describe("piezas de contenido del agente", () => {
 			"publicacion",
 			"carrusel (se arma en Canva)",
 			"prompt_imagen (foto con IA en Gemini",
-			"prompt_heygen (video por escenas en HeyGen",
-			"Guion para la presentadora (D-ID)",
+			"prompt_avatar_dreamina (presentadora en cámara con AI Avatar de Dreamina",
+			"prompt_seedance (video por escenas en Dreamina",
+			"Guion para la presentadora (AI Avatar de Dreamina)",
 			"Si la persona saluda o conversa",
 		])
 			expect(INSTRUCCIONES_AGENTE).toContain(texto);
@@ -82,6 +85,41 @@ describe("piezas de contenido del agente", () => {
 		).toContain("entre 2 y 3 bloques");
 	});
 
+	it("los videos se hacen en Dreamina, sin rastros de HeyGen ni D-ID", () => {
+		expect(TIPOS_PIEZA).not.toContain("prompt_heygen");
+		expect(HERRAMIENTA_PIEZA.prompt_seedance?.nombre).toBe("Dreamina");
+		expect(HERRAMIENTA_PIEZA.prompt_avatar_dreamina?.url).toBe(
+			"https://dreamina.capcut.com/ai-tool/ai-video",
+		);
+		expect(INSTRUCCIONES_AGENTE).not.toMatch(/heygen|d-id|instruccion\.fondo/i);
+	});
+
+	it("el avatar de Dreamina separa lo que dice de su movimiento", () => {
+		const avatar: Pieza = {
+			tipo: "prompt_avatar_dreamina",
+			titulo: "Arma tu Fresita",
+			red: "tiktok",
+			bloques: [
+				{ etiqueta: "Lo que dice", texto: "¡Hola! Arma tu Fresita hoy." },
+				{ etiqueta: "Movimiento y cámara", texto: "Sonríe y señala." },
+				{ etiqueta: "Cómo usar", texto: "Abre AI Avatar en Dreamina." },
+			],
+		};
+		expect(erroresPieza(avatar)).toEqual([]);
+		expect(
+			erroresPieza({ ...avatar, bloques: avatar.bloques.slice(1) }).join(" "),
+		).toContain("«Lo que dice»");
+		expect(
+			erroresPieza({
+				...avatar,
+				bloques: [avatar.bloques[0], avatar.bloques[2]],
+			}).join(" "),
+		).toContain("«Movimiento y cámara»");
+		expect(promptPieza(avatar)).toBe(
+			"Lo que dice\n¡Hola! Arma tu Fresita hoy.\n\nMovimiento y cámara\nSonríe y señala.",
+		);
+	});
+
 	it("copia solo el prompt, sin las indicaciones para la administradora", () => {
 		expect(promptPieza(promptFoto)).toBe("Usa la foto adjunta del producto…");
 		expect(promptPieza(carrusel(5))).toBe(
@@ -98,7 +136,6 @@ describe("piezas de contenido del agente", () => {
 			"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain("«Prompt para Canva IA»");
-		expect(INSTRUCCIONES_AGENTE).toContain("Elige en instruccion.fondo");
 		expect(INSTRUCCIONES_AGENTE).toContain(
 			"Nunca escribas un prompt en el texto del chat",
 		);

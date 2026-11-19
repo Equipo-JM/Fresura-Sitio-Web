@@ -51,11 +51,14 @@ export function leerSalidaPromptVideo(
 	);
 }
 
-/** Identidad editorial de la presentadora que el equipo reutiliza en cada video. */
+/**
+ * Identidad de la presentadora: una persona real que dio su permiso. En
+ * Dreamina (AI Avatar) se mantiene igual porque el equipo sube siempre la misma
+ * foto y elige siempre la misma voz.
+ */
 export const PERFIL_AVATAR_FRESURA = `Presentadora Fresura
-Apariencia: mujer adulta, cabello castaño oscuro recogido, blusa crema y delantal rosa suave.
-Voz: femenina, cálida y clara, en español de Colombia, con tuteo y velocidad normal (1×).
-Reutiliza el mismo avatar, look, voz y motor de voz guardados para Fresura en todas las escenas y videos. El estilo y las indicaciones de escena solo ajustan luz, fondo, gesto y encuadre. Lee en voz alta únicamente el texto del avatar.`;
+Es una persona real del equipo de Fresura. Voz cálida y clara, en español de Colombia, con tuteo y velocidad normal.
+En AI Avatar de Dreamina, sube siempre la misma foto de la presentadora y elige siempre la misma voz. Las indicaciones solo ajustan gesto, emoción y encuadre; no cambian su apariencia. Lee en voz alta únicamente el texto de la presentadora.`;
 
 /** Reúne en un solo bloque el estilo y todo el contenido de cada escena. */
 export function textoCompletoPromptVideo(

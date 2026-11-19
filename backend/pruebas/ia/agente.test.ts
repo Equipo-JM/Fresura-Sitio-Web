@@ -60,10 +60,10 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 			"solo si la persona eligió esa opción",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain(
-			"Usa el avatar Presentadora Fresura ya preseleccionado en HeyGen, con el mismo look y la misma voz guardados.",
+			"¿Cómo quieres el video? 1. Con la presentadora en cámara (AI Avatar de Dreamina). 2. Solo escenas, sin personas (Seedance).",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain(
-			"Presentadora Fresura aparece y habla en cámara en todas las escenas principales.",
+			"sube siempre la misma foto de la presentadora y elige siempre la misma voz",
 		);
 	});
 

@@ -28,9 +28,6 @@ describe("acceso a las rutas de IA", () => {
 				IA_MODELO: "principal",
 				IA_MODELO_RESPALDO: "respaldo",
 				GEMINI_API_KEY: "gemini-ficticia",
-				DID_API_KEY: "did:ficticia",
-				DID_AVATAR_IMAGE_URL: "https://fresura.invalid/avatar.jpg",
-				DID_VOICE_ID: "voz-ficticia",
 			};
 			const servir =
 				vi.fn<(atender: (peticion: Request) => Promise<Response>) => void>();
@@ -55,7 +52,7 @@ describe("acceso a las rutas de IA", () => {
 					new Request(`https://supabase.invalid/functions/v1/ia/${ruta}`, {
 						method: "POST",
 						headers: cabeceras,
-						body: JSON.stringify({ mensaje: "confirmar video" }),
+						body: JSON.stringify({ mensaje: "Hola" }),
 					}),
 				);
 				expect(respuesta.status, ruta).toBe(401);
