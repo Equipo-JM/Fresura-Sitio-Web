@@ -326,7 +326,7 @@ describe("video de Fresura con D-ID", () => {
 			sentiment_id: "snt_animado",
 			background: {
 				type: "image_url",
-				value: "https://fresura.example/marca/fondo-presentadora-producto.png",
+				value: "https://fresura.example/marca/fondo-presentadora-producto.jpg",
 			},
 		});
 		expect(cuerpos[1].sentiment_id).toBe("snt_amable");
@@ -353,7 +353,7 @@ describe("video de Fresura con D-ID", () => {
 			sentiment_id: "snt_ficticio",
 			// El guion de prueba no tiene producto ni campaña: fondo de marca.
 			background: {
-				value: "https://fresura.example/marca/fondo-presentadora-marca.png",
+				value: "https://fresura.example/marca/fondo-presentadora-marca.jpg",
 			},
 			script: {
 				provider: {

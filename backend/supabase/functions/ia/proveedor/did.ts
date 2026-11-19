@@ -40,7 +40,7 @@ export type PerfilDid =
 			voz: string;
 			modeloVoz: string;
 			/**
-			 * Carpeta HTTPS con fondo-presentadora-{tema}.png (1920 × 1080); sin
+			 * Carpeta HTTPS con fondo-presentadora-{tema}.jpg (1920 × 1080); sin
 			 * ella D-ID usa su fondo liso.
 			 */
 			fondos?: string;
@@ -71,7 +71,7 @@ export function crearProveedorDid(config: {
 								background: {
 									type: "image_url",
 									value: new URL(
-										`fondo-presentadora-${estilo.tema}.png`,
+										`fondo-presentadora-${estilo.tema}.jpg`,
 										perfil.fondos,
 									).href,
 								},
