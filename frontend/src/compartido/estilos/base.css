@@ -445,20 +445,6 @@ h2:focus {
 	background: var(--color-platinum) none center / cover;
 	overflow: clip;
 }
-.portada .envoltura {
-	display: grid;
-	gap: 20px;
-	padding-block: 18px 56px;
-}
-.portada-texto {
-	display: grid;
-	gap: 18px;
-	justify-items: start;
-}
-.portada-texto p {
-	font-size: var(--texto-destacado);
-	max-width: 34ch;
-}
 .arco {
 	position: relative;
 	border-radius: 999px 999px var(--radio) var(--radio);
@@ -469,27 +455,6 @@ h2:focus {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-}
-.portada-foto {
-	position: relative;
-	justify-self: center;
-	width: min(58%, 320px);
-}
-.portada-foto .arco {
-	aspect-ratio: 4 / 5;
-	border: 8px solid var(--color-platinum);
-	box-shadow: 0 18px 44px rgba(91, 59, 36, 0.2);
-}
-.portada-foto .arco img {
-	object-position: 45% 72%;
-}
-.portada-sello {
-	position: absolute;
-	left: -56px;
-	bottom: -8px;
-	width: 92px;
-	height: 92px;
-	z-index: 3;
 }
 
 /* Promociones */
@@ -1552,24 +1517,6 @@ dialog::backdrop {
 	.pie {
 		padding-bottom: 72px;
 	}
-	.portada .envoltura {
-		grid-template-columns: 1.05fr 0.95fr;
-		align-items: center;
-		min-height: min(78vh, 700px);
-		padding-block: 48px;
-	}
-	.portada-texto {
-		order: -1;
-	}
-	.portada-foto {
-		width: min(100%, 440px);
-	}
-	.portada-sello {
-		width: 148px;
-		height: 148px;
-		left: -74px;
-		bottom: 24px;
-	}
 	.promo-grid {
 		grid-template-columns: 1fr 1.1fr;
 		gap: 48px;
@@ -1857,53 +1804,202 @@ body {
 .portada {
 	background: var(--color-platinum);
 }
-.portada-trazo {
+/* Ondas We Peep que suben por los lados, detrás de la escena */
+.portada-ondas {
 	left: 0;
-	right: 0;
 	bottom: 0;
 	width: 100%;
-	height: 46%;
-	object-fit: cover;
-	object-position: 30% 0;
+	/* En móvil quedan bajas, como un remate: altas se estiran en óvalos. */
+	height: clamp(96px, 16%, 150px);
 }
-.portada .envoltura {
+.portada-contenido {
 	position: relative;
-	gap: 36px;
-	padding-block: 28px 64px;
+	display: grid;
+	justify-items: center;
+	text-align: center;
+	padding-block: 28px 56px;
 }
-.portada h1 {
-	font-size: var(--titulo-portada);
-	line-height: 1.02;
-	letter-spacing: -0.01em;
+.portada-logo {
+	margin: 0;
+	line-height: 0;
 }
-.palabra {
-	display: inline-block;
-	overflow: clip;
-	overflow-clip-margin: 0.12em;
-	padding-bottom: 0.06em;
-	margin-bottom: -0.06em;
-	vertical-align: top;
+.portada-logo img {
+	width: min(300px, 78vw);
+	height: auto;
 }
-.palabra-in {
-	display: inline-block;
-	will-change: transform;
+.portada-frase {
+	margin-top: 12px;
+	font-family: var(--fuente-titulos);
+	font-style: italic;
+	font-weight: 500;
+	font-size: clamp(1.625rem, 1.2rem + 1.4vw, 2.375rem); /* 26-38 px */
+	line-height: 1.15;
+	text-wrap: balance;
+	max-width: 22ch;
 }
-.portada-texto {
-	gap: 20px;
+/* Escena: el vaso al centro y las piezas sueltas alrededor, en coordenadas
+   relativas al escenario. Cada pieza trae su posición de móvil y de escritorio. */
+.portada-escena {
+	position: relative;
+	width: min(100%, 560px);
+	aspect-ratio: 39 / 29;
+	/* El viento de abajo deja aire bajo el vaso: los botones suben a cubrirlo. */
+	margin-block: 8px -12px;
+	pointer-events: none;
 }
-.portada-bajada {
-	font-size: var(--texto-destacado);
-	max-width: 38ch;
+.portada-vaso {
+	position: absolute;
+	left: 28.7%;
+	top: 1%;
+	width: 42.6%;
+	z-index: 2;
+}
+.portada-vaso img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+.portada-sombra {
+	position: absolute;
+	left: 34%;
+	top: 80%;
+	width: 32%;
+	height: 5%;
+	border-radius: 50%;
+	background: radial-gradient(
+		closest-side,
+		rgba(91, 59, 36, 0.28),
+		transparent
+	);
+	z-index: 1;
+}
+.portada-pieza {
+	position: absolute;
+	left: var(--x-movil);
+	top: var(--y-movil);
+	width: var(--ancho-movil);
+}
+.portada-pieza[data-movil="no"] {
+	display: none;
+}
+.portada-pieza img {
+	display: block;
+	width: 100%;
+	height: auto;
+	user-select: none;
+}
+.portada-pieza.atras {
+	z-index: 1;
+}
+.portada-pieza.delante {
+	z-index: 3;
+}
+/* Viento: estelas abiertas que se desvanecen en las puntas. El trazo no se
+   deforma al estirar el dibujo con el escenario. */
+.portada-viento {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	fill: none;
+	stroke-linecap: round;
+}
+.portada-viento.atras {
+	z-index: 0;
+}
+.portada-viento.delante {
+	z-index: 2;
+}
+.portada-viento path {
+	vector-effect: non-scaling-stroke;
+}
+.viento-ancho {
+	stroke-width: 12;
+}
+.viento-medio {
+	stroke-width: 5;
+}
+.viento-hilo {
+	stroke-width: 2;
+}
+.viento-estela {
+	stroke-dasharray: 0.38 0.62;
+	animation: viento-fluye var(--ritmo, 4.5s) linear infinite;
+}
+@keyframes viento-fluye {
+	from {
+		stroke-dashoffset: 1;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.viento-estela {
+		animation: none;
+	}
+}
+/* Costados de escritorio: viento a todo el ancho detrás y piezas grandes
+   desenfocadas delante, como si estuvieran más cerca de la cámara. */
+.portada-viento-ancho,
+.portada-costados {
+	display: none;
+}
+.portada-viento-ancho {
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	fill: none;
+	stroke-linecap: round;
+}
+.portada-viento-ancho path {
+	vector-effect: non-scaling-stroke;
+}
+.portada-costados {
+	position: absolute;
+	inset: 0;
+	z-index: 4;
+	pointer-events: none;
+}
+.portada-costado {
+	position: absolute;
+	top: var(--y);
+	width: min(var(--ancho), var(--tope));
+}
+.portada-costado[data-lado="izquierda"] {
+	left: var(--borde);
+}
+.portada-costado[data-lado="derecha"] {
+	right: var(--borde);
+}
+.portada-costado img {
+	display: block;
+	width: 100%;
+	height: auto;
+	filter: blur(var(--desenfoque));
+	user-select: none;
+}
+/* Debajo de 1200 px la escena central ya ocupa casi todo el ancho. */
+@media (min-width: 1200px) {
+	.portada-viento-ancho,
+	.portada-costados {
+		display: block;
+	}
 }
 .portada-acciones {
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: center;
 	gap: 10px;
+	margin-top: 4px;
 }
 .portada-dato {
 	display: flex;
 	align-items: flex-start;
+	justify-content: center;
 	gap: 8px;
+	margin-top: 18px;
 	font-size: var(--texto-chico);
 	max-width: 40ch;
 }
@@ -1912,18 +2008,65 @@ body {
 	height: 20px;
 	margin-top: 1px;
 }
-.portada-foto {
-	width: min(86%, 380px);
-}
-.portada-foto .arco {
-	box-shadow: 0 30px 60px -28px rgba(91, 59, 36, 0.5);
-}
-.portada-sello {
-	width: 104px;
-	height: 104px;
-	left: -30px;
-	bottom: 18px;
-	filter: drop-shadow(0 10px 16px rgba(91, 59, 36, 0.25));
+@media (min-width: 900px) {
+	.portada-ondas {
+		height: min(48%, 420px);
+	}
+	.portada-contenido {
+		padding-block: 36px 64px;
+	}
+	.portada-logo img {
+		width: clamp(380px, 38vw, 560px);
+	}
+	.portada-frase {
+		margin-top: 16px;
+		max-width: none;
+	}
+	.portada-escena {
+		width: min(1000px, 100%);
+		aspect-ratio: 100 / 47;
+		margin-block: 4px 0;
+	}
+	.portada-vaso {
+		left: 36.3%;
+		top: 0;
+		width: 27.4%;
+	}
+	.portada-sombra {
+		left: 38%;
+		top: 88%;
+		width: 24%;
+	}
+	.portada-pieza {
+		left: var(--x);
+		top: var(--y);
+		width: var(--ancho);
+	}
+	.portada-pieza[data-movil="no"] {
+		display: block;
+	}
+	.viento-ancho {
+		stroke-width: 20;
+	}
+	.viento-medio {
+		stroke-width: 8;
+	}
+	.viento-hilo {
+		stroke-width: 3;
+	}
+	.portada-acciones {
+		gap: 16px;
+		margin-top: 12px;
+	}
+	.portada-acciones .boton {
+		min-height: 56px;
+		padding-inline: 34px;
+		font-size: var(--texto-destacado);
+	}
+	.portada-dato {
+		margin-top: 24px;
+		font-size: var(--texto-base);
+	}
 }
 
 /* Selector de antojos */
@@ -2162,33 +2305,6 @@ body {
 @media (min-width: 900px) {
 	.anuncio .envoltura {
 		padding-block: 4px;
-	}
-	.portada .envoltura {
-		grid-template-columns: 1.1fr 0.9fr;
-		gap: 56px;
-		min-height: min(84vh, 760px);
-		padding-block: 40px 72px;
-	}
-	.portada-texto {
-		order: 0;
-		gap: 24px;
-	}
-	.portada-foto {
-		width: min(100%, 470px);
-		justify-self: end;
-	}
-	.portada-sello {
-		width: 156px;
-		height: 156px;
-		left: -78px;
-		bottom: 36px;
-	}
-	.portada-trazo {
-		left: auto;
-		top: 0;
-		width: 44%;
-		height: 100%;
-		object-position: 0 30%;
 	}
 	.antojos-sticker {
 		width: 132px;

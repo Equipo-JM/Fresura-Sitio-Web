@@ -97,11 +97,11 @@ describe("paridad del inicio", () => {
 			expect(pie).not.toHaveTextContent("Sede U");
 		},
 	);
-	it("presenta la foto de portada a su escala final desde la entrada", () => {
+	it("presenta el vaso de portada a su escala final desde la entrada", () => {
 		mostrar();
-		const foto = document.querySelector(".portada-arco img");
-		if (!foto) throw new Error("Falta la foto de portada");
-		expect(Number(gsap.getProperty(foto, "scaleX"))).toBe(1);
+		const vaso = document.querySelector(".portada-vaso img");
+		if (!vaso) throw new Error("Falta el vaso de portada");
+		expect(Number(gsap.getProperty(vaso, "scaleX"))).toBe(1);
 	});
 	it("liga el sello y Nosotros al desplazamiento y limpia al salir", () => {
 		// Además de estos momentos, los revelados al bajar crean sus propios
@@ -165,17 +165,19 @@ describe("paridad del inicio", () => {
 		).toHaveFocus();
 	});
 	it.each([prueba, respaldo])(
-		"lee la presentación del contenido con el énfasis del rediseño",
+		"cambia el lema anterior del contenido por la frase de la portada",
 		(contenido) => {
 			mostrar("/", contenido);
-			const titulo = screen.getByRole("heading", {
-				level: 1,
-				name: "Fresas jugosas, crema esponjosa y tu toque favorito",
-			});
-			expect(titulo.querySelector("em")).toHaveTextContent("tu toque favorito");
 			expect(
-				screen.getByText(
-					"Fresas con crema a tu manera: eliges el tamaño, le pones tu toque y terminamos el pedido por WhatsApp.",
+				screen.getByRole("heading", {
+					level: 1,
+					name: "Un antojo fresco, hecho a tu manera",
+				}),
+			).toBeInTheDocument();
+			expect(
+				within(document.querySelector(".portada") as HTMLElement).getByRole(
+					"img",
+					{ name: "Fresura" },
 				),
 			).toBeInTheDocument();
 			expect(
@@ -185,9 +187,16 @@ describe("paridad del inicio", () => {
 			).toBeInTheDocument();
 		},
 	);
-	it("no repite la pregunta de la portada en antojos", () => {
+	it("ofrece en la portada el menú y conocer Fresura", () => {
 		mostrar();
-		expect(screen.getAllByText("¿No sabes qué pedir?")).toHaveLength(1);
+		const portada = within(document.querySelector(".portada") as HTMLElement);
+		expect(portada.getByRole("link", { name: "Ver el menú" })).toHaveAttribute(
+			"href",
+			"/menu",
+		);
+		expect(
+			portada.getByRole("link", { name: "Conocer Fresura" }),
+		).toHaveAttribute("href", "/nosotros");
 	});
 	it("ofrece el menú cuando no hay promociones", () => {
 		const contenido = structuredClone(prueba);
@@ -847,10 +856,10 @@ describe("estilos de paridad sin medición de geometría", () => {
 		document.head.append(estilos);
 	});
 	afterEach(() => estilos.remove());
-	it("deja la foto de portada sin etiqueta encima", () => {
+	it("deja la escena de portada sin etiqueta encima", () => {
 		mostrar();
-		expect(document.querySelector(".portada-foto")).toBeInTheDocument();
-		expect(document.querySelector(".portada-foto .pv-foto")).toBeNull();
+		expect(document.querySelector(".portada-escena")).toBeInTheDocument();
+		expect(document.querySelector(".portada-escena .pv-foto")).toBeNull();
 	});
 	it("conserva el marco de la ficha sin recortar el borde beige", () => {
 		mostrar("/producto/fresitas-caribena");
@@ -860,11 +869,15 @@ describe("estilos de paridad sin medición de geometría", () => {
 		expect(getComputedStyle(foto).aspectRatio).toBe("auto");
 		expect(foto.querySelector(".tarjeta-foto")).toBeInTheDocument();
 	});
-	it("usa fondos planos en las fotos pendientes y el encuadre de portada", () => {
+	it("usa fondos planos en las fotos pendientes y piezas decorativas en la portada", () => {
 		const inicio = mostrar();
-		const portada = document.querySelector(".portada-arco img");
-		if (!portada) throw new Error("Falta la foto de portada");
-		expect(getComputedStyle(portada).objectPosition).toBe("45% 72%");
+		// Solo el vaso se describe: las piezas que vuelan son decoración.
+		for (const pieza of document.querySelectorAll(".portada-pieza img")) {
+			expect(pieza).toHaveAttribute("alt", "");
+		}
+		expect(
+			document.querySelector(".portada-vaso img")?.getAttribute("alt"),
+		).toBeTruthy();
 		inicio.unmount();
 		// Todos tienen foto de Rappi; un id sin ella muestra el espacio pendiente.
 		const contenido = structuredClone(prueba);

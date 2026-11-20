@@ -221,7 +221,6 @@ dialog {
 /* Fotos: llenan su marco; el espacio «Foto por validar» ocupa el marco entero */
 .tarjeta-foto,
 .polaroid-foto,
-.portada-arco,
 .arco {
 	position: relative;
 }
@@ -312,9 +311,6 @@ dialog {
 	transform: translateX(-50%);
 	z-index: 2;
 }
-.portada-foto .arco img {
-	object-position: 45% 72%;
-}
 
 /* Carruseles de producto: con más de tres, se desplazan en horizontal */
 .carrusel {
@@ -348,18 +344,6 @@ dialog {
 }
 
 /* Portada */
-.portada-grid {
-	display: grid;
-	gap: 36px;
-	align-items: center;
-}
-.portada-palabra-caja {
-	display: inline-block;
-}
-.portada-palabra {
-	display: inline-block;
-	will-change: transform;
-}
 .portada-acciones {
 	display: flex;
 	flex-wrap: wrap;
@@ -379,9 +363,6 @@ dialog {
 	height: 20px;
 	margin-top: 1px;
 	flex: none;
-}
-.portada-foto {
-	position: relative;
 }
 
 /* Lo más reciente */
@@ -1293,10 +1274,6 @@ button.paso-num {
 }
 
 @media (min-width: 900px) {
-	.portada-grid {
-		grid-template-columns: 1.1fr 0.9fr;
-		gap: 56px;
-	}
 	.pz {
 		grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
 		gap: 56px;
@@ -1806,14 +1783,6 @@ button.paso-num {
 	.portada-borde {
 		--alto-onda: 14px;
 		--ancho-onda: 84px;
-	}
-	/* Desvanece el trazo antes de la onda para que ambas curvas no se rocen. */
-	.portada-trazo {
-		mask-image: linear-gradient(
-			to bottom,
-			#000 calc(100% - 48px),
-			transparent calc(100% - 16px)
-		);
 	}
 	.seccion::after,
 	.pagina::after {
