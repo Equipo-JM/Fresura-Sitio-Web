@@ -140,7 +140,7 @@ function simular(
 	);
 	render(
 		<MemoryRouter>
-			<GuionesPanel cliente={cliente} irVersiones={vi.fn()} />
+			<GuionesPanel cliente={cliente} />
 		</MemoryRouter>,
 	);
 	return {

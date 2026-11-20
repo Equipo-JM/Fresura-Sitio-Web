@@ -1,5 +1,7 @@
 ﻿import type { SupabaseClient } from "@supabase/supabase-js";
+import { useRef } from "react";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
+import { Icono } from "../../compartido/componentes/Icono";
 import type { Database } from "../../tipos/database.types";
 import {
 	Campo,
@@ -20,11 +22,22 @@ export function Productos({
 }: {
 	cliente: SupabaseClient<Database>;
 	seleccion: number | null;
-	setSeleccion: (indice: number) => void;
+	setSeleccion: (indice: number | null) => void;
 }) {
 	const { contenido, cambiar } = useEdicion();
 	const producto = seleccion === null ? null : contenido.productos[seleccion];
 	const ruta = `productos.${seleccion}`;
+	const destinoFoco = useRef<"lista" | "editor" | null>(null);
+
+	function seleccionar(indice: number | null) {
+		destinoFoco.current = indice === null ? "lista" : "editor";
+		setSeleccion(indice);
+	}
+	function enfocar(elemento: HTMLElement | null, destino: "lista" | "editor") {
+		if (!elemento || destinoFoco.current !== destino) return;
+		destinoFoco.current = null;
+		elemento.focus();
+	}
 	function agregar() {
 		const nuevo: Contenido["productos"][number] = {
 			id: "",
@@ -40,103 +53,189 @@ export function Productos({
 			grupos_opciones: [],
 		};
 		cambiar("productos", [...contenido.productos, nuevo]);
-		setSeleccion(contenido.productos.length);
+		seleccionar(contenido.productos.length);
 	}
 	return (
 		<section aria-labelledby="titulo-productos">
-			<h2 id="titulo-productos">Productos</h2>
-			<ErrorCampo ruta="productos" />
-			{contenido.productos.length === 0 && (
-				<p>
-					Aún no hay productos. Agrega el primero para que aparezca en el sitio.
-				</p>
-			)}
-			<ul>
-				{contenido.productos.map((p, i) => (
-					<li key={`producto-${i.toString()}`}>
-						{p.nombre || "Producto nuevo"}{" "}
-						{!p.vigente && <small>(oculto)</small>}{" "}
-						<button
-							className="boton-texto"
-							type="button"
-							aria-pressed={seleccion === i}
-							onClick={() => setSeleccion(i)}
-						>
-							Editar {p.nombre || "producto nuevo"}
-						</button>
-					</li>
-				))}
-			</ul>
-			<button className="boton secundario" type="button" onClick={agregar}>
-				Agregar producto
-			</button>
-			{producto && (
-				<fieldset className="panel-bloque">
-					<legend>{producto.nombre || "Producto nuevo"}</legend>
-					<Campo ruta={`${ruta}.nombre`} etiqueta="Nombre" maximo={80} />
-					<Campo
-						ruta={`${ruta}.descripcion`}
-						etiqueta="Descripción"
-						tipo="textarea"
-						maximo={600}
-					/>
-					<Selector
-						ruta={`${ruta}.categoria`}
-						etiqueta="Categoría"
-						opciones={completarIdentificadores(contenido).categorias.map(
-							(c) => ({ valor: c.id, nombre: c.nombre }),
-						)}
-					/>
-					<Campo
-						ruta={`${ruta}.orden`}
-						etiqueta="Orden en el menú"
-						tipo="number"
-					/>
-					<Casilla ruta={`${ruta}.vigente`} etiqueta="Mostrar en el sitio" />
-					<Casilla
-						ruta={`${ruta}.destacado`}
-						etiqueta="Destacar en el inicio"
-					/>
-					<FotoProducto key={ruta} ruta={ruta} cliente={cliente} />
-					<Presentaciones indice={seleccion ?? 0} />
-					<Opciones indice={seleccion ?? 0} />
-					<ListaCampos
-						ruta={`${ruta}.caracteristicas`}
-						titulo="Característica"
-						agregar={() =>
-							cambiar(`${ruta}.caracteristicas`, [
-								...producto.caracteristicas,
-								"",
-							])
-						}
+			<div className="panel-productos-cabecera">
+				<h2
+					id="titulo-productos"
+					tabIndex={-1}
+					ref={(elemento) => enfocar(elemento, "lista")}
+				>
+					Productos
+				</h2>
+				{!producto && (
+					<button
+						className="boton secundario compacto"
+						type="button"
+						onClick={agregar}
 					>
-						{producto.caracteristicas.map((_, i) => (
-							<div key={`${ruta}.caracteristicas.${i.toString()}`}>
-								<Campo
-									ruta={`${ruta}.caracteristicas.${i}`}
-									etiqueta={`Característica ${i + 1}`}
-									maximo={80}
-								/>
-								<button
-									className="boton-texto"
-									type="button"
-									onClick={() =>
-										cambiar(
-											`${ruta}.caracteristicas`,
-											producto.caracteristicas.filter((_, j) => j !== i),
-										)
-									}
-								>
-									Quitar característica {i + 1}
-								</button>
-							</div>
-						))}
-					</ListaCampos>
-				</fieldset>
+						<Icono nombre="mas" />
+						Agregar producto
+					</button>
+				)}
+			</div>
+			<ErrorCampo ruta="productos" />
+			{!producto ? (
+				<CatalogoEditable contenido={contenido} seleccionar={seleccionar} />
+			) : (
+				<div className="panel-producto-editor">
+					<button
+						type="button"
+						className="panel-accion"
+						ref={(elemento) => enfocar(elemento, "editor")}
+						onClick={() => seleccionar(null)}
+					>
+						<Icono nombre="izquierda" />
+						Volver a productos
+					</button>
+					<fieldset className="panel-bloque">
+						<legend>{producto.nombre || "Producto nuevo"}</legend>
+						<Campo ruta={`${ruta}.nombre`} etiqueta="Nombre" maximo={80} />
+						<Campo
+							ruta={`${ruta}.descripcion`}
+							etiqueta="Descripción"
+							tipo="textarea"
+							maximo={600}
+						/>
+						<Selector
+							ruta={`${ruta}.categoria`}
+							etiqueta="Categoría"
+							opciones={completarIdentificadores(contenido).categorias.map(
+								(c) => ({ valor: c.id, nombre: c.nombre }),
+							)}
+						/>
+						<Campo
+							ruta={`${ruta}.orden`}
+							etiqueta="Orden en el menú"
+							tipo="number"
+						/>
+						<Casilla ruta={`${ruta}.vigente`} etiqueta="Mostrar en el sitio" />
+						<Casilla
+							ruta={`${ruta}.destacado`}
+							etiqueta="Destacar en el inicio"
+						/>
+						<FotoProducto key={ruta} ruta={ruta} cliente={cliente} />
+						<Presentaciones indice={seleccion ?? 0} />
+						<Opciones indice={seleccion ?? 0} />
+						<ListaCampos
+							ruta={`${ruta}.caracteristicas`}
+							titulo="Característica"
+							agregar={() =>
+								cambiar(`${ruta}.caracteristicas`, [
+									...producto.caracteristicas,
+									"",
+								])
+							}
+						>
+							{producto.caracteristicas.map((_, i) => (
+								<div key={`${ruta}.caracteristicas.${i.toString()}`}>
+									<Campo
+										ruta={`${ruta}.caracteristicas.${i}`}
+										etiqueta={`Característica ${i + 1}`}
+										maximo={80}
+									/>
+									<button
+										className="boton-texto"
+										type="button"
+										onClick={() =>
+											cambiar(
+												`${ruta}.caracteristicas`,
+												producto.caracteristicas.filter((_, j) => j !== i),
+											)
+										}
+									>
+										Quitar característica {i + 1}
+									</button>
+								</div>
+							))}
+						</ListaCampos>
+					</fieldset>
+				</div>
 			)}
 		</section>
 	);
 }
+function CatalogoEditable({
+	contenido,
+	seleccionar,
+}: {
+	contenido: Contenido;
+	seleccionar: (indice: number) => void;
+}) {
+	const categorias = [...contenido.categorias].sort(
+		(a, b) => a.orden - b.orden,
+	);
+	const grupos = new Map(
+		categorias.map((categoria) => [
+			categoria.id,
+			{
+				nombre: categoria.nombre || "Categoría nueva",
+				indices: [] as number[],
+			},
+		]),
+	);
+	const sinCategoria = { nombre: "Sin categoría", indices: [] as number[] };
+	contenido.productos.forEach((producto, indice) => {
+		const grupo = grupos.get(producto.categoria) ?? sinCategoria;
+		grupo.indices.push(indice);
+	});
+	const gruposVisibles = [...grupos.values(), sinCategoria].filter(
+		(grupo) => grupo.indices.length > 0,
+	);
+
+	if (gruposVisibles.length === 0)
+		return (
+			<p>
+				Aún no hay productos. Agrega el primero para que aparezca en el sitio.
+			</p>
+		);
+
+	return (
+		<div className="panel-productos-cuadricula">
+			{gruposVisibles.map(({ nombre, indices }) => (
+				<section
+					key={indices[0]}
+					className="panel-categoria"
+					aria-labelledby={`grupo-productos-${indices[0]}`}
+				>
+					<div className="panel-categoria-cabecera">
+						<h3 id={`grupo-productos-${indices[0]}`}>{nombre}</h3>
+						<img
+							src="/marca/sticker-simbolo.svg"
+							width="48"
+							height="42"
+							alt=""
+						/>
+					</div>
+					<ul>
+						{indices.map((indice) => {
+							const producto = contenido.productos[indice];
+							const nombreProducto = producto.nombre || "Producto nuevo";
+							return (
+								<li key={indice}>
+									<button
+										aria-label={`Editar ${nombreProducto}${producto.vigente ? "" : " (oculto)"}`}
+										type="button"
+										onClick={() => seleccionar(indice)}
+									>
+										<span>
+											{nombreProducto}
+											{!producto.vigente && <small> · Oculto</small>}
+										</span>
+										<Icono nombre="derecha" />
+									</button>
+								</li>
+							);
+						})}
+					</ul>
+				</section>
+			))}
+		</div>
+	);
+}
+
 function Presentaciones({ indice }: { indice: number }) {
 	const { contenido, cambiar } = useEdicion();
 	const producto = contenido.productos[indice];
