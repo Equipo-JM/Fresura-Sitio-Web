@@ -9,7 +9,6 @@ import {
 	wrapLanguageModel,
 } from "ai";
 import {
-	ENLACE_VIDEO_DID,
 	esquemaChat,
 	esTituloProvisional,
 	tituloConversacion,
@@ -48,11 +47,6 @@ import {
 	RESPUESTAS_ERROR_IA,
 } from "../proveedor/generar.ts";
 import { fechaColombia } from "./instrucciones.ts";
-import {
-	accionVideoDid,
-	procesarVideoDid,
-	type VideoDid,
-} from "./video-did.ts";
 
 /** Dependencias con RLS y proveedor sustituible para probar el flujo sin conexiones externas. */
 export type OpcionesRutaChat = {
@@ -61,7 +55,6 @@ export type OpcionesRutaChat = {
 	modeloAgente: string;
 	modeloRespaldo: string;
 	crearModelo?: (id: string) => ModeloBase;
-	videoDid?: VideoDid;
 };
 
 /** Modelo que acepta el envoltorio del SDK (el de Google y los simulados de las pruebas). */
@@ -172,36 +165,6 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 				"Esa conversación no existe.",
 				cors,
 			);
-		const accion = accionVideoDid(mensaje);
-		if (accion) {
-			// Confirmar también lee el guion entregado para elegir fondo y expresión;
-			// si quedó fuera de los mensajes recientes, se usa el fondo de marca.
-			const historial =
-				accion !== "consultar" && opciones.videoDid
-					? await cargarMensajes(cliente, id)
-					: [];
-			const texto = await procesarVideoDid(
-				accion,
-				id,
-				historial,
-				opciones.videoDid,
-			);
-			await guardarMensajes(cliente, id, [
-				{ role: "user", content: mensaje },
-				{ role: "assistant", content: texto },
-			]);
-			const flujo = createUIMessageStream({
-				execute: ({ writer }) => {
-					const idTexto = crypto.randomUUID();
-					writer.write({ type: "start", messageId: crypto.randomUUID() });
-					writer.write({ type: "text-start", id: idTexto });
-					writer.write({ type: "text-delta", id: idTexto, delta: texto });
-					writer.write({ type: "text-end", id: idTexto });
-					writer.write({ type: "finish", finishReason: "stop" });
-				},
-			});
-			return createUIMessageStreamResponse({ stream: flujo, headers: cors });
-		}
 		const { data, error } = await cliente
 			.from("versiones_contenido")
 			.select("json")
@@ -239,11 +202,6 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 						"La versión publicada es de ejemplo. Puedes usarla para la demo. Si el guion se apoya en estos datos, avisa a la persona administradora en el chat para que los verifique antes de usar el guion.",
 					]
 				: []),
-			...(opciones.videoDid
-				? [
-						"Cuando la persona quiera convertir un guion en video con Presentadora Fresura, indícale que escriba «crear video». El chat pedirá «confirmar video» y después mostrará el enlace por sí solo cuando el video esté listo; no hace falta escribir nada más. El render usa D-ID. Nunca afirmes haber dejado un trabajo en cola ni inventes un enlace.",
-					]
-				: []),
 		].join("\n\n");
 		const flujo = createUIMessageStream({
 			onError: () => RESPUESTAS_ERROR_IA.ia_tiempo.mensaje,
@@ -261,20 +219,7 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 							),
 					),
 					system: instrucciones,
-					messages: [
-						...historial.map((m) =>
-							m.role === "assistant" &&
-							typeof m.content === "string" &&
-							m.content.startsWith(ENLACE_VIDEO_DID)
-								? {
-										role: "assistant" as const,
-										content:
-											"El video está listo. Para renovar el enlace escribe «estado del video».",
-									}
-								: m,
-						),
-						nuevo,
-					],
+					messages: [...historial, nuevo],
 					tools: herramientas,
 					stopWhen: isStepCount(MAXIMO_PASOS_AGENTE),
 					// Sin reintentos del SDK: el 503 y el cupo los atiende `modeloConRespaldo`,

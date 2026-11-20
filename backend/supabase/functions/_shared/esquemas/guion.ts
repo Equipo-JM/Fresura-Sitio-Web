@@ -12,33 +12,10 @@ export const DURACIONES_VIDEO = [15, 30, 60] as const;
 export type DuracionVideo = (typeof DURACIONES_VIDEO)[number];
 
 /**
- * Fondos reales para el video de la presentadora en D-ID
- * (`/marca/fondo-presentadora-{clave}.jpg`). `cafeteria` es el general.
- */
-export const FONDOS_PRESENTADORA = [
-	"cafeteria",
-	"vitrina",
-	"fresas",
-	"festivo",
-	"flores",
-	"fresal",
-	"terraza",
-	"noche",
-	"navidad",
-	"rosado",
-	"corazones",
-] as const;
-
-/** Clave de un fondo de la presentadora. */
-export type FondoPresentadora = (typeof FONDOS_PRESENTADORA)[number];
-
-/**
  * Instrucción de un guion guardado o entregado por el chat.
- * Un producto nulo representa un tema general. `fondo` es opcional: lo elige
- * el agente para el video de la presentadora; los guiones anteriores no lo traen.
+ * Un producto nulo representa un tema general.
  */
 export const esquemaInstruccionGuion = z.strictObject({
-	fondo: z.enum(FONDOS_PRESENTADORA).nullable().optional(),
 	producto_id: z.string().min(1).max(80).nullable(),
 	campana: z.string().trim().max(120).nullable(),
 	objetivo: z.enum([
@@ -51,6 +28,18 @@ export const esquemaInstruccionGuion = z.strictObject({
 	red: z.enum(["instagram", "tiktok", "facebook"]),
 	duracion_s: z.union([z.literal(15), z.literal(30), z.literal(60)]),
 });
+
+/**
+ * Lectura de una instrucción ya guardada en el historial o en la biblioteca.
+ * Las de antes del 19 nov de 2026 traen `fondo`, del video que se hacía con
+ * D-ID: se descarta para que esos guiones sigan abriendo.
+ */
+export const esquemaInstruccionGuardada = z.preprocess((valor) => {
+	if (typeof valor !== "object" || valor === null || !("fondo" in valor))
+		return valor;
+	const { fondo: _retirado, ...resto } = valor;
+	return resto;
+}, esquemaInstruccionGuion);
 
 /** Contrato de la ruta anterior, que sigue exigiendo un producto. */
 export const esquemaInstruccionGuionProducto = esquemaInstruccionGuion.extend({

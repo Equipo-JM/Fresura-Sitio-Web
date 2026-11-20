@@ -11,7 +11,7 @@ export const TIPOS_PIEZA = [
 	"publicacion",
 	"carrusel",
 	"prompt_imagen",
-	"prompt_heygen",
+	"prompt_seedance",
 	"variantes_gancho",
 	"ideas",
 	"calendario",
@@ -21,13 +21,22 @@ export const TIPOS_PIEZA = [
 /** Tipo de pieza. */
 export type TipoPieza = (typeof TIPOS_PIEZA)[number];
 
+/**
+ * Personaje guardado en la cuenta de Dreamina con la foto de la presentadora.
+ * Pegado como texto no queda enlazado: hay que escribir @ y elegirlo en la lista.
+ */
+export const PERSONAJE_DREAMINA = "@fresura";
+
+/** Dreamina (CapCut): videos con Seedance. No tiene API oficial. */
+const URL_DREAMINA = "https://dreamina.capcut.com/ai-tool/ai-video";
+
 /** Herramienta externa donde se pega la pieza; las demás se copian sin abrir nada. */
 export const HERRAMIENTA_PIEZA: Partial<
 	Record<TipoPieza, { nombre: string; url: string }>
 > = {
 	carrusel: { nombre: "Canva", url: "https://www.canva.com/" },
 	prompt_imagen: { nombre: "Gemini", url: "https://gemini.google.com/app" },
-	prompt_heygen: { nombre: "HeyGen", url: "https://app.heygen.com/" },
+	prompt_seedance: { nombre: "Dreamina", url: URL_DREAMINA },
 };
 
 /** Nombre visible de cada tipo, para el panel y la biblioteca. */
@@ -35,7 +44,7 @@ export const NOMBRE_PIEZA: Record<TipoPieza, string> = {
 	publicacion: "Publicación",
 	carrusel: "Carrusel",
 	prompt_imagen: "Prompt de foto",
-	prompt_heygen: "Prompt de HeyGen",
+	prompt_seedance: "Prompt de Seedance",
 	variantes_gancho: "Variantes de gancho",
 	ideas: "Ideas de contenido",
 	calendario: "Calendario de publicaciones",
@@ -47,7 +56,7 @@ export const BLOQUES_PIEZA: Record<TipoPieza, readonly [number, number]> = {
 	publicacion: [1, 3],
 	carrusel: [5, 14],
 	prompt_imagen: [1, 4],
-	prompt_heygen: [1, 2],
+	prompt_seedance: [1, 2],
 	variantes_gancho: [2, 3],
 	ideas: [3, 8],
 	calendario: [3, 31],
@@ -94,6 +103,26 @@ export function erroresPieza(pieza: Pieza): string[] {
 				"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
 			);
 	}
+	if (pieza.tipo === "prompt_seedance")
+		for (const bloque of pieza.bloques) {
+			if (/^c[oó]mo usar/i.test(bloque.etiqueta)) continue;
+			const menciones = bloque.texto.split(PERSONAJE_DREAMINA).length - 1;
+			if (/presentadora/i.test(bloque.texto) && menciones === 0)
+				errores.push(
+					`La presentadora es el personaje ${PERSONAJE_DREAMINA} guardado en Dreamina: escríbelo al inicio del prompt.`,
+				);
+			// Dreamina solo enlaza el personaje si se elige en la lista al escribir
+			// @: va una sola vez y al inicio, para que la persona lo marque en un paso.
+			if (menciones > 1)
+				errores.push(
+					`Escribe ${PERSONAJE_DREAMINA} una sola vez, al inicio; después nómbrala «la presentadora» o «ella».`,
+				);
+			if (
+				menciones === 1 &&
+				!bloque.texto.trimStart().startsWith(PERSONAJE_DREAMINA)
+			)
+				errores.push(`El prompt empieza con ${PERSONAJE_DREAMINA} al inicio.`);
+		}
 	if (
 		(pieza.tipo === "publicacion" || pieza.tipo === "carrusel") &&
 		pieza.red === null

@@ -76,6 +76,39 @@ describe("piezas de contenido en el chat", () => {
 		).toBeVisible();
 	});
 
+	it("omite las piezas de HeyGen guardadas antes del cambio a Dreamina", () => {
+		const anterior = { ...pieza, tipo: "prompt_heygen" };
+		expect(leerPiezas([anterior, pieza])).toEqual([pieza]);
+	});
+
+	it("el video con @fresura copia solo el prompt y abre Dreamina", async () => {
+		const escribir = vi.fn(async () => {});
+		vi.stubGlobal("navigator", { clipboard: { writeText: escribir } });
+		const prompt =
+			"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece. La presentadora dice: «¡Arma tu Fresita hoy!»";
+		render(
+			<TarjetaPieza
+				pieza={{
+					tipo: "prompt_seedance",
+					titulo: "Arma tu Fresita",
+					red: "tiktok",
+					bloques: [
+						{ etiqueta: "Prompt", texto: prompt },
+						{ etiqueta: "Cómo usar", texto: "Abre AI Video." },
+					],
+				}}
+			/>,
+		);
+		expect(screen.getByText("Prompt de Seedance · TikTok")).toBeVisible();
+		fireEvent.click(
+			screen.getByRole("link", { name: /Copiar y abrir Dreamina/ }),
+		);
+		expect(escribir).toHaveBeenCalledWith(prompt);
+		expect(
+			screen.queryByRole("button", { name: /^Copiar Prompt$/ }),
+		).toBeNull();
+	});
+
 	it("una publicación se copia completa y no abre ninguna herramienta", async () => {
 		const escribir = vi.fn(async () => {});
 		vi.stubGlobal("navigator", { clipboard: { writeText: escribir } });

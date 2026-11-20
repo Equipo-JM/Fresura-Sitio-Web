@@ -6,7 +6,7 @@ import {
 } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import {
 	crearEsquemaGuion,
-	esquemaInstruccionGuion,
+	esquemaInstruccionGuardada,
 	type Guion,
 	type InstruccionGuion,
 } from "../../../../backend/supabase/functions/_shared/esquemas/guion";
@@ -48,7 +48,7 @@ export function leerTarjeta(valor: unknown): TarjetaGuion | undefined {
 		!("guion" in valor)
 	)
 		return;
-	const instruccion = esquemaInstruccionGuion.safeParse(valor.instruccion);
+	const instruccion = esquemaInstruccionGuardada.safeParse(valor.instruccion);
 	if (!instruccion.success) return;
 	const guion = crearEsquemaGuion(instruccion.data.duracion_s).safeParse(
 		valor.guion,

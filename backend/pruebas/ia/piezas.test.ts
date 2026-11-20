@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { esquemaContenido } from "../../supabase/functions/_shared/esquemas/contenido";
 import {
 	erroresPieza,
+	HERRAMIENTA_PIEZA,
 	type Pieza,
 	promptPieza,
+	TIPOS_PIEZA,
 } from "../../supabase/functions/_shared/esquemas/pieza";
 import {
 	crearHerramientasAgente,
@@ -60,8 +62,8 @@ describe("piezas de contenido del agente", () => {
 			"publicacion",
 			"carrusel (se arma en Canva)",
 			"prompt_imagen (foto con IA en Gemini",
-			"prompt_heygen (video por escenas en HeyGen",
-			"Guion para la presentadora (D-ID)",
+			"prompt_seedance (video en Dreamina con Seedance",
+			"Guion para la presentadora (@fresura en Dreamina)",
 			"Si la persona saluda o conversa",
 		])
 			expect(INSTRUCCIONES_AGENTE).toContain(texto);
@@ -82,6 +84,72 @@ describe("piezas de contenido del agente", () => {
 		).toContain("entre 2 y 3 bloques");
 	});
 
+	it("los videos se hacen en Dreamina, sin rastros de HeyGen ni D-ID", () => {
+		expect(TIPOS_PIEZA).not.toContain("prompt_heygen");
+		expect(HERRAMIENTA_PIEZA.prompt_seedance?.nombre).toBe("Dreamina");
+		expect(TIPOS_PIEZA).not.toContain("prompt_avatar_dreamina");
+		expect(HERRAMIENTA_PIEZA.prompt_seedance?.url).toBe(
+			"https://dreamina.capcut.com/ai-tool/ai-video",
+		);
+		expect(INSTRUCCIONES_AGENTE).not.toMatch(/heygen|d-id|instruccion\.fondo/i);
+	});
+
+	it("la presentadora es siempre el personaje @fresura guardado en Dreamina", () => {
+		const conPresentadora: Pieza = {
+			tipo: "prompt_seedance",
+			titulo: "Arma tu Fresita",
+			red: "tiktok",
+			bloques: [
+				{
+					etiqueta: "Prompt",
+					texto:
+						"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece. Video vertical 9:16. La presentadora dice: «¡Arma tu Fresita hoy!»",
+				},
+				{ etiqueta: "Cómo usar", texto: "Abre AI Video en Dreamina." },
+			],
+		};
+		expect(erroresPieza(conPresentadora)).toEqual([]);
+		expect(promptPieza(conPresentadora)).toBe(conPresentadora.bloques[0].texto);
+		const sinPersonaje = {
+			...conPresentadora,
+			bloques: [
+				{ etiqueta: "Prompt", texto: "La presentadora sonríe y dice hola." },
+			],
+		};
+		expect(erroresPieza(sinPersonaje).join(" ")).toContain("@fresura");
+		// Dreamina solo enlaza el personaje si se elige en la lista al escribir @:
+		// va una sola vez y al inicio, para marcarlo en un paso.
+		const repetido = {
+			...conPresentadora,
+			bloques: [
+				{
+					etiqueta: "Prompt",
+					texto: `${conPresentadora.bloques[0].texto} Luego @fresura sonríe.`,
+				},
+			],
+		};
+		expect(erroresPieza(repetido).join(" ")).toContain("una sola vez");
+		const alFinal = {
+			...conPresentadora,
+			bloques: [
+				{ etiqueta: "Prompt", texto: "La presentadora saluda. Es @fresura." },
+			],
+		};
+		expect(erroresPieza(alFinal).join(" ")).toContain("al inicio");
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"escribe @ en ese lugar y elige fresura en la lista",
+		);
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece.",
+		);
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"Si el guion dura más de 15 segundos, resúmelo a 15",
+		);
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"El chat ya no genera videos: si en mensajes anteriores aparecen «crear video»",
+		);
+	});
+
 	it("copia solo el prompt, sin las indicaciones para la administradora", () => {
 		expect(promptPieza(promptFoto)).toBe("Usa la foto adjunta del producto…");
 		expect(promptPieza(carrusel(5))).toBe(
@@ -98,7 +166,6 @@ describe("piezas de contenido del agente", () => {
 			"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain("«Prompt para Canva IA»");
-		expect(INSTRUCCIONES_AGENTE).toContain("Elige en instruccion.fondo");
 		expect(INSTRUCCIONES_AGENTE).toContain(
 			"Nunca escribas un prompt en el texto del chat",
 		);
