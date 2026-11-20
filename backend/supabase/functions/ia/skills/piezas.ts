@@ -32,9 +32,9 @@ export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con 
 - Si no han elegido el formato en esta conversación, pregunta exactamente «¿Cómo quieres el video? 1. Con la presentadora (@fresura) en cámara. 2. Solo escenas, sin personas.» y espera la respuesta antes de redactar el prompt. Mencionar Dreamina por sí solo no elige un formato.
 - Conserva el formato que la persona eligió expresamente para ese video; si pide cambiarlo, usa el nuevo.
 - prompt_seedance (video en Dreamina con Seedance): bloques «Prompt» (todo el video en un texto: escenas en orden con lo que se ve, el movimiento de cámara y el texto en pantalla; vertical 9:16; estética cálida y limpia con la paleta de Fresura; como máximo 15 segundos) y «Cómo usar».
-- Con la presentadora: la presentadora es el personaje @fresura, guardado en la cuenta de Dreamina con su foto. El «Prompt» empieza con esta frase exacta: «Usa el personaje @fresura como presentadora en todas las escenas donde aparece; conserva su cara, cabello y ropa.» Escribe lo que dice así: @fresura dice: «…», con como máximo 240 caracteres hablados en total. Puede aparecer con el producto, en la tienda o en otros lugares. No describas su apariencia física: la da el personaje.
+- Con la presentadora: la presentadora es el personaje @fresura, guardado en la cuenta de Dreamina con su foto. El «Prompt» empieza con esta frase exacta: «@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece.» Escribe @fresura solo esa vez; después nómbrala «la presentadora» o «ella». Escribe lo que dice así: La presentadora dice: «…», con como máximo 240 caracteres hablados en total. Puede aparecer con el producto, en la tienda o en otros lugares. No describas su apariencia física: la da el personaje.
 - Solo escenas (prodúcelo solo si la persona eligió esa opción): nunca incluyas personas reconocibles; usa producto, manos, lugares y texto en pantalla.
-- «Cómo usar»: abrir Dreamina, entrar a AI Video con el modelo Dreamina Seedance, pegar el prompt (si es con la presentadora, comprobar que @fresura quede marcado como personaje; si no, elegirlo en el selector de personajes), elegir 9:16 y generar.
+- «Cómo usar»: abrir Dreamina, entrar a AI Video con el modelo Dreamina Seedance y pegar el prompt. Si es con la presentadora: borra «@fresura» del inicio, escribe @ en ese lugar y elige fresura en la lista, para que quede marcado como personaje (pegado como texto no funciona). Elegir 9:16 en la barra de abajo, porque Dreamina no toma el formato del texto, y generar.
 - Conserva el guion y la duración acordados. No digas que el video ya se generó.
 
 5. variantes_gancho: 2 o 3 bloques «Opción 1»… con estilos distintos (pregunta, dato del producto, reto o emoción), cada uno de máximo 15 palabras y una línea de por qué funciona.
@@ -50,7 +50,7 @@ export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con 
  * Seedance, donde ella es el personaje `@fresura` de Dreamina.
  */
 export const INSTRUCCIONES_GUION_PRESENTADORA = `Guion para la presentadora (@fresura en Dreamina):
-- Si el video es con la presentadora, en «Qué se ve» nómbrala como @fresura y describe su gesto, el encuadre y el lugar; puede aparecer con el producto.
+- Si el video es con la presentadora, en «Qué se ve» nómbrala «la presentadora» y describe su gesto, el encuadre y el lugar; puede aparecer con el producto.
 - Lo que dice va en la voz de cada escena.
 - Entrégalo junto con la pieza prompt_seedance con la presentadora. Si el guion dura más de 15 segundos, resúmelo a 15 para esa pieza y dilo en una línea, o propón dividirlo en varias piezas de 15 segundos.
 - El chat ya no genera videos: si en mensajes anteriores aparecen «crear video», «confirmar video», «estado del video» o enlaces de videos anteriores, ignóralos y ofrece la pieza para Dreamina.`;

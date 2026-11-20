@@ -103,7 +103,7 @@ describe("piezas de contenido del agente", () => {
 				{
 					etiqueta: "Prompt",
 					texto:
-						"Usa el personaje @fresura como presentadora en todas las escenas donde aparece; conserva su cara, cabello y ropa. Video vertical 9:16. @fresura dice: «¡Arma tu Fresita hoy!»",
+						"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece. Video vertical 9:16. La presentadora dice: «¡Arma tu Fresita hoy!»",
 				},
 				{ etiqueta: "Cómo usar", texto: "Abre AI Video en Dreamina." },
 			],
@@ -117,8 +117,30 @@ describe("piezas de contenido del agente", () => {
 			],
 		};
 		expect(erroresPieza(sinPersonaje).join(" ")).toContain("@fresura");
+		// Dreamina solo enlaza el personaje si se elige en la lista al escribir @:
+		// va una sola vez y al inicio, para marcarlo en un paso.
+		const repetido = {
+			...conPresentadora,
+			bloques: [
+				{
+					etiqueta: "Prompt",
+					texto: `${conPresentadora.bloques[0].texto} Luego @fresura sonríe.`,
+				},
+			],
+		};
+		expect(erroresPieza(repetido).join(" ")).toContain("una sola vez");
+		const alFinal = {
+			...conPresentadora,
+			bloques: [
+				{ etiqueta: "Prompt", texto: "La presentadora saluda. Es @fresura." },
+			],
+		};
+		expect(erroresPieza(alFinal).join(" ")).toContain("al inicio");
 		expect(INSTRUCCIONES_AGENTE).toContain(
-			"Usa el personaje @fresura como presentadora en todas las escenas donde aparece; conserva su cara, cabello y ropa.",
+			"escribe @ en ese lugar y elige fresura en la lista",
+		);
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece.",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain(
 			"Si el guion dura más de 15 segundos, resúmelo a 15",

@@ -162,7 +162,7 @@ El panel tiene tres vistas: **Chat**, **Biblioteca** (tabla `biblioteca_piezas`:
 
 Dreamina (CapCut) no tiene API oficial, así que el chat no genera videos: entrega la pieza **Prompt de Seedance** (`prompt_seedance`) para copiar y pegar en AI Video con el modelo Dreamina Seedance, con el botón **Copiar y abrir Dreamina**.
 
-- **Con la presentadora:** es el personaje `@fresura`, guardado en la cuenta de Dreamina con la foto de una persona real que dio su permiso. El prompt empieza siempre nombrando a `@fresura` y la validación lo exige si menciona a la presentadora.
+- **Con la presentadora:** es el personaje `@fresura`, guardado en la cuenta de Dreamina con la foto de una persona real que dio su permiso. El prompt nombra a `@fresura` una sola vez, al inicio: pegado como texto no queda enlazado, así que se borra, se escribe @ y se elige fresura en la lista. En la barra de Dreamina hay que elegir 9:16.
 - **Solo escenas:** sin personas reconocibles.
 
 AI Avatar de Dreamina no está disponible en Colombia. No hay secretos ni tablas para video: las migraciones `20261119200000_quitar_d_id_heygen.sql` y `20261119220000_quitar_avatar_dreamina.sql` quitaron lo que usaban D-ID y AI Avatar.

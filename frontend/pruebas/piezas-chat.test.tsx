@@ -85,7 +85,7 @@ describe("piezas de contenido en el chat", () => {
 		const escribir = vi.fn(async () => {});
 		vi.stubGlobal("navigator", { clipboard: { writeText: escribir } });
 		const prompt =
-			"Usa el personaje @fresura como presentadora en todas las escenas donde aparece; conserva su cara, cabello y ropa. @fresura dice: «¡Arma tu Fresita hoy!»";
+			"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece. La presentadora dice: «¡Arma tu Fresita hoy!»";
 		render(
 			<TarjetaPieza
 				pieza={{

@@ -23,7 +23,7 @@ export type TipoPieza = (typeof TIPOS_PIEZA)[number];
 
 /**
  * Personaje guardado en la cuenta de Dreamina con la foto de la presentadora.
- * Seedance lo reconoce al escribirlo en el prompt.
+ * Pegado como texto no queda enlazado: hay que escribir @ y elegirlo en la lista.
  */
 export const PERSONAJE_DREAMINA = "@fresura";
 
@@ -103,16 +103,26 @@ export function erroresPieza(pieza: Pieza): string[] {
 				"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
 			);
 	}
-	if (
-		pieza.tipo === "prompt_seedance" &&
-		pieza.bloques.some(
-			(b) =>
-				/presentadora/i.test(b.texto) && !b.texto.includes(PERSONAJE_DREAMINA),
-		)
-	)
-		errores.push(
-			`La presentadora es el personaje ${PERSONAJE_DREAMINA} guardado en Dreamina: escríbelo en el prompt.`,
-		);
+	if (pieza.tipo === "prompt_seedance")
+		for (const bloque of pieza.bloques) {
+			if (/^c[oó]mo usar/i.test(bloque.etiqueta)) continue;
+			const menciones = bloque.texto.split(PERSONAJE_DREAMINA).length - 1;
+			if (/presentadora/i.test(bloque.texto) && menciones === 0)
+				errores.push(
+					`La presentadora es el personaje ${PERSONAJE_DREAMINA} guardado en Dreamina: escríbelo al inicio del prompt.`,
+				);
+			// Dreamina solo enlaza el personaje si se elige en la lista al escribir
+			// @: va una sola vez y al inicio, para que la persona lo marque en un paso.
+			if (menciones > 1)
+				errores.push(
+					`Escribe ${PERSONAJE_DREAMINA} una sola vez, al inicio; después nómbrala «la presentadora» o «ella».`,
+				);
+			if (
+				menciones === 1 &&
+				!bloque.texto.trimStart().startsWith(PERSONAJE_DREAMINA)
+			)
+				errores.push(`El prompt empieza con ${PERSONAJE_DREAMINA} al inicio.`);
+		}
 	if (
 		(pieza.tipo === "publicacion" || pieza.tipo === "carrusel") &&
 		pieza.red === null
