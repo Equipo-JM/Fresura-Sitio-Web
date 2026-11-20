@@ -24,14 +24,7 @@ vi.mock("../src/panel/contenido/ContenidoPanel", () => ({
 	),
 }));
 vi.mock("../src/panel/guiones/GuionesPanel", () => ({
-	GuionesPanel: ({ irVersiones }: { irVersiones: () => void }) => (
-		<>
-			<h1>Pantalla de guiones</h1>
-			<button type="button" onClick={irVersiones}>
-				Volver a versiones
-			</button>
-		</>
-	),
+	GuionesPanel: () => <h1>Pantalla de guiones</h1>,
 }));
 
 function abrirPanel() {
@@ -50,14 +43,18 @@ describe("menú del panel", () => {
 		expect(screen.getByRole("button", { name: "Agente" }));
 	});
 
-	it("abre Agente a pantalla completa y vuelve a Versiones con su propio botón", () => {
+	it("mantiene un solo menú, con la sección activa marcada", () => {
 		abrirPanel();
 		fireEvent.click(screen.getByRole("button", { name: "Agente" }));
 		expect(screen.getByRole("heading", { name: "Pantalla de guiones" }));
-		expect(screen.queryByRole("navigation", { name: "Menú del panel" })).toBe(
-			null,
+		expect(
+			screen.getAllByRole("navigation", { name: "Menú del panel" }),
+		).toHaveLength(1);
+		expect(screen.getByRole("button", { name: "Agente" })).toHaveAttribute(
+			"aria-current",
+			"page",
 		);
-		fireEvent.click(screen.getByRole("button", { name: "Volver a versiones" }));
+		fireEvent.click(screen.getByRole("button", { name: "Versiones" }));
 		expect(screen.getByRole("heading", { name: "Pantalla de versiones" }));
 	});
 

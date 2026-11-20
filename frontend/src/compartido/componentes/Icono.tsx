@@ -16,6 +16,9 @@ export type NombreIcono =
 	| "mas"
 	| "paquete"
 	| "atras"
+	| "recargar"
+	| "externo"
+	| "ojo"
 	| "foto";
 
 const TRAZOS: Record<NombreIcono, string> = {
@@ -37,6 +40,9 @@ const TRAZOS: Record<NombreIcono, string> = {
 	mas: "M12 6v12M6 12h12",
 	paquete: "M12 3 4 7v10l8 4 8-4V7l-8-4Z M4 7l8 4 8-4 M12 11v10",
 	atras: "M15 6l-6 6 6 6",
+	recargar: "M20 11a8 8 0 1 0-2.2 6.8 M20 5v6h-6",
+	externo: "M13 4h7v7 M20 4l-9 9 M10 5H5v14h14v-5",
+	ojo: "M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z M14.5 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z",
 	// Marco con montaña y sol: el símbolo universal de «aquí va una foto».
 	foto: "M3.5 5.5h17v13h-17Z m3.5 11 4.5-5 3 3 2-2 3 3 m-4-8a1.5 1.5 0 1 0 .01 0",
 };

@@ -4,6 +4,7 @@ import {
 	type Contenido,
 	esquemaContenido,
 } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
+import { Icono } from "../../compartido/componentes/Icono";
 import type { Database } from "../../tipos/database.types";
 import { useVersiones } from "../versiones/useVersiones";
 import { ContextoEdicion, cambiarCampo } from "./Campos";
@@ -62,30 +63,24 @@ export function ContenidoPanel({
 		: null;
 	return (
 		<main id="contenido" tabIndex={-1} aria-busy={ocupado}>
-			<h1>Contenido</h1>
+			<div className="panel-titulo-fila">
+				<h1>Contenido</h1>
+				<button
+					type="button"
+					className="panel-accion"
+					disabled={ocupado}
+					onClick={() => void recargar()}
+				>
+					<Icono nombre="recargar" />
+					{!versiones && error ? "Reintentar" : "Recargar"}
+				</button>
+			</div>
 			{error && (
 				<p className="panel-aviso" role="alert">
 					{error}
 				</p>
 			)}
-			<button
-				type="button"
-				className="boton-texto"
-				disabled={ocupado}
-				onClick={() => void recargar()}
-			>
-				Recargar
-			</button>
 			{!versiones && !error && <p>Cargando productos…</p>}
-			{!versiones && error && (
-				<button
-					type="button"
-					className="boton secundario"
-					onClick={() => void recargar()}
-				>
-					Reintentar
-				</button>
-			)}
 			{versiones && !versiones.borrador && (
 				<>
 					<p>
@@ -207,14 +202,10 @@ function EditorContenido({
 					void enviar();
 				}}
 			>
-				<nav
-					className="panel-versiones-acciones"
-					aria-label="Contenido editable"
-				>
+				<nav className="panel-subsecciones" aria-label="Contenido editable">
 					{BLOQUES.map((nombre) => (
 						<button
 							type="button"
-							className="boton secundario compacto"
 							key={nombre}
 							aria-pressed={bloque === nombre}
 							onClick={() => {
