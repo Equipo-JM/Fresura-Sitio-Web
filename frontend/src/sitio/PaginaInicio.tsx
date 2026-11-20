@@ -19,7 +19,6 @@ export function PaginaInicio() {
 					<>
 						<Portada
 							titulo={presentacion.titulo}
-							texto={presentacion.texto}
 							sedes={sedes.map((s) => s.nombre)}
 						/>
 						<Destacados

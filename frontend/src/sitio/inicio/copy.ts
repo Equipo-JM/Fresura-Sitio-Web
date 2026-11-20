@@ -65,6 +65,12 @@ export const TEXTO_RECIENTE =
 	"Fotos y videos de tus fresas favoritas. Síguenos para enterarte primero.";
 
 /**
+ * Frase bajo el logotipo de la portada cuando el contenido aún trae uno de los
+ * lemas anteriores al rediseño. Un título nuevo editado en el panel la reemplaza.
+ */
+export const FRASE_PORTADA = "Un antojo fresco, hecho a tu manera";
+
+/**
  * Fotos de ejemplo del inicio, tomadas del kit de marca (`referencia/`) solo
  * para el prototipo. El contrato de contenido aún no tiene campo para la foto
  * de portada ni para «Lo más reciente»: hasta que exista, se cambian aquí.

@@ -232,8 +232,8 @@ describe("sitio de varias páginas (RF-02)", () => {
 		mostrar();
 		expect(screen.queryByRole("region", { name: /antoja/i })).toBeNull();
 		expect(
-			screen.getByRole("link", { name: "¿No sabes qué pedir?" }),
-		).toHaveAttribute("href", "/menu#antojos");
+			screen.getAllByRole("link", { name: "Ver el menú" })[0],
+		).toHaveAttribute("href", "/menu");
 	});
 
 	it("elegir un antojo completa la frase en el menú", () => {
