@@ -72,6 +72,22 @@ describe("formularios del borrador", () => {
 			},
 		});
 	});
+	it("abre un producto desde su categoría y conserva los cambios al volver al catálogo", async () => {
+		simular();
+		const categoria = await screen.findByRole("region", { name: "Fresitas" });
+		fireEvent.click(
+			within(categoria).getByRole("button", { name: "Editar Arma tu Fresita" }),
+		);
+		const volver = screen.getByRole("button", { name: "Volver a productos" });
+		expect(volver).toHaveFocus();
+		fireEvent.change(screen.getByLabelText("Nombre"), {
+			target: { value: "Mi Fresita" },
+		});
+		fireEvent.click(volver);
+		expect(screen.getByRole("heading", { name: "Productos" })).toHaveFocus();
+		fireEvent.click(screen.getByRole("button", { name: "Editar Mi Fresita" }));
+		expect(screen.getByLabelText("Nombre")).toHaveValue("Mi Fresita");
+	});
 	it("cancelar la recarga conserva lo escrito", async () => {
 		simular();
 		fireEvent.click(

@@ -202,7 +202,10 @@ function EditorContenido({
 					void enviar();
 				}}
 			>
-				<nav className="panel-subsecciones" aria-label="Contenido editable">
+				<nav
+					className="panel-subsecciones panel-contenido-menu"
+					aria-label="Contenido editable"
+				>
 					{BLOQUES.map((nombre) => (
 						<button
 							type="button"
@@ -220,7 +223,6 @@ function EditorContenido({
 				<p>
 					Los cambios de todos los apartados se guardan juntos en el borrador.
 				</p>
-				<div role="status">{guardado && <p>Borrador guardado</p>}</div>
 				{Object.keys(errores).length > 0 && (
 					<div role="alert" className="panel-aviso">
 						<h3>Revisa este campo</h3>
@@ -266,9 +268,12 @@ function EditorContenido({
 					<div hidden={bloque !== "Categorías"}>
 						<Categorias />
 					</div>
-					<button type="submit" className="boton">
-						{ocupado ? "Guardando…" : "Guardar borrador"}
-					</button>
+					<div className="panel-contenido-guardar">
+						<button type="submit" className="boton">
+							{ocupado ? "Guardando…" : "Guardar borrador"}
+						</button>
+						<div role="status">{guardado && <p>Borrador guardado</p>}</div>
+					</div>
 				</fieldset>
 			</form>
 		</ContextoEdicion.Provider>
