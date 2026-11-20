@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { objetivoCaracteresVoz } from "./guion.ts";
 
 /**
  * Piezas de contenido que el agente entrega en el chat además del guion:
@@ -12,7 +11,6 @@ export const TIPOS_PIEZA = [
 	"publicacion",
 	"carrusel",
 	"prompt_imagen",
-	"prompt_avatar_dreamina",
 	"prompt_seedance",
 	"variantes_gancho",
 	"ideas",
@@ -24,12 +22,12 @@ export const TIPOS_PIEZA = [
 export type TipoPieza = (typeof TIPOS_PIEZA)[number];
 
 /**
- * Caracteres de «Lo que dice» en AI Avatar: 15 segundos, hasta confirmar en la
- * cuenta de Dreamina cuánto puede durar cada video.
+ * Personaje guardado en la cuenta de Dreamina con la foto de la presentadora.
+ * Seedance lo reconoce al escribirlo en el prompt.
  */
-export const MAXIMO_VOZ_AVATAR = objetivoCaracteresVoz(15);
+export const PERSONAJE_DREAMINA = "@fresura";
 
-/** Dreamina (CapCut): AI Avatar para la presentadora y Seedance para escenas. No tiene API oficial. */
+/** Dreamina (CapCut): videos con Seedance. No tiene API oficial. */
 const URL_DREAMINA = "https://dreamina.capcut.com/ai-tool/ai-video";
 
 /** Herramienta externa donde se pega la pieza; las demás se copian sin abrir nada. */
@@ -38,7 +36,6 @@ export const HERRAMIENTA_PIEZA: Partial<
 > = {
 	carrusel: { nombre: "Canva", url: "https://www.canva.com/" },
 	prompt_imagen: { nombre: "Gemini", url: "https://gemini.google.com/app" },
-	prompt_avatar_dreamina: { nombre: "Dreamina", url: URL_DREAMINA },
 	prompt_seedance: { nombre: "Dreamina", url: URL_DREAMINA },
 };
 
@@ -47,7 +44,6 @@ export const NOMBRE_PIEZA: Record<TipoPieza, string> = {
 	publicacion: "Publicación",
 	carrusel: "Carrusel",
 	prompt_imagen: "Prompt de foto",
-	prompt_avatar_dreamina: "Avatar de Dreamina",
 	prompt_seedance: "Prompt de Seedance",
 	variantes_gancho: "Variantes de gancho",
 	ideas: "Ideas de contenido",
@@ -60,7 +56,6 @@ export const BLOQUES_PIEZA: Record<TipoPieza, readonly [number, number]> = {
 	publicacion: [1, 3],
 	carrusel: [5, 14],
 	prompt_imagen: [1, 4],
-	prompt_avatar_dreamina: [2, 3],
 	prompt_seedance: [1, 2],
 	variantes_gancho: [2, 3],
 	ideas: [3, 8],
@@ -108,18 +103,16 @@ export function erroresPieza(pieza: Pieza): string[] {
 				"Agrega el bloque «Prompt para Canva IA» con el carrusel completo.",
 			);
 	}
-	if (pieza.tipo === "prompt_avatar_dreamina") {
-		for (const etiqueta of ["Lo que dice", "Movimiento y cámara"])
-			if (!pieza.bloques.some((b) => b.etiqueta === etiqueta))
-				errores.push(
-					`Agrega el bloque «${etiqueta}»: en AI Avatar va en su propio campo.`,
-				);
-		const voz = pieza.bloques.find((b) => b.etiqueta === "Lo que dice");
-		if (voz && voz.texto.length > MAXIMO_VOZ_AVATAR)
-			errores.push(
-				`«Lo que dice» lleva como máximo ${MAXIMO_VOZ_AVATAR} caracteres (15 segundos); tiene ${voz.texto.length}. Resúmelo.`,
-			);
-	}
+	if (
+		pieza.tipo === "prompt_seedance" &&
+		pieza.bloques.some(
+			(b) =>
+				/presentadora/i.test(b.texto) && !b.texto.includes(PERSONAJE_DREAMINA),
+		)
+	)
+		errores.push(
+			`La presentadora es el personaje ${PERSONAJE_DREAMINA} guardado en Dreamina: escríbelo en el prompt.`,
+		);
 	if (
 		(pieza.tipo === "publicacion" || pieza.tipo === "carrusel") &&
 		pieza.red === null
@@ -142,12 +135,6 @@ export function textoPieza(pieza: Pieza): string {
  * no, los bloques de prompt sin la explicación «Cómo usar».
  */
 export function promptPieza(pieza: Pieza): string {
-	// En AI Avatar lo hablado y el movimiento van en campos distintos: el botón
-	// principal copia lo hablado y la tarjeta copia el movimiento aparte.
-	if (pieza.tipo === "prompt_avatar_dreamina") {
-		const voz = pieza.bloques.find((b) => b.etiqueta === "Lo que dice");
-		if (voz) return voz.texto;
-	}
 	const directo = pieza.bloques.find((b) => /^prompt para/i.test(b.etiqueta));
 	if (directo) return directo.texto;
 	const prompts = pieza.bloques.filter(

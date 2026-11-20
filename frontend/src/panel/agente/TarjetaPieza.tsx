@@ -48,19 +48,6 @@ export function TarjetaPieza({
 				<div key={bloque.etiqueta + bloque.texto}>
 					<h4>{bloque.etiqueta}</h4>
 					<p className="agente-texto">{bloque.texto}</p>
-					{/* AI Avatar tiene un campo para lo hablado y otro para el movimiento. */}
-					{pieza.tipo === "prompt_avatar_dreamina" &&
-						bloque.etiqueta !== "Cómo usar" && (
-							<button
-								className="boton secundario compacto"
-								type="button"
-								onClick={() =>
-									void copiar(bloque.texto, `${bloque.etiqueta}: copiado.`)
-								}
-							>
-								Copiar {bloque.etiqueta}
-							</button>
-						)}
 				</div>
 			))}
 			<div className="agente-acciones">

@@ -53,12 +53,12 @@ export function leerSalidaPromptVideo(
 
 /**
  * Identidad de la presentadora: una persona real que dio su permiso. En
- * Dreamina (AI Avatar) se mantiene igual porque el equipo sube siempre la misma
- * foto y elige siempre la misma voz.
+ * Dreamina está guardada como el personaje `@fresura`, que mantiene su cara en
+ * todos los videos.
  */
 export const PERFIL_AVATAR_FRESURA = `Presentadora Fresura
 Es una persona real del equipo de Fresura. Voz cálida y clara, en español de Colombia, con tuteo y velocidad normal.
-En AI Avatar de Dreamina, sube siempre la misma foto de la presentadora y elige siempre la misma voz. Las indicaciones solo ajustan gesto, emoción y encuadre; no cambian su apariencia. Lee en voz alta únicamente el texto de la presentadora.`;
+En Dreamina es el personaje @fresura, guardado en la cuenta de Dreamina: escríbelo siempre en el prompt para que aparezca la misma persona. Las indicaciones solo ajustan gesto, emoción, encuadre y lugar; no cambian su apariencia.`;
 
 /** Reúne en un solo bloque el estilo y todo el contenido de cada escena. */
 export function textoCompletoPromptVideo(

@@ -154,18 +154,18 @@ npm run functions:deploy -- panel
 
 ## Piezas de contenido del chat
 
-Además del guion, el agente entrega con la herramienta `entregar_pieza` publicaciones por red, carruseles, prompts de foto (Gemini), el avatar de la presentadora para AI Avatar de Dreamina, prompts de video por escenas para Seedance en Dreamina, variantes de gancho, ideas, calendarios y revisiones. Cada tipo sigue el formato de su herramienta (`ia/skills/piezas.ts`), se valida con `_shared/esquemas/pieza.ts` y llega al panel en `message.metadata.piezas`. La tarjeta copia solo el prompt y abre la herramienta en otra pestaña; ninguna de estas herramientas se llama por API ni tiene costo para el proyecto.
+Además del guion, el agente entrega con la herramienta `entregar_pieza` publicaciones por red, carruseles, prompts de foto (Gemini), prompts de video para Seedance en Dreamina (con la presentadora `@fresura` o solo escenas), variantes de gancho, ideas, calendarios y revisiones. Cada tipo sigue el formato de su herramienta (`ia/skills/piezas.ts`), se valida con `_shared/esquemas/pieza.ts` y llega al panel en `message.metadata.piezas`. La tarjeta copia solo el prompt y abre la herramienta en otra pestaña; ninguna de estas herramientas se llama por API ni tiene costo para el proyecto.
 
 El panel tiene tres vistas: **Chat**, **Biblioteca** (tabla `biblioteca_piezas`: guardar desde el chat para tenerlo a mano, copiar y borrar, sin estados de aprobación; RF-18) y **Estilo de redes** (tabla `referencias_estilo`: publicaciones recientes de Fresura pegadas a mano). El agente lee las 12 referencias más recientes con `ver_estilo_redes` para imitar el estilo, sin tomar de ahí datos comerciales. La columna `origen` deja lista la importación con la API de Meta, que está pendiente.
 
 ## Videos en Dreamina
 
-Dreamina (CapCut) no tiene API oficial, así que el chat no genera videos: entrega dos piezas para copiar y pegar, con el botón **Copiar y abrir Dreamina**.
+Dreamina (CapCut) no tiene API oficial, así que el chat no genera videos: entrega la pieza **Prompt de Seedance** (`prompt_seedance`) para copiar y pegar en AI Video con el modelo Dreamina Seedance, con el botón **Copiar y abrir Dreamina**.
 
-- **Avatar de Dreamina** (`prompt_avatar_dreamina`): la presentadora, una persona real que dio su permiso, habla en cámara en una sola toma. En **AI Avatar** se sube siempre la misma foto, se elige siempre la misma voz, se pega «Lo que dice» en el guion y «Movimiento y cámara» en las indicaciones, y se genera con Avatar Pro.
-- **Prompt de Seedance** (`prompt_seedance`): video por escenas sin personas. Seedance rechaza caras de personas reales.
+- **Con la presentadora:** es el personaje `@fresura`, guardado en la cuenta de Dreamina con la foto de una persona real que dio su permiso. El prompt empieza siempre nombrando a `@fresura` y la validación lo exige si menciona a la presentadora.
+- **Solo escenas:** sin personas reconocibles.
 
-No hay secretos ni tablas para video. La migración `20261119200000_quitar_d_id_heygen.sql` eliminó lo que usaba D-ID.
+AI Avatar de Dreamina no está disponible en Colombia. No hay secretos ni tablas para video: las migraciones `20261119200000_quitar_d_id_heygen.sql` y `20261119220000_quitar_avatar_dreamina.sql` quitaron lo que usaban D-ID y AI Avatar.
 
 ## Respaldo semanal
 

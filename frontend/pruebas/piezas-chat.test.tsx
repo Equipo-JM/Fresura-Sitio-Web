@@ -81,39 +81,31 @@ describe("piezas de contenido en el chat", () => {
 		expect(leerPiezas([anterior, pieza])).toEqual([pieza]);
 	});
 
-	it("el avatar de Dreamina se copia sin «Cómo usar» y abre Dreamina", async () => {
+	it("el video con @fresura copia solo el prompt y abre Dreamina", async () => {
 		const escribir = vi.fn(async () => {});
 		vi.stubGlobal("navigator", { clipboard: { writeText: escribir } });
+		const prompt =
+			"Usa el personaje @fresura como presentadora en todas las escenas donde aparece; conserva su cara, cabello y ropa. @fresura dice: «¡Arma tu Fresita hoy!»";
 		render(
 			<TarjetaPieza
 				pieza={{
-					tipo: "prompt_avatar_dreamina",
+					tipo: "prompt_seedance",
 					titulo: "Arma tu Fresita",
 					red: "tiktok",
 					bloques: [
-						{ etiqueta: "Lo que dice", texto: "¡Arma tu Fresita hoy!" },
-						{ etiqueta: "Movimiento y cámara", texto: "Sonríe." },
-						{ etiqueta: "Cómo usar", texto: "Abre AI Avatar." },
+						{ etiqueta: "Prompt", texto: prompt },
+						{ etiqueta: "Cómo usar", texto: "Abre AI Video." },
 					],
 				}}
 			/>,
 		);
-		expect(screen.getByText("Avatar de Dreamina · TikTok")).toBeVisible();
-		const enlace = screen.getByRole("link", {
-			name: /Copiar y abrir Dreamina/,
-		});
-		expect(enlace).toHaveAttribute(
-			"href",
-			"https://dreamina.capcut.com/ai-tool/ai-video",
-		);
-		fireEvent.click(enlace);
-		expect(escribir).toHaveBeenCalledWith("¡Arma tu Fresita hoy!");
+		expect(screen.getByText("Prompt de Seedance · TikTok")).toBeVisible();
 		fireEvent.click(
-			screen.getByRole("button", { name: "Copiar Movimiento y cámara" }),
+			screen.getByRole("link", { name: /Copiar y abrir Dreamina/ }),
 		);
-		expect(escribir).toHaveBeenLastCalledWith("Sonríe.");
+		expect(escribir).toHaveBeenCalledWith(prompt);
 		expect(
-			screen.queryByRole("button", { name: "Copiar Cómo usar" }),
+			screen.queryByRole("button", { name: /^Copiar Prompt$/ }),
 		).toBeNull();
 	});
 

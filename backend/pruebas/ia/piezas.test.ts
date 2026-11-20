@@ -62,9 +62,8 @@ describe("piezas de contenido del agente", () => {
 			"publicacion",
 			"carrusel (se arma en Canva)",
 			"prompt_imagen (foto con IA en Gemini",
-			"prompt_avatar_dreamina (presentadora en cámara con AI Avatar de Dreamina",
-			"prompt_seedance (video por escenas en Dreamina",
-			"Guion para la presentadora (AI Avatar de Dreamina)",
+			"prompt_seedance (video en Dreamina con Seedance",
+			"Guion para la presentadora (@fresura en Dreamina)",
 			"Si la persona saluda o conversa",
 		])
 			expect(INSTRUCCIONES_AGENTE).toContain(texto);
@@ -88,43 +87,39 @@ describe("piezas de contenido del agente", () => {
 	it("los videos se hacen en Dreamina, sin rastros de HeyGen ni D-ID", () => {
 		expect(TIPOS_PIEZA).not.toContain("prompt_heygen");
 		expect(HERRAMIENTA_PIEZA.prompt_seedance?.nombre).toBe("Dreamina");
-		expect(HERRAMIENTA_PIEZA.prompt_avatar_dreamina?.url).toBe(
+		expect(TIPOS_PIEZA).not.toContain("prompt_avatar_dreamina");
+		expect(HERRAMIENTA_PIEZA.prompt_seedance?.url).toBe(
 			"https://dreamina.capcut.com/ai-tool/ai-video",
 		);
 		expect(INSTRUCCIONES_AGENTE).not.toMatch(/heygen|d-id|instruccion\.fondo/i);
 	});
 
-	it("el avatar de Dreamina separa lo que dice de su movimiento", () => {
-		const avatar: Pieza = {
-			tipo: "prompt_avatar_dreamina",
+	it("la presentadora es siempre el personaje @fresura guardado en Dreamina", () => {
+		const conPresentadora: Pieza = {
+			tipo: "prompt_seedance",
 			titulo: "Arma tu Fresita",
 			red: "tiktok",
 			bloques: [
-				{ etiqueta: "Lo que dice", texto: "¡Hola! Arma tu Fresita hoy." },
-				{ etiqueta: "Movimiento y cámara", texto: "Sonríe y señala." },
-				{ etiqueta: "Cómo usar", texto: "Abre AI Avatar en Dreamina." },
+				{
+					etiqueta: "Prompt",
+					texto:
+						"Usa el personaje @fresura como presentadora en todas las escenas donde aparece; conserva su cara, cabello y ropa. Video vertical 9:16. @fresura dice: «¡Arma tu Fresita hoy!»",
+				},
+				{ etiqueta: "Cómo usar", texto: "Abre AI Video en Dreamina." },
 			],
 		};
-		expect(erroresPieza(avatar)).toEqual([]);
-		expect(
-			erroresPieza({ ...avatar, bloques: avatar.bloques.slice(1) }).join(" "),
-		).toContain("«Lo que dice»");
-		expect(
-			erroresPieza({
-				...avatar,
-				bloques: [avatar.bloques[0], avatar.bloques[2]],
-			}).join(" "),
-		).toContain("«Movimiento y cámara»");
-		// El botón principal copia solo lo hablado: va en el campo del guion de AI Avatar.
-		expect(promptPieza(avatar)).toBe("¡Hola! Arma tu Fresita hoy.");
-		const largo = {
-			...avatar,
+		expect(erroresPieza(conPresentadora)).toEqual([]);
+		expect(promptPieza(conPresentadora)).toBe(conPresentadora.bloques[0].texto);
+		const sinPersonaje = {
+			...conPresentadora,
 			bloques: [
-				{ etiqueta: "Lo que dice", texto: "a".repeat(241) },
-				...avatar.bloques.slice(1),
+				{ etiqueta: "Prompt", texto: "La presentadora sonríe y dice hola." },
 			],
 		};
-		expect(erroresPieza(largo).join(" ")).toContain("240 caracteres");
+		expect(erroresPieza(sinPersonaje).join(" ")).toContain("@fresura");
+		expect(INSTRUCCIONES_AGENTE).toContain(
+			"Usa el personaje @fresura como presentadora en todas las escenas donde aparece; conserva su cara, cabello y ropa.",
+		);
 		expect(INSTRUCCIONES_AGENTE).toContain(
 			"Si el guion dura más de 15 segundos, resúmelo a 15",
 		);
