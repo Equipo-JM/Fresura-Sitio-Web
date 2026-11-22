@@ -44,9 +44,6 @@ dialog {
 .ficha-titulo h1 {
 	font-size: var(--titulo-1);
 }
-.cupon :is(h2, h3) {
-	font-size: var(--titulo-3);
-}
 .contacto-sedes {
 	margin-top: 28px;
 	padding: clamp(20px, 3vw, 32px);
@@ -912,39 +909,6 @@ button.paso-num {
 	gap: 28px;
 	padding-block: 24px 40px;
 }
-.visual {
-	position: relative;
-	display: grid;
-	place-items: center;
-	min-height: 440px;
-	padding: 56px 24px 28px;
-	overflow: hidden;
-	/* Arco arriba y esquinas redondas abajo. Con «999px» arriba el navegador
-	   reducía todos los radios en la misma proporción y las esquinas de abajo
-	   quedaban casi rectas (unos 6 px). Con porcentajes los radios caben en la
-	   caja y los de abajo se respetan; el 38 % vertical deja el arco casi circular. */
-	border-radius: 50% 50% 40px 40px / 38% 38% 40px 40px;
-	background: var(--color-flamingo);
-}
-.visual::before {
-	content: "";
-	position: absolute;
-	width: 70%;
-	aspect-ratio: 1;
-	top: 18%;
-	left: 15%;
-	border-radius: 50%;
-	background: var(--color-we-peep);
-}
-.visual > * {
-	position: relative;
-}
-.visual .pv-foto {
-	position: absolute;
-	top: 10px;
-	left: 50%;
-	transform: translateX(-50%);
-}
 .visual-simple {
 	font-family: var(--fuente-titulos);
 	font-size: var(--titulo-3);
@@ -1133,6 +1097,8 @@ button.paso-num {
 	background: var(--color-flamingo);
 	border-color: var(--color-flamingo);
 	color: var(--color-peat-brown);
+	/* El marcador salta al elegir; se apaga con movimiento reducido (más abajo). */
+	animation: fresa-pop 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .op[aria-pressed="true"] .op-marca .icono,
 .op:has(input:checked) .op-marca .icono {
@@ -1284,9 +1250,6 @@ button.paso-num {
 		position: sticky;
 		top: 24px;
 	}
-	.visual {
-		min-height: 620px;
-	}
 	.lienzo {
 		grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
 		gap: 48px;
@@ -1317,13 +1280,6 @@ button.paso-num {
 }
 
 @media (max-width: 599.98px) {
-	.visual {
-		min-height: 0;
-		padding: 48px 20px 20px;
-	}
-	.zona-vaso {
-		width: min(72%, 230px);
-	}
 	.barra-pedido {
 		flex-wrap: nowrap;
 	}
@@ -1628,9 +1584,6 @@ button.paso-num {
 }
 .calcomania-sedes .calcomania {
 	rotate: 5deg;
-}
-.calcomania-promociones .calcomania {
-	rotate: 7deg;
 }
 .calcomania-explora {
 	margin-bottom: clamp(28px, 4vw, 48px);
@@ -2900,6 +2853,178 @@ main > :last-child > .seccion:last-child::after {
 	.ficha-calcomania-b {
 		left: -4%;
 	}
+}
+
+/* Personalizar con opciones: el vaso que se arma ocupa el arco de la ficha,
+   sobre crema lisa. Debajo, lo elegido en stickers.
+   Microanimaciones sobrias al elegir: el marcador de la opción salta, el
+   contador muestra una fresa al completarse, cada sticker se pega al aparecer y
+   la etiqueta café rebota cuando cambia la frase. */
+.ficha-escena .tarjeta-vaso {
+	display: grid;
+	place-items: center;
+	padding: 14% 8% 10%;
+	background: var(--color-platinum);
+}
+/* Como en la ficha (`.pagina`): las calcomanías caen desde fuera y asoman por
+   el borde en móvil; se recortan aquí para que no haya desplazamiento lateral.
+   `clip` no crea contenedor de desplazamiento, así que la columna pegajosa sigue
+   funcionando. */
+.pagina-personalizar {
+	overflow-x: clip;
+}
+/* Con el vaso que se arma, la etiqueta café va centrada bajo el arco y recta:
+   inclinada, como en la ficha, se veía torcida bajo el vaso. */
+.ficha-escena-vaso .ficha-tamano {
+	right: auto;
+	left: 50%;
+	translate: -50% 0;
+	rotate: 0deg;
+	white-space: nowrap;
+}
+.tarjeta-vaso .zona-vaso {
+	width: 100%;
+}
+
+/* Sin opciones: bajo la escena, la descripción en un boleto como el precio
+   «Desde» de la ficha. */
+.boleto-descripcion {
+	display: grid;
+	gap: 4px;
+	margin-top: 22px;
+	padding: 16px 38px;
+}
+.boleto-descripcion p {
+	margin: 0;
+	font-weight: var(--peso-bold);
+	line-height: 1.5;
+}
+
+/* Cantidad e indicaciones van en cajas separadas. Junto a la cantidad, un
+   vasito por unidad que entra con un saltito; el precio de la barra rebota
+   cada vez que cambia. */
+.extra h2 .opc {
+	font-family: var(--fuente-texto);
+	font-size: var(--texto-chico);
+	font-weight: var(--peso-normal);
+}
+.cantidad-fila {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 16px;
+}
+.vasitos {
+	display: inline-flex;
+	align-items: flex-end;
+	gap: 6px;
+	min-height: 44px;
+	padding: 6px 12px;
+	border-radius: var(--radio-pildora);
+	background: var(--color-we-peep);
+}
+.vasito {
+	display: block;
+	animation: vasito-entra 460ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.vasitos-mas {
+	align-self: center;
+	font-size: var(--texto-chico);
+	font-weight: var(--peso-bold);
+}
+.precio-salta {
+	display: inline-block;
+	animation: precio-salta 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes vasito-entra {
+	from {
+		transform: translateY(14px) scale(0.3);
+		opacity: 0;
+	}
+}
+@keyframes precio-salta {
+	0% {
+		scale: 0.86;
+	}
+	60% {
+		scale: 1.08;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.vasito,
+	.precio-salta {
+		animation: none;
+	}
+}
+.ficha-foto .stickers-lista {
+	margin-inline: auto;
+	margin-top: 24px;
+}
+.sticker-op {
+	animation: pega 280ms var(--curva-salida) both;
+}
+.frase-viva {
+	display: inline-block;
+	animation: frase-salta 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes frase-salta {
+	0% {
+		scale: 0.8;
+	}
+	60% {
+		scale: 1.08;
+	}
+	100% {
+		scale: 1;
+	}
+}
+.cuenta-lista::before {
+	content: "";
+	width: 14px;
+	height: 14px;
+	margin-right: 6px;
+	background: url("/marca/fresa-flamingo.svg") center / contain no-repeat;
+	animation: fresa-pop 450ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+	.sticker-op,
+	.frase-viva,
+	.op[aria-pressed="true"] .op-marca,
+	.op:has(input:checked) .op-marca,
+	.cuenta-lista::before {
+		animation: none;
+	}
+}
+
+/* Columna de datos de personalizar con más carácter, sin agregar elementos:
+   título al tamaño de la ficha, bajada más legible y el contador como una
+   etiqueta con relieve, igual que las opciones. Al completarse se invierte a
+   Peat Brown con texto Platinum (8,2:1). */
+.pz-encabezado h1 {
+	font-size: clamp(2.75rem, 2rem + 3vw, 5rem);
+	line-height: 1;
+	letter-spacing: -0.02em;
+	text-wrap: balance;
+}
+.pz-encabezado p {
+	max-width: 46ch;
+	font-size: var(--texto-destacado);
+	line-height: 1.5;
+	text-wrap: pretty;
+}
+.pz-datos .ayuda {
+	line-height: 1.5;
+	text-wrap: pretty;
+}
+.pz-datos .cuenta {
+	border: 1.5px solid var(--texto);
+	box-shadow: 0 2px 0 var(--texto);
+	font-variant-numeric: tabular-nums;
+	rotate: 3deg;
+}
+.pz-datos .cuenta-lista {
+	background: var(--color-peat-brown);
+	color: var(--color-platinum);
 }
 
 .ficha-titulo {

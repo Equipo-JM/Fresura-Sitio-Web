@@ -203,10 +203,37 @@ describe("sitio de varias páginas (RF-02)", () => {
 			"Promociones",
 		);
 		for (const enlace of within(region).getAllByRole("link", {
-			name: "Ver el menú",
+			name: /Ver el menú|Pedirla desde el menú/,
 		})) {
 			expect(enlace).toHaveAttribute("href", "/menu");
 		}
+	});
+
+	it("/promociones muestra cada promoción vigente como cupón legible", () => {
+		const contenido = structuredClone(prueba);
+		const [producto] = contenido.productos;
+		contenido.promociones = [
+			{
+				id: "dos-por-uno",
+				titulo: "2x1 en fresas con crema",
+				productos: [producto.id],
+				vigencia: { desde: "2000-01-01", hasta: "2999-12-31" },
+				condiciones: "No acumulable.",
+			},
+		];
+		mostrar("/promociones", contenido);
+		const region = within(screen.getByRole("region", { name: "Promociones" }));
+		expect(
+			region.getByRole("heading", { name: "2x1 en fresas con crema" }),
+		).toBeInTheDocument();
+		expect(region.getByText("1 promoción vigente")).toBeInTheDocument();
+		expect(
+			region.getByText(/Del 1 de enero de 2000 al 31 de diciembre de 2999/),
+		).toBeInTheDocument();
+		expect(
+			region.getByRole("list", { name: "Productos de la promoción" }),
+		).toHaveTextContent(producto.nombre);
+		expect(region.getByText(/No acumulable\./)).toBeInTheDocument();
 	});
 
 	it("/nosotros reúne la historia, los valores y la calificación", () => {

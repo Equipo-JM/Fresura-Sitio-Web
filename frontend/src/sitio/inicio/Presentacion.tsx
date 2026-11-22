@@ -1,18 +1,23 @@
 import { useRef } from "react";
 import { Link } from "react-router";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
-import { nombreProducto } from "../../compartido/carrito/reglas";
 import { FotoEjemplo } from "../../compartido/componentes/FotoEjemplo";
-import { promocionesVigentes } from "../../compartido/contenido/vigencia";
+import {
+	fechaColombia,
+	promocionesVigentes,
+} from "../../compartido/contenido/vigencia";
 import { useCalcomaniaViva } from "../../compartido/movimiento/useCalcomaniaViva";
 import { Calcomania } from "../Calcomania";
+import { CajaAbierta } from "../promociones/CajaAbierta";
 import { CajaSorpresa } from "../promociones/CajaSorpresa";
+import { CuponPromocion } from "../promociones/CuponPromocion";
 import { NOSOTROS } from "./copy";
 
 /**
- * Promociones vigentes hoy en Colombia, con su vigencia, productos y condiciones
- * (RNF-16). Las vencidas o futuras se quedan en el panel sin mostrarse.
- * `comoPagina` usa el título como la `h1` de /promociones.
+ * Promociones vigentes hoy en Colombia, cada una como cupón con su vigencia,
+ * productos y condiciones (RNF-16). Las vencidas o futuras se quedan en el
+ * panel sin mostrarse; sin ninguna vigente se muestra la caja sorpresa
+ * cerrada. `comoPagina` usa el título como la `h1` de /promociones.
  */
 export function Promociones({
 	contenido,
@@ -24,66 +29,44 @@ export function Promociones({
 	const Titulo = comoPagina ? "h1" : "h2";
 	// En la página propia los cupones cuelgan del h1: h2, sin saltar niveles.
 	const Subtitulo = comoPagina ? "h2" : "h3";
-	const vigentes = promocionesVigentes(contenido.promociones);
-	if (comoPagina && vigentes.length === 0) return <PromocionesVacias />;
+	const hoy = fechaColombia();
+	const vigentes = promocionesVigentes(contenido.promociones, hoy);
+	if (vigentes.length === 0) return <PromocionesVacias />;
+	// Hasta tres columnas: con una o dos promociones los cupones se reparten
+	// el ancho en lugar de dejar huecos a los lados.
+	const columnas = Math.min(vigentes.length, 3);
 	return (
 		<section
-			className="seccion fondo-flamingo"
+			className="seccion fondo-peep promos"
 			id="promociones"
 			aria-labelledby="titulo-promociones"
 		>
-			<img
-				className="deco promo-patron"
-				src="/marca/patron-fresas-we-peep.svg"
-				alt=""
-			/>
-			<div className="envoltura promo-grid">
-				<div>
-					<div
-						className={
-							comoPagina
-								? "titulo-con-calcomania calcomania-promociones"
-								: undefined
-						}
-					>
-						<Titulo
-							id="titulo-promociones"
-							className="promo-titulo"
-							tabIndex={-1}
-						>
+			<div className="envoltura">
+				<div className="promos-encabezado">
+					<div>
+						<Titulo id="titulo-promociones" tabIndex={-1}>
 							Promociones
 						</Titulo>
-						{comoPagina && <Calcomania nombre="ven-date-un-gusto-bonito" />}
+						<p className="promos-conteo">
+							{vigentes.length === 1
+								? "1 promoción vigente"
+								: `${vigentes.length} promociones vigentes`}
+						</p>
 					</div>
+					<CajaAbierta />
 				</div>
-				{vigentes.length === 0 ? (
-					<Cupon>
-						<Subtitulo>Por ahora no tenemos promociones publicadas</Subtitulo>
-					</Cupon>
-				) : (
-					vigentes.map((p) => (
-						<Cupon key={p.id}>
-							<Subtitulo>{p.titulo}</Subtitulo>
-							<p>
-								<strong>Vigencia:</strong> {p.vigencia.desde} a{" "}
-								{p.vigencia.hasta}.
-							</p>
-							<p>
-								<strong>Productos:</strong>{" "}
-								{contenido.productos
-									.filter((producto) => p.productos.includes(producto.id))
-									.map((producto) =>
-										nombreProducto(producto, contenido.categorias),
-									)
-									.join(", ")}
-								.
-							</p>
-							<p>
-								<strong>Condiciones:</strong> {p.condiciones}
-							</p>
-						</Cupon>
-					))
-				)}
+				<div className={`promos-cupones promos-columnas-${columnas}`}>
+					{vigentes.map((promocion, i) => (
+						<CuponPromocion
+							key={promocion.id}
+							promocion={promocion}
+							contenido={contenido}
+							hoy={hoy}
+							orden={i}
+							Titulo={Subtitulo}
+						/>
+					))}
+				</div>
 			</div>
 		</section>
 	);
@@ -113,20 +96,6 @@ function PromocionesVacias() {
 				</Link>
 			</div>
 		</section>
-	);
-}
-
-function Cupon({ children }: { children: React.ReactNode }) {
-	return (
-		<article className="cupon">
-			<div className="cupon-rayas" aria-hidden="true" />
-			<div className="cupon-cuerpo">
-				{children}
-				<Link className="boton" to="/menu">
-					Ver el menú
-				</Link>
-			</div>
-		</article>
 	);
 }
 

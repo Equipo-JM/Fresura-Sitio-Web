@@ -223,7 +223,9 @@ describe("paridad del inicio", () => {
 		];
 		mostrar("/promociones", contenido);
 		const bloque = within(screen.getByRole("region", { name: "Promociones" }));
-		expect(bloque.getByText(/2000-11-01.*2999-11-30/)).toBeInTheDocument();
+		expect(
+			bloque.getByText(/Del 1 de noviembre de 2000 al 30 de noviembre de 2999/),
+		).toBeInTheDocument();
 		expect(bloque.getByText(/Fresitas: Caribeña/)).toBeInTheDocument();
 		expect(bloque.getByText(/Solo en U Nacional/)).toBeInTheDocument();
 	});
@@ -378,14 +380,32 @@ describe("paridad de ficha y personalización", () => {
 			expect(titulo.parentElement).not.toHaveTextContent("Por validar");
 		}
 	});
-	it("en personalización la referencia tiene solo el sello Propuesta", () => {
+	it("en personalización sin opciones repite la escena de la ficha, sin sellos", () => {
 		mostrar("/personalizar/chocolate-fresitas");
-		const visual = document.querySelector(".visual");
-		expect(visual).toHaveTextContent("Propuesta");
-		expect(visual).not.toHaveTextContent("Por validar");
+		const escena = document.querySelector(".columna-visual .ficha-escena");
+		expect(escena).not.toBeNull();
+		expect(escena?.querySelector(".tarjeta-foto")).not.toBeNull();
+		expect(escena?.querySelectorAll(".ficha-calcomania")).toHaveLength(0);
+		expect(escena?.querySelector(".ficha-tamano")).not.toBeNull();
+		expect(document.querySelector(".visual")).toBeNull();
+		const columna = document.querySelector(".columna-visual");
+		expect(columna).not.toHaveTextContent("Propuesta");
+		expect(columna).not.toHaveTextContent("Por validar");
 		expect(
 			screen.queryByRole("list", { name: "Lo que llevas" }),
 		).not.toBeInTheDocument();
+	});
+	it("en personalización con opciones arma el vaso dentro de la escena de la ficha", () => {
+		mostrar("/personalizar/fresitas-caribena");
+		const escena = document.querySelector(".columna-visual .ficha-escena");
+		expect(escena?.querySelector(".tarjeta-vaso .zona-vaso")).not.toBeNull();
+		expect(escena?.querySelectorAll(".ficha-calcomania")).toHaveLength(0);
+		expect(escena?.querySelector(".ficha-tamano")).toHaveTextContent(
+			"Empieza por la base",
+		);
+		expect(document.querySelector(".columna-visual")).not.toHaveTextContent(
+			"Propuesta",
+		);
 	});
 	it("la consulta por WhatsApp identifica categoría y producto", () => {
 		mostrar("/producto/fresitas-caribena");
@@ -447,6 +467,27 @@ describe("paridad de ficha y personalización", () => {
 		expect(
 			screen.queryByRole("heading", { name: "Base" }),
 		).not.toBeInTheDocument();
+	});
+	it("sin opciones, muestra la descripción en un boleto bajo la foto", () => {
+		mostrar("/personalizar/chocolate-fresitas");
+		const boleto = document.querySelector(
+			".columna-visual .boleto-descripcion",
+		);
+		expect(boleto).toHaveTextContent("Lo que trae");
+		expect(boleto).toHaveTextContent(/Fresas jugosas bañadas en chocolate/);
+	});
+	it("separa cantidad e indicaciones y dibuja un vasito por unidad", () => {
+		mostrar("/personalizar/chocolate-fresitas");
+		expect(
+			screen.getByRole("region", { name: "Cantidad" }),
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole("region", { name: /Indicaciones/ }),
+		).toBeInTheDocument();
+		expect(document.querySelectorAll(".vasitos .vasito")).toHaveLength(1);
+		fireEvent.click(screen.getByRole("button", { name: "Agregar una unidad" }));
+		fireEvent.click(screen.getByRole("button", { name: "Agregar una unidad" }));
+		expect(document.querySelectorAll(".vasitos .vasito")).toHaveLength(3);
 	});
 	it("usa categoría, Desde, características y toppings en la ficha", () => {
 		mostrar("/producto/fresitas-caribena");

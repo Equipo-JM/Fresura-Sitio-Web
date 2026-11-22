@@ -16,10 +16,11 @@ import { Icono } from "../compartido/componentes/Icono";
 import { volarAlCarrito } from "../compartido/movimiento/volarAlCarrito";
 import { CompraDesactivada } from "./CompraDesactivada";
 import { ConContenido } from "./ConContenido";
-import { FotoProducto } from "./FotoProducto";
+import { EscenaProducto } from "./EscenaProducto";
 import { PERSONALIZACION } from "./inicio/copy";
 import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
 import { useDialogoAgregado } from "./personalizar/useDialogoAgregado";
+import { VasitosCantidad } from "./personalizar/VasitosCantidad";
 import { VasoIlustrado } from "./personalizar/VasoIlustrado";
 
 /** Pantalla «Ponle tu toque»: tamaño, opciones por grupo, cantidad y agregar al carrito. */
@@ -137,44 +138,64 @@ function Personalizador({
 			return { grupo: grupo.nombre, nombre: opcion?.nombre ?? id };
 		}),
 	);
+	const frase =
+		elegidos.length === 0
+			? PERSONALIZACION.inicio
+			: elegidos.length < 4
+				? PERSONALIZACION.frases[0]
+				: elegidos.length < 7
+					? PERSONALIZACION.frases[1]
+					: PERSONALIZACION.frases[2];
 
 	return (
-		<section>
+		<section className="pagina-personalizar">
 			<div className="envoltura pz">
 				<div className="columna-visual">
-					<div className="visual">
-						<span className="pv pv-foto">Propuesta</span>
-						{producto.grupos_opciones.length > 0 ? (
-							<VasoIlustrado producto={producto} seleccion={seleccion} />
-						) : (
-							<div className="visual-foto tarjeta-foto">
-								<FotoProducto producto={producto} />
-							</div>
-						)}
-						{elegidos.length > 0 && (
-							<ul className="stickers-lista" aria-label="Lo que llevas">
-								{elegidos.map((e) => (
-									<li className="sticker-op" key={`${e.grupo}-${e.nombre}`}>
-										<span className="sticker-grupo">{e.grupo}</span> {e.nombre}
-									</li>
-								))}
-							</ul>
-						)}
-						{producto.grupos_opciones.length > 0 && (
-							<p className="visual-pie">
-								{elegidos.length === 0
-									? PERSONALIZACION.inicio
-									: elegidos.length < 4
-										? PERSONALIZACION.frases[0]
-										: elegidos.length < 7
-											? PERSONALIZACION.frases[1]
-											: PERSONALIZACION.frases[2]}
-							</p>
-						)}
-						{producto.grupos_opciones.length === 0 && (
-							<p className="visual-pie">{producto.nombre}</p>
-						)}
-					</div>
+					{producto.grupos_opciones.length === 0 ? (
+						// Sin opciones que ilustrar, se muestra la misma escena de la ficha
+						// y, debajo, la descripción en un boleto como el precio de la ficha.
+						<EscenaProducto
+							producto={producto}
+							calcomanias={false}
+							pie={
+								producto.descripcion && (
+									<div className="boleto boleto-descripcion">
+										<span className="boleto-etiqueta">Lo que trae</span>
+										<p>{producto.descripcion}</p>
+									</div>
+								)
+							}
+						/>
+					) : (
+						// La misma escena de la ficha, con el vaso que se arma en el arco
+						// y la frase de avance en la etiqueta café.
+						<EscenaProducto
+							producto={producto}
+							calcomanias={false}
+							centro={
+								<VasoIlustrado producto={producto} seleccion={seleccion} />
+							}
+							etiqueta={
+								// La clave cambia con la frase para que la etiqueta vuelva
+								// a saltar cada vez que avanza.
+								<span className="frase-viva" key={frase}>
+									{frase}
+								</span>
+							}
+							pie={
+								elegidos.length > 0 && (
+									<ul className="stickers-lista" aria-label="Lo que llevas">
+										{elegidos.map((e) => (
+											<li className="sticker-op" key={`${e.grupo}-${e.nombre}`}>
+												<span className="sticker-grupo">{e.grupo}</span>{" "}
+												{e.nombre}
+											</li>
+										))}
+									</ul>
+								)
+							}
+						/>
+					)}
 				</div>
 
 				<form
@@ -237,7 +258,11 @@ function Personalizador({
 								>
 									<div className="grupo-cabeza">
 										<h2 id={`grupo-${grupo.id}`}>{grupo.nombre}</h2>
-										<span className="cuenta">
+										<span
+											className={
+												lleno && !adicional ? "cuenta cuenta-lista" : "cuenta"
+											}
+										>
 											{adicional
 												? `${elegidas.length} ${elegidas.length === 1 ? "elegido" : "elegidos"}`
 												: `${lleno ? "Listo · " : ""}${elegidas.length} de ${grupo.maximo}`}
@@ -289,37 +314,44 @@ function Personalizador({
 						})}
 					</div>
 
-					<div className="extra">
-						<h2>Cantidad e indicaciones</h2>
-						<fieldset className="paso-cantidad" aria-label="Cantidad">
-							<button
-								type="button"
-								className="redondo"
-								aria-label="Quitar una unidad"
-								disabled={cantidad <= 1}
-								onClick={() => fijarCantidad(Math.max(1, cantidad - 1))}
-							>
-								<Icono nombre="menos" />
-							</button>
-							<span className="num" aria-live="polite">
-								{cantidad}
-							</span>
-							<button
-								type="button"
-								className="redondo"
-								aria-label="Agregar una unidad"
-								disabled={cantidad >= MAX_UNIDADES}
-								onClick={() =>
-									fijarCantidad(Math.min(MAX_UNIDADES, cantidad + 1))
-								}
-							>
-								<Icono nombre="mas" />
-							</button>
-						</fieldset>
+					<section className="extra" aria-labelledby="titulo-cantidad">
+						<h2 id="titulo-cantidad">Cantidad</h2>
+						<div className="cantidad-fila">
+							<fieldset className="paso-cantidad" aria-label="Cantidad">
+								<button
+									type="button"
+									className="redondo"
+									aria-label="Quitar una unidad"
+									disabled={cantidad <= 1}
+									onClick={() => fijarCantidad(Math.max(1, cantidad - 1))}
+								>
+									<Icono nombre="menos" />
+								</button>
+								<span className="num" aria-live="polite">
+									{cantidad}
+								</span>
+								<button
+									type="button"
+									className="redondo"
+									aria-label="Agregar una unidad"
+									disabled={cantidad >= MAX_UNIDADES}
+									onClick={() =>
+										fijarCantidad(Math.min(MAX_UNIDADES, cantidad + 1))
+									}
+								>
+									<Icono nombre="mas" />
+								</button>
+							</fieldset>
+							<VasitosCantidad cantidad={cantidad} />
+						</div>
+					</section>
+
+					<section className="extra" aria-labelledby="titulo-indicaciones">
+						<h2 id="titulo-indicaciones">
+							<label htmlFor="indicaciones">Indicaciones</label>{" "}
+							<span className="opc">(opcional)</span>
+						</h2>
 						<div className="campo">
-							<label htmlFor="indicaciones">
-								Indicaciones <span className="opc">(opcional)</span>
-							</label>
 							<textarea
 								id="indicaciones"
 								maxLength={MAX_INDICACIONES}
@@ -331,7 +363,7 @@ function Personalizador({
 								{indicaciones.length} de {MAX_INDICACIONES}
 							</span>
 						</div>
-					</div>
+					</section>
 
 					<p className="pz-whatsapp">
 						<a
@@ -358,7 +390,10 @@ function Personalizador({
 									{producto.nombre} × {cantidad}
 								</span>
 								<strong className="precio-barra">
-									{precio === null ? "Precio por confirmar" : pesos(precio)}
+									{/* La clave cambia con el precio para que vuelva a rebotar. */}
+									<span className="precio-salta" key={precio ?? "sin-precio"}>
+										{precio === null ? "Precio por confirmar" : pesos(precio)}
+									</span>
 								</strong>
 							</div>
 							<button className="boton" type="submit">

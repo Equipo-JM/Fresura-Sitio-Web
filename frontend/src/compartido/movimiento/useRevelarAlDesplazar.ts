@@ -14,7 +14,6 @@ const GRUPOS = [
 	".preguntas > details",
 	".ficha-bloque",
 	".pz-datos > .grupo",
-	".cupon",
 	".contacto-sedes",
 	".reciente-cabeza",
 	".destacados-encabezado",
