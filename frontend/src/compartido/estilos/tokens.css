@@ -53,7 +53,7 @@
 	--titulo-3: clamp(1.75rem, 1.5rem + 0.8vw, 2.25rem); /* 28-36 px */
 	--titulo-2: clamp(2.125rem, 1.7rem + 1.8vw, 3.5rem); /* 34-56 px */
 	--titulo-1: clamp(2.5rem, 2rem + 2.4vw, 4rem); /* 40-64 px */
-	--titulo-portada: clamp(2.75rem, 1.7rem + 4.4vw, 5.5rem); /* 44-88 px */
+	--titulo-portada: clamp(2.75rem, 1.6rem + 4.2vw, 6rem); /* 44-96 px */
 	--interlineado: 1.5;
 	--ancho-lectura: 65ch;
 

@@ -457,32 +457,417 @@ h2:focus {
 	object-fit: cover;
 }
 
-/* Promociones */
-.promo-grid {
+/* Promociones: la caja sorpresa abierta y un cupón por promoción vigente.
+   Composición y movimiento: propuesta del rediseño del 22 nov. */
+.promos {
+	padding-block: clamp(28px, 4vw, 48px) clamp(56px, 7vw, 88px);
+	/* Las fresas que salen de la caja pueden pasar el borde de arriba: solo se
+	   recorta a los lados, para no crear desplazamiento horizontal. */
+	overflow-x: clip;
+	overflow-y: visible;
+}
+.promos-encabezado {
 	display: grid;
-	gap: 24px;
+	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
-	position: relative;
+	gap: 16px 48px;
 }
-.promo-titulo {
-	font-size: var(--titulo-2);
+.promos-encabezado :is(h1, h2) {
+	margin: 0;
+	font-size: var(--titulo-1);
+	line-height: 1.05;
 }
-.cupon {
-	position: relative;
-	background: var(--color-platinum);
-	border-radius: var(--radio);
-	overflow: hidden;
+.promos-conteo {
+	margin: 12px 0 0;
+	font-size: var(--texto-chico);
+	font-weight: var(--peso-bold);
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
 }
-.cupon-rayas {
-	height: 22px;
-	background: url(/marca/rayas-toldo.svg) 0 0 / 44px 44px repeat-x;
-	border-bottom: 1px solid var(--color-dust-storm);
-}
-.cupon-cuerpo {
-	padding: clamp(20px, 3vw, 36px);
+.promos-cupones {
 	display: grid;
+	gap: 40px 28px;
+	margin-top: 24px;
+}
+.promos-columnas-1 {
+	grid-template-columns: minmax(0, 1fr);
+}
+.promos-columnas-2 {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.promos-columnas-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Caja abierta: cae, la tapa salta y salen fresas que se quedan flotando. Va al
+   60 % para que el encabezado ocupe poca altura. */
+.caja-abierta {
+	position: relative;
+	width: 200px;
+	height: 200px;
+	margin: -12px 24px -40px 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	scale: 0.6;
+}
+.caja-abierta:focus-visible {
+	outline: 3px solid var(--foco);
+	outline-offset: 6px;
+}
+.caja-abierta-escena {
+	position: absolute;
+	inset: 0;
+	animation: caja-abierta-caer 900ms cubic-bezier(0.34, 1.56, 0.64, 1) both
+		150ms;
+}
+.caja-abierta-base,
+.caja-abierta-tapa {
+	position: absolute;
+	border-radius: 14px;
+	background: var(--color-flamingo);
+}
+.caja-abierta-base {
+	inset: 86px 10px 8px;
+}
+.caja-abierta-tapa {
+	top: 54px;
+	right: 2px;
+	left: 2px;
+	z-index: 2;
+	height: 44px;
+	transform-origin: 14% 100%;
+	box-shadow: 0 4px 0 rgba(91, 59, 36, 0.25);
+	animation: caja-abierta-tapa 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both
+		900ms;
+}
+.caja-abierta-base::after,
+.caja-abierta-tapa::after {
+	content: "";
+	position: absolute;
+	inset: 0 44%;
+	background: var(--color-we-peep);
+}
+.caja-abierta-fresa {
+	position: absolute;
+	top: 70px;
+	left: 85px;
+	/* Delante de la tapa; sus posiciones ya evitan quedar encima de ella. */
+	z-index: 3;
+	width: 30px;
+	height: auto;
+	animation:
+		caja-abierta-fresa 900ms var(--curva-salida) both
+		calc(1000ms + var(--retraso)),
+		caja-abierta-flotar 3.2s ease-in-out infinite calc(1900ms + var(--retraso));
+}
+@keyframes caja-abierta-caer {
+	from {
+		transform: translateY(-160px) rotate(-10deg);
+		opacity: 0;
+	}
+}
+@keyframes caja-abierta-tapa {
+	to {
+		transform: translate(-18px, -40px) rotate(-24deg);
+	}
+}
+@keyframes caja-abierta-fresa {
+	from {
+		transform: translate(0, 40px) scale(0.2);
+		opacity: 0;
+	}
+	to {
+		transform: translate(var(--x), var(--y)) rotate(var(--giro));
+	}
+}
+@keyframes caja-abierta-flotar {
+	0%,
+	100% {
+		transform: translate(var(--x), var(--y)) rotate(var(--giro));
+	}
+	50% {
+		transform: translate(var(--x), calc(var(--y) - 8px))
+			rotate(calc(var(--giro) * -1));
+	}
+}
+
+/* Cupón: crema, con muescas a los lados sobre la línea de corte */
+.cupon-promo {
+	display: flex;
+	flex-direction: column;
+	border-radius: var(--radio);
+	background: var(--color-platinum);
+	box-shadow: 0 22px 40px -30px rgba(91, 59, 36, 0.5);
+	animation: cupon-promo-entrar 800ms var(--curva-salida) both
+		calc(300ms + var(--orden) * 160ms);
+	transition:
+		transform 320ms var(--curva-salida),
+		box-shadow 320ms var(--curva-salida);
+}
+.cupon-promo:hover {
+	transform: translateY(-8px) rotate(-0.5deg);
+	box-shadow: 0 30px 50px -28px rgba(91, 59, 36, 0.55);
+}
+.cupon-promo-cabeza {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 24px 26px 0;
+}
+.cupon-promo-icono {
+	display: grid;
+	place-items: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 14px;
+	background: var(--color-flamingo);
+	box-shadow: 0 6px 12px -8px rgba(91, 59, 36, 0.5);
+}
+.cupon-promo-fresa {
+	width: 34px;
+	height: auto;
+	transform-origin: 50% 90%;
+	animation: cupon-promo-fresa 700ms cubic-bezier(0.34, 1.56, 0.64, 1) both
+		calc(750ms + var(--orden) * 160ms);
+}
+.cupon-promo:hover .cupon-promo-fresa {
+	animation: cupon-promo-menear 600ms ease-in-out;
+}
+.cupon-promo-aviso {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 36px;
+	padding: 6px 14px;
+	border-radius: var(--radio-pildora);
+	background: var(--color-peat-brown);
+	color: var(--color-platinum);
+	font-size: var(--texto-chico);
+	font-weight: var(--peso-bold);
+}
+.cupon-promo-urgente {
+	animation: cupon-promo-latir 1.8s ease-in-out infinite 2.4s;
+}
+.cupon-promo-cuerpo {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: column;
 	gap: 16px;
-	justify-items: start;
+	padding: 18px 26px 26px;
+}
+.cupon-promo-titulo {
+	margin: 0;
+	text-wrap: balance;
+}
+.cupon-promo-oferta {
+	display: block;
+	font-family: var(--fuente-titulos);
+	font-size: clamp(2.75rem, 2rem + 2vw, 4rem);
+	font-weight: 600;
+	line-height: 0.95;
+}
+.cupon-promo-resto {
+	display: block;
+	margin-top: 6px;
+	font-family: var(--fuente-titulos);
+	font-size: 1.625rem;
+	font-weight: var(--peso-normal);
+	line-height: 1.15;
+}
+.promos-columnas-3 .cupon-promo-oferta {
+	font-size: 2.875rem;
+}
+.promos-columnas-3 .cupon-promo-resto {
+	font-size: 1.375rem;
+}
+.cupon-promo-fechas {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font-weight: var(--peso-bold);
+}
+.cupon-promo-fechas svg {
+	flex: none;
+}
+.cupon-promo-productos {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.cupon-promo-productos li {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 32px;
+	padding: 6px 14px 6px 10px;
+	border-radius: var(--radio-pildora);
+	background: var(--color-we-peep);
+	font-size: var(--texto-chico);
+	font-weight: var(--peso-bold);
+}
+.cupon-promo-chip-fresa {
+	width: 13px;
+	height: auto;
+}
+.cupon-promo-lado {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: column;
+	gap: 18px;
+}
+.cupon-promo-corte {
+	position: relative;
+	margin: 4px 0;
+	border-top: 2px dashed var(--color-porcini);
+}
+/* Las muescas son círculos del color del fondo que «muerden» el borde. */
+.cupon-promo-corte span {
+	position: absolute;
+	top: -14px;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background: var(--color-we-peep);
+	box-shadow: inset 0 2px 3px rgba(91, 59, 36, 0.12);
+}
+.cupon-promo-corte span:first-child {
+	left: -40px;
+}
+.cupon-promo-corte span:last-child {
+	right: -40px;
+}
+.cupon-promo-condiciones {
+	flex-grow: 1;
+	margin: 0;
+	font-size: var(--texto-chico);
+}
+.cupon-promo-boton {
+	align-self: flex-start;
+	gap: 12px;
+}
+.cupon-promo-flecha {
+	transition: transform 260ms var(--curva-salida);
+}
+.cupon-promo-boton:hover .cupon-promo-flecha {
+	transform: translateX(3px);
+}
+/* Con una sola promoción el cupón ocupa todo el ancho: oferta a la izquierda y
+   condiciones a la derecha, con la línea de corte en vertical. */
+.promos-columnas-1 .cupon-promo-cuerpo {
+	display: grid;
+	grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+	column-gap: 56px;
+	align-items: start;
+}
+.promos-columnas-1 .cupon-promo-cuerpo > * {
+	grid-column: 1;
+}
+.promos-columnas-1 .cupon-promo-lado {
+	grid-row: 1 / span 4;
+	grid-column: 2;
+	align-self: stretch;
+	padding-left: 40px;
+	border-left: 2px dashed var(--color-porcini);
+}
+.promos-columnas-1 .cupon-promo-corte {
+	display: none;
+}
+@keyframes cupon-promo-entrar {
+	from {
+		transform: translateY(28px);
+		opacity: 0;
+	}
+}
+@keyframes cupon-promo-fresa {
+	from {
+		transform: translateY(-30px) scale(0.4);
+		opacity: 0;
+	}
+}
+@keyframes cupon-promo-menear {
+	25% {
+		transform: rotate(-12deg);
+	}
+	60% {
+		transform: rotate(9deg);
+	}
+}
+@keyframes cupon-promo-latir {
+	50% {
+		transform: scale(1.06);
+	}
+}
+@media (max-width: 1080px) {
+	.promos-columnas-3 {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.promos-columnas-2 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+@media (max-width: 760px) {
+	/* En celular la caja va pequeña junto al título, no encima: así no empuja
+	   los cupones hacia abajo. Los márgenes negativos quitan el espacio que
+	   deja la escala. */
+	.promos-encabezado {
+		gap: 12px;
+	}
+	.promos-encabezado :is(h1, h2) {
+		/* Se achica con la pantalla para que nunca choque con la caja. */
+		font-size: clamp(1.625rem, 8vw, 2.25rem);
+	}
+	.promos-conteo {
+		letter-spacing: 0.06em;
+	}
+	.caja-abierta {
+		margin: -50px -54px -62px -62px;
+		scale: 0.38;
+	}
+	.promos-columnas-3 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.promos-columnas-1 .cupon-promo-cuerpo {
+		display: flex;
+	}
+	.promos-columnas-1 .cupon-promo-lado {
+		padding-left: 0;
+		border-left: 0;
+	}
+	.promos-columnas-1 .cupon-promo-corte {
+		display: block;
+	}
+	.cupon-promo-oferta,
+	.promos-columnas-3 .cupon-promo-oferta {
+		font-size: 3rem;
+	}
+	.cupon-promo-resto,
+	.promos-columnas-3 .cupon-promo-resto {
+		font-size: 1.375rem;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.caja-abierta *,
+	.cupon-promo,
+	.cupon-promo * {
+		/* biome-ignore lint/complexity/noImportantStyles: con movimiento reducido nada debe animarse, ni al pasar el cursor */
+		animation: none !important;
+	}
+	.cupon-promo:hover {
+		transform: none;
+	}
+	.caja-abierta-tapa {
+		transform: translate(-18px, -40px) rotate(-24deg);
+	}
+	.caja-abierta-fresa {
+		transform: translate(var(--x), var(--y)) rotate(var(--giro));
+	}
 }
 .datos {
 	display: grid;
@@ -1517,10 +1902,6 @@ dialog::backdrop {
 	.pie {
 		padding-bottom: 72px;
 	}
-	.promo-grid {
-		grid-template-columns: 1fr 1.1fr;
-		gap: 48px;
-	}
 	.fila-productos {
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
@@ -2344,22 +2725,6 @@ body {
 	}
 }
 
-/* Promociones: figuras de fresa en We Peep sobre Flamingo */
-.promo-patron {
-	width: 220px;
-	right: -50px;
-	top: -250px;
-}
-@media (min-width: 900px) {
-	.promo-patron {
-		width: 280px;
-		right: auto;
-		left: -40px;
-		top: auto;
-		bottom: -340px;
-	}
-}
-
 /* Móvil: anuncio en una línea (WhatsApp ya está en el botón flotante) y acciones a todo el ancho */
 @media (max-width: 599.98px) {
 	.anuncio-enlace {
@@ -2524,26 +2889,6 @@ body {
 	gap: 28px;
 	padding-block: 24px 40px;
 }
-.visual {
-	position: relative;
-	display: grid;
-	place-items: center;
-	min-height: 440px;
-	padding: 56px 24px 28px;
-	overflow: hidden;
-	border-radius: 999px 999px 28px 28px;
-	background: var(--color-flamingo);
-}
-.visual::before {
-	content: "";
-	position: absolute;
-	width: 70%;
-	aspect-ratio: 1;
-	top: 18%;
-	left: 15%;
-	border-radius: 50%;
-	background: var(--color-we-peep);
-}
 .zona-vaso {
 	position: relative;
 	width: min(100%, 300px);
@@ -2572,21 +2917,6 @@ body {
 }
 .sticker-op.nuevo {
 	animation: pega 280ms var(--curva-salida) both;
-}
-.visual-pie {
-	position: relative;
-	margin-top: 24px;
-	padding: 6px 16px;
-	border-radius: var(--radio-pildora);
-	background: var(--color-platinum);
-	font-family: var(--fuente-titulos);
-	font-style: italic;
-	font-size: var(--titulo-4);
-	text-align: center;
-}
-.visual-foto {
-	position: relative;
-	width: min(100%, 300px);
 }
 .pz-datos {
 	display: grid;
@@ -3138,9 +3468,6 @@ button.paso-num {
 		position: sticky;
 		top: 24px;
 	}
-	.visual {
-		min-height: 620px;
-	}
 	.lienzo {
 		grid-template-columns: minmax(0, 1.45fr) minmax(320px, 1fr);
 		gap: 48px;
@@ -3198,17 +3525,6 @@ button.paso-num {
 	}
 }
 @media (max-width: 599.98px) {
-	.visual {
-		min-height: 0;
-		padding: 48px 20px 20px;
-	}
-	.zona-vaso {
-		width: min(72%, 230px);
-	}
-	.visual-pie {
-		margin-top: 18px;
-		font-size: var(--texto-destacado);
-	}
 	.compra-barra .envoltura {
 		flex-wrap: nowrap;
 	}

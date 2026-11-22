@@ -3,10 +3,8 @@ import { Link, useParams } from "react-router";
 import { nombreProducto, pesos } from "../compartido/carrito/reglas";
 import { Icono } from "../compartido/componentes/Icono";
 import { useConteoPrecio } from "../compartido/movimiento/useConteoPrecio";
-import { Calcomania } from "./Calcomania";
 import { ConContenido } from "./ConContenido";
-import { calcomaniasDeProducto } from "./calcomanias";
-import { FotoProducto } from "./FotoProducto";
+import { EscenaProducto } from "./EscenaProducto";
 import { PaginaNoEncontrada } from "./PaginaNoEncontrada";
 import { PromocionesFicha } from "./PromocionesFicha";
 import { piezasIncluidas } from "./piezasIncluidas";
@@ -36,11 +34,6 @@ export function PaginaProducto() {
 				const mensajeWhatsapp = encodeURIComponent(
 					`Hola, Fresura. Quiero preguntar por ${nombreProducto(producto, contenido.categorias)}.`,
 				);
-				const [calcomaniaA, calcomaniaB] = calcomaniasDeProducto(producto.id);
-				const tamanoUnico =
-					producto.presentaciones.length === 1
-						? producto.presentaciones[0].nombre
-						: null;
 				const incluidas = producto.caracteristicas
 					.map((texto) => ({ texto, piezas: piezasIncluidas(texto) }))
 					.filter((c) => c.piezas !== null);
@@ -54,29 +47,7 @@ export function PaginaProducto() {
 								<span className="volver-flecha">←</span> Volver al menú
 							</Link>
 							<div className="ficha">
-								<div className="ficha-foto">
-									<div className="ficha-escena">
-										<img
-											className="deco ficha-trazo"
-											src="/marca/trazo-3-flamingo.svg"
-											alt=""
-										/>
-										<div className="tarjeta-foto">
-											<FotoProducto producto={producto} />
-										</div>
-										<Calcomania
-											nombre={calcomaniaA}
-											className="ficha-calcomania ficha-calcomania-a"
-										/>
-										<Calcomania
-											nombre={calcomaniaB}
-											className="ficha-calcomania ficha-calcomania-b"
-										/>
-										{tamanoUnico ? (
-											<span className="ficha-tamano">{tamanoUnico}</span>
-										) : null}
-									</div>
-								</div>
+								<EscenaProducto producto={producto} />
 								<div className="ficha-datos">
 									<div className="ficha-titulo">
 										<h1>
