@@ -1,7 +1,12 @@
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { Icono } from "../../compartido/componentes/Icono";
 import { MapaSede } from "../MapaSede";
-import { PUBLICACIONES_RECIENTE, RESENAS_GOOGLE, TEXTO_RECIENTE } from "./copy";
+import {
+	codigosReels,
+	PUBLICACIONES_RECIENTE,
+	RESENAS_GOOGLE,
+	TEXTO_RECIENTE,
+} from "./copy";
 
 /** «Lo más reciente»: las últimas publicaciones de Instagram dentro de polaroids. */
 export function LoMasReciente({ contenido }: { contenido: Contenido }) {
@@ -38,17 +43,17 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 					)}
 				</div>
 				<ul className="polaroids">
-					{PUBLICACIONES_RECIENTE.map((publicacion, i) => (
-						<li className={`polaroid p${i + 1}`} key={publicacion.codigo}>
+					{codigosReels(contenido).map((codigo, i) => (
+						<li className={`polaroid p${i + 1}`} key={codigo}>
 							<span
-								className={`adhesivo cinta-${publicacion.cinta}`}
+								className={`adhesivo cinta-${PUBLICACIONES_RECIENTE[i % PUBLICACIONES_RECIENTE.length].cinta}`}
 								aria-hidden="true"
 							/>
 							<div className="polaroid-foto polaroid-instagram">
 								{/* Inserción de Instagram sin su script: solo un iframe perezoso,
 								    así el sitio no carga código de terceros (CSP: frame-src). */}
 								<iframe
-									src={`https://www.instagram.com/reel/${publicacion.codigo}/embed/`}
+									src={`https://www.instagram.com/reel/${codigo}/embed/`}
 									title={`Publicación ${i + 1} de ${usuario} en Instagram`}
 									loading="lazy"
 									allowFullScreen
@@ -56,7 +61,7 @@ export function LoMasReciente({ contenido }: { contenido: Contenido }) {
 							</div>
 							<p className="polaroid-pie">
 								<a
-									href={`https://www.instagram.com/reel/${publicacion.codigo}/`}
+									href={`https://www.instagram.com/reel/${codigo}/`}
 									target="_blank"
 									rel="noopener noreferrer"
 								>
@@ -122,16 +127,17 @@ export function Calificacion({
 			</div>
 			<div className="envoltura">
 				<ul className="google-resenas">
-					{RESENAS_GOOGLE.map((resena) => (
-						<li key={resena.autor}>
+					{(opiniones.resenas ?? RESENAS_GOOGLE).map((resena, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: las reseñas tienen posiciones fijas y sus datos visibles son editables.
+						<li key={i}>
 							<figure className="google-resena">
 								<p
 									className="google-resena-estrellas"
 									role="img"
-									aria-label="5 de 5 estrellas"
+									aria-label={`${resena.estrellas} de 5 estrellas`}
 								>
-									{Array.from({ length: 5 }, (_, i) => (
-										// biome-ignore lint/suspicious/noArrayIndexKey: cinco estrellas fijas
+									{Array.from({ length: resena.estrellas }, (_, i) => (
+										// biome-ignore lint/suspicious/noArrayIndexKey: las estrellas no tienen identidad individual
 										<Icono key={i} nombre="estrella" />
 									))}
 								</p>

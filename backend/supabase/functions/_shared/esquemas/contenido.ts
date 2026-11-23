@@ -118,6 +118,15 @@ const categoria = z.strictObject({ id, nombre: texto(40), orden });
 const opiniones = z
 	.strictObject({
 		mostrar: z.boolean(),
+		resenas: z
+			.array(
+				z.strictObject({
+					autor: z.string().trim().min(1).max(120),
+					texto: z.string().trim().min(1).max(2000),
+					estrellas: z.int().min(1).max(5),
+				}),
+			)
+			.optional(),
 		calificacion: z.number().min(1).max(5).nullable(),
 		numero_opiniones: z.int().min(0).nullable(),
 		fecha_corte: fecha.nullable(),
@@ -142,6 +151,13 @@ const opiniones = z
 	});
 
 const formaContenido = z.strictObject({
+	reels: z
+		.array(z.string().regex(/^[A-Za-z0-9_-]+$/))
+		.refine(
+			(codigos) => new Set(codigos).size === codigos.length,
+			"Hay reels repetidos.",
+		)
+		.optional(),
 	version_contrato: z.string().regex(/^[0-9]+\.[0-9]+\.[0-9]+$/),
 	estado: z.enum(["ejemplo", "real"]),
 	categorias: z.array(categoria).min(1),

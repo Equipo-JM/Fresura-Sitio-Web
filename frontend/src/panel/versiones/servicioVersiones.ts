@@ -143,7 +143,7 @@ export function crearServicioVersiones(cliente: SupabaseClient<Database>) {
 				.maybeSingle();
 			if (error)
 				throw new Error(
-					"No pudimos descartar el borrador. Inténtalo de nuevo.",
+					"No pudimos descartar los cambios. Inténtalo de nuevo.",
 				);
 			if (!data) throw new Error(CONFLICTO);
 		},

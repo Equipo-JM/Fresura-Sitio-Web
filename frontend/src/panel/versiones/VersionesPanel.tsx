@@ -133,7 +133,9 @@ export function VersionesPanel({
 						aria-labelledby="borrador-titulo"
 					>
 						<h2 id="borrador-titulo">
-							{versiones.borrador ? "Borrador guardado" : "Borrador"}
+							{versiones.borrador
+								? "Cambios guardados"
+								: "Sin cambios pendientes"}
 						</h2>
 						{versiones.borrador ? (
 							<>
@@ -159,7 +161,7 @@ export function VersionesPanel({
 											setPublicando(false);
 										}}
 									>
-										{publicando ? "Publicando…" : "Publicar"}
+										{publicando ? "Publicando…" : "Publicar cambios"}
 									</button>
 									<button
 										type="button"
@@ -182,7 +184,7 @@ export function VersionesPanel({
 										setConfirmacion("descartar");
 									}}
 								>
-									Descartar borrador
+									Descartar cambios
 								</button>
 							</>
 						) : (
@@ -218,7 +220,7 @@ export function VersionesPanel({
 									ref={(elemento) => elemento?.focus()}
 								>
 									{confirmacion === "descartar"
-										? "¿Descartar el borrador?"
+										? "¿Descartar los cambios?"
 										: "¿Volver a la versión anterior?"}
 								</h2>
 								<p>
@@ -228,15 +230,15 @@ export function VersionesPanel({
 								</p>
 								{confirmacion === "restaurar" && versiones.borrador && (
 									<>
-										<p>Tienes un borrador sin publicar</p>
-										<p>Revísalo o descártalo antes de publicarlo.</p>
+										<p>Tienes cambios sin publicar</p>
+										<p>Revísalos o descártalos antes de publicarlos.</p>
 										<button
 											type="button"
 											className="boton-texto"
 											disabled={ocupado}
 											onClick={() => setConfirmacion("descartar")}
 										>
-											Descartar borrador
+											Descartar cambios
 										</button>
 									</>
 								)}

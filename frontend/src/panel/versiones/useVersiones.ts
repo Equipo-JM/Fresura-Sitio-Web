@@ -76,7 +76,7 @@ export function useVersiones(cliente: SupabaseClient<Database>) {
 			if (!versiones?.borrador) return;
 			await servicio.descartar(versiones.borrador);
 			setVersiones({ ...versiones, borrador: null });
-		}, "Borrador descartado.");
+		}, "Cambios descartados.");
 	const publicar = (aprobado: boolean) =>
 		ejecutar(async () => {
 			if (!versiones?.borrador) throw new Error("No hay cambios por publicar.");

@@ -49,6 +49,7 @@ describe("referencias de estilo en el panel", () => {
 	it("guarda una referencia válida, rechaza enlaces sin https y permite borrar", async () => {
 		const { cambios } = montar();
 		expect(await screen.findByText("¿Antojo bonito? 🍓")).toBeVisible();
+		fireEvent.click(screen.getByRole("button", { name: /Agregar referencia/ }));
 
 		fireEvent.change(
 			screen.getByLabelText("Enlace de la publicación (opcional)"),

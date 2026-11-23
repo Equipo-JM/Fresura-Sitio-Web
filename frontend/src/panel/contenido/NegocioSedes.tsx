@@ -1,4 +1,5 @@
-﻿import { Campo, ErrorCampo, ListaCampos, useEdicion } from "./Campos";
+import { FichaPanel } from "../FichaPanel";
+import { Campo, ErrorCampo, ListaCampos, useEdicion } from "./Campos";
 
 /** Presentación, contacto y sedes; conserva la sede de pedidos hasta resolver DT-01 §19.3. */
 export function NegocioSedes() {
@@ -7,28 +8,38 @@ export function NegocioSedes() {
 	return (
 		<section aria-labelledby="titulo-negocio">
 			<h2 id="titulo-negocio">Negocio y sedes</h2>
-			<Campo
-				ruta="negocio.presentacion.titulo"
-				etiqueta="Título de presentación"
-				maximo={80}
-			/>
-			<Campo
-				ruta="negocio.presentacion.texto"
-				etiqueta="Presentación del negocio"
-				tipo="textarea"
-				maximo={600}
-			/>
-			<Campo
-				ruta="negocio.whatsapp"
-				etiqueta="WhatsApp del negocio (57 y número de celular)"
-				tipo="tel"
-			/>
+			<FichaPanel
+				seccion="Negocio y sedes"
+				titulo="Presentación y contacto"
+				resumen={contenido.negocio.presentacion.titulo}
+			>
+				<Campo
+					ruta="negocio.presentacion.titulo"
+					etiqueta="Título de presentación"
+					maximo={80}
+				/>
+				<Campo
+					ruta="negocio.presentacion.texto"
+					etiqueta="Presentación del negocio"
+					tipo="textarea"
+					maximo={600}
+				/>
+				<Campo
+					ruta="negocio.whatsapp"
+					etiqueta="WhatsApp del negocio (57 y número de celular)"
+					tipo="tel"
+				/>
+			</FichaPanel>
 			<ErrorCampo ruta="negocio.sedes" />
 			{sedes.map((sede, i) => {
 				const ruta = `negocio.sedes.${i}`;
 				return (
-					<fieldset key={ruta} className="panel-bloque">
-						<legend>Sede: {sede.nombre || "Nueva"}</legend>
+					<FichaPanel
+						key={ruta}
+						seccion="Negocio y sedes"
+						titulo={sede.nombre || "Sede nueva"}
+						resumen={sede.direccion}
+					>
 						<Campo
 							ruta={`${ruta}.nombre`}
 							etiqueta="Nombre de la sede"
@@ -122,7 +133,7 @@ export function NegocioSedes() {
 						>
 							Quitar sede {sede.nombre}
 						</button>
-					</fieldset>
+					</FichaPanel>
 				);
 			})}
 			<button
@@ -147,26 +158,27 @@ export function NegocioSedes() {
 			>
 				Agregar sede
 			</button>
-			<h3>Redes</h3>
-			<p>Deja el enlace vacío para ocultarlo.</p>
-			<Campo
-				ruta="negocio.redes.instagram"
-				etiqueta="Instagram"
-				tipo="url"
-				opcional
-			/>
-			<Campo
-				ruta="negocio.redes.tiktok"
-				etiqueta="TikTok"
-				tipo="url"
-				opcional
-			/>
-			<Campo
-				ruta="negocio.redes.facebook"
-				etiqueta="Facebook"
-				tipo="url"
-				opcional
-			/>
+			<FichaPanel seccion="Negocio y sedes" titulo="Redes sociales">
+				<p>Deja el enlace vacío para ocultarlo.</p>
+				<Campo
+					ruta="negocio.redes.instagram"
+					etiqueta="Instagram"
+					tipo="url"
+					opcional
+				/>
+				<Campo
+					ruta="negocio.redes.tiktok"
+					etiqueta="TikTok"
+					tipo="url"
+					opcional
+				/>
+				<Campo
+					ruta="negocio.redes.facebook"
+					etiqueta="Facebook"
+					tipo="url"
+					opcional
+				/>
+			</FichaPanel>
 		</section>
 	);
 }

@@ -25,7 +25,7 @@ export function FotoProducto({
 		try {
 			const foto = await subirFoto(cliente, archivo, imagen.alt);
 			cambiar(`${ruta}.imagen`, foto);
-			setEstado("Foto lista. Guarda el borrador para conservarla.");
+			setEstado("Foto lista. Guarda los cambios para conservarla.");
 		} catch (fallo) {
 			setEstado("");
 			setError(

@@ -1,4 +1,5 @@
-﻿import { Campo, ErrorCampo, useEdicion } from "./Campos";
+import { FichaPanel } from "../FichaPanel";
+import { Campo, ErrorCampo, useEdicion } from "./Campos";
 
 /** Preguntas y respuestas aprobadas al publicar, con su orden visible. */
 export function Preguntas() {
@@ -11,8 +12,12 @@ export function Preguntas() {
 			{lista.map((pregunta, i) => {
 				const ruta = `preguntas_frecuentes.${i}`;
 				return (
-					<fieldset key={ruta} className="panel-bloque">
-						<legend>{pregunta.pregunta || "Pregunta nueva"}</legend>
+					<FichaPanel
+						key={ruta}
+						seccion="Preguntas frecuentes"
+						titulo={pregunta.pregunta || "Pregunta nueva"}
+						resumen={pregunta.respuesta}
+					>
 						<Campo ruta={`${ruta}.pregunta`} etiqueta="Pregunta" maximo={200} />
 						<Campo
 							ruta={`${ruta}.respuesta`}
@@ -33,7 +38,7 @@ export function Preguntas() {
 						>
 							Quitar pregunta {pregunta.pregunta}
 						</button>
-					</fieldset>
+					</FichaPanel>
 				);
 			})}
 			<button

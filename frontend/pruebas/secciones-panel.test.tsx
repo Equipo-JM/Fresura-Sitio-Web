@@ -27,6 +27,10 @@ vi.mock("../src/panel/guiones/GuionesPanel", () => ({
 	GuionesPanel: () => <h1>Pantalla de guiones</h1>,
 }));
 
+vi.mock("../src/panel/EscritorioPanel", () => ({
+	EscritorioPanel: () => <h1>El escritorio de Fresura</h1>,
+}));
+
 function abrirPanel() {
 	render(
 		<MemoryRouter>
@@ -36,21 +40,21 @@ function abrirPanel() {
 }
 
 describe("menú del panel", () => {
-	it("empieza en Versiones y ofrece Contenido y Agente", () => {
+	it("empieza en el escritorio y ofrece Contenido y Agente", () => {
 		abrirPanel();
-		expect(screen.getByRole("heading", { name: "Pantalla de versiones" }));
-		expect(screen.getByRole("button", { name: "Contenido" }));
-		expect(screen.getByRole("button", { name: "Agente" }));
+		expect(screen.getByRole("heading", { name: "El escritorio de Fresura" }));
+		expect(screen.getByRole("button", { name: "Productos" }));
+		expect(screen.getByRole("button", { name: "Chat" }));
 	});
 
 	it("mantiene un solo menú, con la sección activa marcada", () => {
 		abrirPanel();
-		fireEvent.click(screen.getByRole("button", { name: "Agente" }));
+		fireEvent.click(screen.getByRole("button", { name: "Chat" }));
 		expect(screen.getByRole("heading", { name: "Pantalla de guiones" }));
 		expect(
 			screen.getAllByRole("navigation", { name: "Menú del panel" }),
 		).toHaveLength(1);
-		expect(screen.getByRole("button", { name: "Agente" })).toHaveAttribute(
+		expect(screen.getByRole("button", { name: "Chat" })).toHaveAttribute(
 			"aria-current",
 			"page",
 		);
@@ -61,9 +65,9 @@ describe("menú del panel", () => {
 	it("pregunta antes de salir de Contenido con cambios sin guardar", () => {
 		const confirmar = vi.spyOn(window, "confirm").mockReturnValue(false);
 		abrirPanel();
-		fireEvent.click(screen.getByRole("button", { name: "Contenido" }));
+		fireEvent.click(screen.getByRole("button", { name: "Productos" }));
 		fireEvent.click(screen.getByRole("button", { name: "Escribir algo" }));
-		fireEvent.click(screen.getByRole("button", { name: "Agente" }));
+		fireEvent.click(screen.getByRole("button", { name: "Chat" }));
 		expect(confirmar).toHaveBeenCalled();
 		expect(screen.getByRole("heading", { name: "Pantalla de contenido" }));
 		confirmar.mockRestore();

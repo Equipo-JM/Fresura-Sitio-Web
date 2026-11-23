@@ -51,15 +51,15 @@ describe("formularios del borrador", () => {
 			"Precio en pesos (vacío: por confirmar)",
 		);
 		fireEvent.change(precio, { target: { value: "12000.5" } });
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
 		expect(precio).toHaveAttribute("aria-invalid", "true");
 		expect(doble.consulta.update).not.toHaveBeenCalled();
 		fireEvent.change(precio, { target: { value: "" } });
 		fireEvent.click(
 			screen.getByRole("checkbox", { name: "Mostrar en el sitio" }),
 		);
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
-		expect(await screen.findByText("Borrador guardado")).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		expect(await screen.findByText("Cambios guardados")).toBeInTheDocument();
 		expect(doble.guardado()).toMatchObject({
 			json: {
 				productos: [
@@ -109,8 +109,8 @@ describe("formularios del borrador", () => {
 		fireEvent.change(screen.getByLabelText("Nombre"), {
 			target: { value: "Fresas nuevas" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
-		expect(await screen.findByText("Borrador guardado")).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		expect(await screen.findByText("Cambios guardados")).toBeInTheDocument();
 		expect(doble.guardado()).toMatchObject({
 			json: { productos: [{ nombre: "Fresas nuevas" }] },
 		});
@@ -124,7 +124,7 @@ describe("formularios del borrador", () => {
 		fireEvent.change(screen.getByLabelText("Nombre"), {
 			target: { value: "" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
 		expect(screen.getByLabelText("Nombre")).toHaveAttribute(
 			"aria-invalid",
 			"true",
@@ -147,7 +147,7 @@ describe("formularios del borrador", () => {
 		fireEvent.change(screen.getByLabelText("Nombre"), {
 			target: { value: "Sin perder" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
 		expect(await screen.findByRole("alert")).toHaveTextContent(
 			"Alguien más cambió este contenido. Recarga para ver la última versión.",
 		);
@@ -177,6 +177,7 @@ describe("formularios del borrador", () => {
 		const doble = simular();
 		fireEvent.click(await screen.findByRole("button", { name: "Promociones" }));
 		fireEvent.click(screen.getByRole("button", { name: "Agregar promoción" }));
+		fireEvent.click(screen.getByRole("button", { name: /Promoción nueva/ }));
 		fireEvent.change(screen.getByLabelText("Título"), {
 			target: { value: "Semana de fresas" },
 		});
@@ -190,7 +191,7 @@ describe("formularios del borrador", () => {
 			target: { value: "Solo en sede" },
 		});
 		fireEvent.click(screen.getByRole("checkbox", { name: /Arma tu/ }));
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
 		expect(screen.getByLabelText("Hasta")).toHaveAttribute(
 			"aria-invalid",
 			"true",
@@ -199,8 +200,8 @@ describe("formularios del borrador", () => {
 		fireEvent.change(screen.getByLabelText("Hasta"), {
 			target: { value: "2026-11-24" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
-		expect(await screen.findByText("Borrador guardado")).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		expect(await screen.findByText("Cambios guardados")).toBeInTheDocument();
 		expect(doble.guardado()).toMatchObject({
 			json: {
 				promociones: [{ id: "semana-de-fresas", condiciones: "Solo en sede" }],
@@ -212,12 +213,13 @@ describe("formularios del borrador", () => {
 		fireEvent.click(
 			await screen.findByRole("button", { name: "Negocio y sedes" }),
 		);
-		const sede = screen.getAllByRole("group", { name: /Sede:/ })[0];
+		fireEvent.click(screen.getAllByRole("button", { name: /Sede U/ })[0]);
+		const sede = screen.getByRole("dialog");
 		fireEvent.change(within(sede).getByLabelText("Dirección"), {
 			target: { value: "Calle de prueba 123" },
 		});
-		fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
-		expect(await screen.findByText("Borrador guardado")).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+		expect(await screen.findByText("Cambios guardados")).toBeInTheDocument();
 		expect(doble.guardado()).toMatchObject({
 			json: {
 				negocio: {
@@ -237,5 +239,65 @@ describe("formularios del borrador", () => {
 				},
 			},
 		});
+	});
+});
+it("conserva los reels históricos, rechaza duplicados y guarda la selección en orden", async () => {
+	const doble = simular();
+	fireEvent.click(
+		await screen.findByRole("button", { name: "Reels de portada" }),
+	);
+	const lista = screen.getByRole("region", { name: "Reels de portada" });
+	const acciones = within(lista);
+	expect(acciones.getAllByRole("listitem")).toHaveLength(3);
+	fireEvent.click(acciones.getByRole("button", { name: "Agregar reel" }));
+	const entrada = acciones.getByLabelText("Enlace de Instagram");
+	fireEvent.change(entrada, {
+		target: { value: "https://www.instagram.com/reel/Df3FurXt_4g/" },
+	});
+	fireEvent.click(acciones.getByRole("button", { name: "Aplicar enlace" }));
+	expect(acciones.getByRole("alert")).toHaveTextContent("ya está");
+	fireEvent.change(entrada, {
+		target: { value: "https://www.instagram.com/reel/Ejemplo_1/?igsh=test" },
+	});
+	fireEvent.click(acciones.getByRole("button", { name: "Aplicar enlace" }));
+	fireEvent.click(acciones.getAllByRole("button", { name: "Subir" })[3]);
+	fireEvent.click(acciones.getAllByRole("button", { name: "Quitar" })[0]);
+	fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+	expect(await screen.findByText("Cambios guardados")).toBeVisible();
+	expect(doble.guardado()).toMatchObject({
+		json: { reels: ["DfX1EGrsRji", "Ejemplo_1", "Dekb08AsDhZ"] },
+	});
+});
+it("edita una reseña existente y guarda las demás opiniones", async () => {
+	const doble = simular();
+	fireEvent.click(await screen.findByRole("button", { name: "Opiniones" }));
+	fireEvent.click(screen.getByRole("button", { name: /Editar reseña 1/ }));
+	const ficha = screen.getByRole("dialog", { name: "Editar reseña 1" });
+	fireEvent.change(within(ficha).getByLabelText("Autor"), {
+		target: { value: "Cliente de prueba" },
+	});
+	fireEvent.change(within(ficha).getByLabelText("Texto de la reseña"), {
+		target: { value: "Texto de prueba" },
+	});
+	fireEvent.change(within(ficha).getByLabelText("Estrellas (de 1 a 5)"), {
+		target: { value: "4" },
+	});
+	fireEvent.click(within(ficha).getByText("Listo"));
+	fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+	expect(await screen.findByText("Cambios guardados")).toBeVisible();
+	expect(doble.guardado()).toMatchObject({
+		json: {
+			opiniones: {
+				resenas: [
+					{
+						autor: "Cliente de prueba",
+						texto: "Texto de prueba",
+						estrellas: 4,
+					},
+					{ autor: "Estefania G." },
+					{ autor: "María Fernanda C." },
+				],
+			},
+		},
 	});
 });
