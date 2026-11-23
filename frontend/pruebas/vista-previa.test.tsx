@@ -108,7 +108,7 @@ it("sin borrador no muestra publicada ni respaldo", async () => {
 		</QueryClientProvider>,
 	);
 	expect(await screen.findByRole("alert")).toHaveTextContent(
-		"No pudimos abrir el borrador",
+		"No pudimos abrir los cambios",
 	);
 	expect(
 		screen.queryByText(contenido.negocio.presentacion.titulo),

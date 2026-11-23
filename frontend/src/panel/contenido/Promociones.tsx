@@ -1,4 +1,5 @@
-﻿import { Campo, ErrorCampo, ListaCampos, useEdicion } from "./Campos";
+import { FichaPanel } from "../FichaPanel";
+import { Campo, ErrorCampo, ListaCampos, useEdicion } from "./Campos";
 import { completarIdentificadores } from "./edicionContenido";
 
 /** Promociones conservadas después de vencer; el sitio aplica la vigencia en Colombia. */
@@ -15,8 +16,14 @@ export function Promociones() {
 			{contenido.promociones.map((promocion, i) => {
 				const ruta = `promociones.${i}`;
 				return (
-					<fieldset key={ruta} className="panel-bloque">
-						<legend>{promocion.titulo || "Promoción nueva"}</legend>
+					<FichaPanel
+						key={ruta}
+						seccion="Promociones"
+						titulo={promocion.titulo || "Promoción nueva"}
+						resumen={
+							promocion.vigencia.desde + " — " + promocion.vigencia.hasta
+						}
+					>
 						<Campo ruta={`${ruta}.titulo`} etiqueta="Título" maximo={80} />
 						<Campo
 							ruta={`${ruta}.vigencia.desde`}
@@ -77,7 +84,7 @@ export function Promociones() {
 						>
 							Quitar promoción {promocion.titulo}
 						</button>
-					</fieldset>
+					</FichaPanel>
 				);
 			})}
 			<button

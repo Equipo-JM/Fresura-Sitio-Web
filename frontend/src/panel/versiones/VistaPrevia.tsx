@@ -34,7 +34,7 @@ export function VistaPrevia({
 	return (
 		<>
 			<aside className="panel-vista-previa" aria-label="Vista previa">
-				<strong>Vista previa · Borrador sin publicar</strong>
+				<strong>Vista previa · Cambios sin publicar</strong>
 				<a className="boton secundario compacto" href="/admin">
 					Volver al panel
 				</a>
@@ -46,7 +46,7 @@ export function VistaPrevia({
 			)}
 			{consulta.isError && (
 				<p className="envoltura" role="alert">
-					No pudimos abrir el borrador. Vuelve al panel e inténtalo de nuevo.
+					No pudimos abrir los cambios. Vuelve al panel e inténtalo de nuevo.
 				</p>
 			)}
 			{consulta.data && !consulta.isError && (

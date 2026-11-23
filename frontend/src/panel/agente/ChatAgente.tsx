@@ -56,6 +56,7 @@ function CopiarRespuesta({ texto }: { texto: string }) {
 export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 	const chat = useChatAgente(cliente);
 	const biblioteca = useMemo(() => crearServicioBiblioteca(cliente), [cliente]);
+	const [historialAbierto, setHistorialAbierto] = useState(false);
 	const [texto, setTexto] = useState("");
 	const hilo = useRef<HTMLDivElement>(null);
 	const seguirHilo = useRef(true);
@@ -94,7 +95,21 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 		<section className="panel-seccion" aria-labelledby="chat-titulo">
 			<h2 id="chat-titulo">Conversar con el agente</h2>
 			<div className="agente-distribucion">
-				<nav className="agente-historial" aria-label="Conversaciones">
+				<button
+					type="button"
+					className="mesa-menu-movil"
+					aria-expanded={historialAbierto}
+					aria-controls="historial-chat"
+					onClick={() => setHistorialAbierto(!historialAbierto)}
+				>
+					Historial
+				</button>
+				<nav
+					id="historial-chat"
+					data-abierto={historialAbierto}
+					className="agente-historial"
+					aria-label="Conversaciones"
+				>
 					<h3>Historial</h3>
 					<button
 						className="boton secundario"
@@ -246,7 +261,11 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 								.filter((parte) => parte?.trim())
 								.join("\n\n");
 							return (
-								<article className="panel-bloque agente-mensaje" key={m.id}>
+								<article
+									className="panel-bloque agente-mensaje"
+									data-autor={m.role}
+									key={m.id}
+								>
 									<strong>{m.role === "user" ? "Tú" : "Agente"}</strong>
 									{partes.map((p) => (
 										<p className="agente-texto" key={p.type + p.text}>

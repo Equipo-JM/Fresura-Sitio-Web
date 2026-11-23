@@ -1,4 +1,5 @@
-﻿import { Campo, ErrorCampo, useEdicion } from "./Campos";
+import { FichaPanel } from "../FichaPanel";
+import { Campo, ErrorCampo, useEdicion } from "./Campos";
 
 /** Categorías del menú; no permite quitar una que todavía use un producto. */
 export function Categorias() {
@@ -13,8 +14,12 @@ export function Categorias() {
 					(p) => p.categoria === categoria.id,
 				);
 				return (
-					<fieldset key={ruta} className="panel-bloque">
-						<legend>{categoria.nombre || "Categoría nueva"}</legend>
+					<FichaPanel
+						key={ruta}
+						seccion="Categorías"
+						titulo={categoria.nombre || "Categoría nueva"}
+						resumen={"Orden " + categoria.orden}
+					>
 						<Campo
 							ruta={`${ruta}.nombre`}
 							etiqueta="Nombre de la categoría"
@@ -39,7 +44,7 @@ export function Categorias() {
 						>
 							Quitar categoría {categoria.nombre}
 						</button>
-					</fieldset>
+					</FichaPanel>
 				);
 			})}
 			<button

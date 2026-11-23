@@ -7,6 +7,7 @@ import {
 import type { Database } from "../../tipos/database.types";
 import { cuerpoGuion } from "../agente/servicioConversaciones";
 import { TarjetaPieza } from "../agente/TarjetaPieza";
+import { FichaPanel } from "../FichaPanel";
 import type { EntradaBiblioteca } from "./servicioBiblioteca";
 import { useBiblioteca } from "./useBiblioteca";
 
@@ -111,25 +112,35 @@ export function BibliotecaPanel({
 						);
 						return (
 							<li key={entrada.id} className="panel-bloque">
-								<p className="biblioteca-estado">
-									Guardada el{" "}
-									{new Date(entrada.creadoEn).toLocaleDateString("es-CO")}
-								</p>
-								{"pieza" in entrada ? (
-									<TarjetaPieza pieza={entrada.pieza} acciones={acciones} />
-								) : (
-									<div className="agente-tarjeta">
-										<h3>{entrada.tarjeta.guion.titulo}</h3>
-										<p>
-											{NOMBRES.guion} · {entrada.tarjeta.instruccion.red} ·{" "}
-											{entrada.tarjeta.instruccion.duracion_s} segundos
-										</p>
-										<p className="agente-texto">
-											{cuerpoGuion(entrada.tarjeta.guion)}
-										</p>
-										<div className="agente-acciones">{acciones}</div>
-									</div>
-								)}
+								<FichaPanel
+									seccion="Biblioteca"
+									titulo={
+										"pieza" in entrada
+											? entrada.pieza.titulo
+											: entrada.tarjeta.guion.titulo
+									}
+									resumen={NOMBRES[entrada.tipo]}
+								>
+									<p className="biblioteca-estado">
+										Guardada el{" "}
+										{new Date(entrada.creadoEn).toLocaleDateString("es-CO")}
+									</p>
+									{"pieza" in entrada ? (
+										<TarjetaPieza pieza={entrada.pieza} acciones={acciones} />
+									) : (
+										<div className="agente-tarjeta">
+											<h3>{entrada.tarjeta.guion.titulo}</h3>
+											<p>
+												{NOMBRES.guion} · {entrada.tarjeta.instruccion.red} ·{" "}
+												{entrada.tarjeta.instruccion.duracion_s} segundos
+											</p>
+											<p className="agente-texto">
+												{cuerpoGuion(entrada.tarjeta.guion)}
+											</p>
+											<div className="agente-acciones">{acciones}</div>
+										</div>
+									)}
+								</FichaPanel>
 							</li>
 						);
 					})}

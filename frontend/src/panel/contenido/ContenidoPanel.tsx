@@ -1,36 +1,36 @@
-﻿import type { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { useCallback, useRef, useState } from "react";
 import {
 	type Contenido,
 	esquemaContenido,
 } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
 import { Icono } from "../../compartido/componentes/Icono";
+import { RESENAS_GOOGLE } from "../../sitio/inicio/copy";
 import type { Database } from "../../tipos/database.types";
+import { BLOQUES } from "../apartados";
+import { ReelsPanel } from "../ReelsPanel";
 import { useVersiones } from "../versiones/useVersiones";
 import { ContextoEdicion, cambiarCampo } from "./Campos";
 import { Categorias } from "./Categorias";
 import { completarIdentificadores, erroresContenido } from "./edicionContenido";
 import { NegocioSedes } from "./NegocioSedes";
-import { Opiniones } from "./Opiniones";
+import { Opiniones, ResenasPublicadas } from "./Opiniones";
 import { Preguntas } from "./Preguntas";
 import { Productos } from "./Productos";
 import { Promociones } from "./Promociones";
 import { useAvisoSalida, useFocoError } from "./useInteraccionEdicion";
 
-const BLOQUES = [
-	"Productos",
-	"Promociones",
-	"Preguntas frecuentes",
-	"Negocio y sedes",
-	"Opiniones",
-	"Categorías",
-] as const;
+type Bloque = (typeof BLOQUES)[number];
 
 /** Carga únicamente el borrador administrativo y crea una copia con el servicio existente. */
 export function ContenidoPanel({
 	cliente,
 	onPendiente,
+	bloqueActivo,
+	alElegirBloque,
 }: {
+	bloqueActivo?: Bloque;
+	alElegirBloque?: (bloque: Bloque) => void;
 	onPendiente?: (valor: boolean) => void;
 	cliente: SupabaseClient<Database>;
 }) {
@@ -64,7 +64,7 @@ export function ContenidoPanel({
 	return (
 		<main id="contenido" tabIndex={-1} aria-busy={ocupado}>
 			<div className="panel-titulo-fila">
-				<h1>Contenido</h1>
+				<h1>{bloqueActivo ?? "Contenido"}</h1>
 				<button
 					type="button"
 					className="panel-accion"
@@ -81,11 +81,19 @@ export function ContenidoPanel({
 				</p>
 			)}
 			{!versiones && !error && <p>Cargando productos…</p>}
+			{versiones && !versiones.borrador && bloqueActivo === "Opiniones" && (
+				<ResenasPublicadas
+					resenas={
+						esquemaContenido.safeParse(versiones.publicada?.json).data
+							?.opiniones.resenas
+					}
+				/>
+			)}
 			{versiones && !versiones.borrador && (
 				<>
 					<p>
-						Editar crea un borrador. Tus cambios se verán en el sitio cuando los
-						publiques desde Versiones.
+						Tus cambios se verán en el sitio cuando los publiques desde
+						Versiones.
 					</p>
 					<button
 						type="button"
@@ -103,6 +111,8 @@ export function ContenidoPanel({
 			{resultado?.success && (
 				<EditorContenido
 					key={`${versiones?.borrador?.id}-${recarga}`}
+					bloqueActivo={bloqueActivo}
+					alElegirBloque={alElegirBloque}
 					pendiente={marcarPendiente}
 					inicial={resultado.data}
 					cliente={cliente}
@@ -121,21 +131,37 @@ export function ContenidoPanel({
 }
 
 function EditorContenido({
+	bloqueActivo,
+	alElegirBloque,
 	pendiente,
 	inicial,
 	cliente,
 	guardar,
 	ocupado,
 }: {
+	bloqueActivo?: Bloque;
+	alElegirBloque?: (bloque: Bloque) => void;
 	pendiente: (valor: boolean) => void;
 	inicial: Contenido;
 	cliente: SupabaseClient<Database>;
 	guardar: (contenido: unknown) => Promise<boolean>;
 	ocupado: boolean;
 }) {
-	const [contenido, setContenido] = useState(inicial);
+	const [contenido, setContenido] = useState(
+		() =>
+			({
+				...inicial,
+				opiniones: {
+					...inicial.opiniones,
+					resenas: inicial.opiniones.resenas ?? RESENAS_GOOGLE,
+				},
+			}) as Contenido,
+	);
 	const [errores, setErrores] = useState<Record<string, string>>({});
-	const [bloque, setBloque] = useState<(typeof BLOQUES)[number]>("Productos");
+	const [bloqueLocal, setBloqueLocal] =
+		useState<(typeof BLOQUES)[number]>("Productos");
+	const bloque = bloqueActivo ?? bloqueLocal;
+	const setBloque = alElegirBloque ?? setBloqueLocal;
 	const [fotos, setFotos] = useState(0);
 	const [guardado, setGuardado] = useState(false);
 	const formulario = useRef<HTMLFormElement>(null);
@@ -203,6 +229,7 @@ function EditorContenido({
 				}}
 			>
 				<nav
+					hidden={!!alElegirBloque}
 					className="panel-subsecciones panel-contenido-menu"
 					aria-label="Contenido editable"
 				>
@@ -220,9 +247,7 @@ function EditorContenido({
 						</button>
 					))}
 				</nav>
-				<p>
-					Los cambios de todos los apartados se guardan juntos en el borrador.
-				</p>
+
 				{Object.keys(errores).length > 0 && (
 					<div role="alert" className="panel-aviso">
 						<h3>Revisa este campo</h3>
@@ -246,6 +271,9 @@ function EditorContenido({
 					disabled={ocupado || fotos > 0}
 					className="panel-editor-campos"
 				>
+					<div hidden={bloque !== "Reels de portada"}>
+						<ReelsPanel />
+					</div>
 					<div hidden={bloque !== "Productos"}>
 						<Productos
 							cliente={cliente}
@@ -269,10 +297,11 @@ function EditorContenido({
 						<Categorias />
 					</div>
 					<div className="panel-contenido-guardar">
+						<small>Los cambios se guardan juntos.</small>
 						<button type="submit" className="boton">
-							{ocupado ? "Guardando…" : "Guardar borrador"}
+							{ocupado ? "Guardando…" : "Guardar cambios"}
 						</button>
-						<div role="status">{guardado && <p>Borrador guardado</p>}</div>
+						<div role="status">{guardado && <p>Cambios guardados</p>}</div>
 					</div>
 				</fieldset>
 			</form>

@@ -168,11 +168,14 @@ describe("ruta /admin con acceso real", () => {
 		});
 	});
 
-	it("con el código y rol admin muestra versiones", async () => {
+	it("con el código y rol admin muestra el escritorio", async () => {
 		sesion = { haySesion: true, nivel: "aal2", factores: 1, rol: "admin" };
 		mostrarPanel();
 		expect(
-			await screen.findByRole("heading", { level: 1, name: "Versiones" }),
+			await screen.findByRole("heading", {
+				level: 1,
+				name: "El escritorio de Fresura",
+			}),
 		).toBeInTheDocument();
 		expect(screen.getByText("Sesión verificada")).toBeInTheDocument();
 	});

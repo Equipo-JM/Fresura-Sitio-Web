@@ -2,27 +2,27 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 import type { Database } from "../../tipos/database.types";
 import { ChatAgente } from "../agente/ChatAgente";
+import { VISTAS } from "../apartados";
 import { BibliotecaPanel } from "../biblioteca/BibliotecaPanel";
 import { EstiloRedesPanel } from "../estilo/EstiloRedesPanel";
 
-const VISTAS = [
-	["chat", "Chat"],
-	["biblioteca", "Biblioteca"],
-	["estilo", "Estilo de redes"],
-] as const;
+type Vista = (typeof VISTAS)[number][0];
 /** Sección «Agente» del panel: chat, biblioteca y estilo de redes. */
 export function GuionesPanel({
 	cliente,
+	vistaActiva,
 }: {
+	vistaActiva?: Vista;
 	cliente: SupabaseClient<Database>;
 }) {
-	const [vista, setVista] = useState<(typeof VISTAS)[number][0]>("chat");
+	const [vistaLocal, setVista] = useState<(typeof VISTAS)[number][0]>("chat");
+	const vista = vistaActiva ?? vistaLocal;
 	// Biblioteca y estilo se montan de nuevo al abrirlos para leer lo recién guardado.
 	const [aperturas, setAperturas] = useState(0);
 	return (
 		<main className="guiones-panel" id="guiones" tabIndex={-1}>
 			<h1>Agente de contenido</h1>
-			<fieldset className="panel-subsecciones">
+			<fieldset hidden={!!vistaActiva} className="panel-subsecciones">
 				<legend className="oculto">Vista</legend>
 				{VISTAS.map(([valor, nombre]) => (
 					<button

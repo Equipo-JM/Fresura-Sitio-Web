@@ -98,8 +98,12 @@ describe("biblioteca de piezas", () => {
 
 	it("lista, filtra y borra con confirmación, sin estados de aprobación", async () => {
 		const { cambios } = montar();
-		expect(await screen.findByText("Antojo de jueves")).toBeVisible();
-		expect(screen.getByText("Fresura en 15 segundos")).toBeVisible();
+		expect(
+			await screen.findByRole("button", { name: /Antojo de jueves/ }),
+		).toBeVisible();
+		expect(
+			screen.getByRole("button", { name: /Fresura en 15 segundos/ }),
+		).toBeVisible();
 		expect(screen.getAllByRole("listitem")).toHaveLength(2);
 		expect(screen.getAllByText(/Guardada el/)).toHaveLength(2);
 		expect(
@@ -114,7 +118,8 @@ describe("biblioteca de piezas", () => {
 			target: { value: "todas" },
 		});
 
-		fireEvent.click(screen.getAllByRole("button", { name: "Borrar" })[0]);
+		fireEvent.click(screen.getByRole("button", { name: /Antojo de jueves/ }));
+		fireEvent.click(screen.getByRole("button", { name: "Borrar" }));
 		expect(
 			screen.getByText("¿Borrar «Pieza 1»? No podrás recuperarla."),
 		).toBeVisible();

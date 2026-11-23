@@ -38,3 +38,13 @@ if (!("ResizeObserver" in globalThis)) {
 
 // jsdom no implementa el desplazamiento; el sitio sube al inicio al cambiar de ruta.
 window.scrollTo = () => {};
+if (!HTMLDialogElement.prototype.showModal) {
+	HTMLDialogElement.prototype.showModal = function () {
+		this.open = true;
+		this.querySelector<HTMLElement>("button")?.focus();
+	};
+	HTMLDialogElement.prototype.close = function () {
+		this.open = false;
+		this.dispatchEvent(new Event("close"));
+	};
+}

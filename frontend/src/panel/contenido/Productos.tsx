@@ -1,8 +1,9 @@
-﻿import type { SupabaseClient } from "@supabase/supabase-js";
-import { useRef } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { useRef, useState } from "react";
 import type { Contenido } from "../../../../backend/supabase/functions/_shared/esquemas/contenido";
-import { Icono } from "../../compartido/componentes/Icono";
+
 import type { Database } from "../../tipos/database.types";
+import { FichaPanel } from "../FichaPanel";
 import {
 	Campo,
 	Casilla,
@@ -65,60 +66,59 @@ export function Productos({
 				>
 					Productos
 				</h2>
-				{!producto && (
-					<button
-						className="boton secundario compacto"
-						type="button"
-						onClick={agregar}
-					>
-						<Icono nombre="mas" />
-						Agregar producto
-					</button>
-				)}
 			</div>
 			<ErrorCampo ruta="productos" />
-			{!producto ? (
-				<CatalogoEditable contenido={contenido} seleccionar={seleccionar} />
-			) : (
-				<div className="panel-producto-editor">
-					<button
-						type="button"
-						className="panel-accion"
-						ref={(elemento) => enfocar(elemento, "editor")}
-						onClick={() => seleccionar(null)}
-					>
-						<Icono nombre="izquierda" />
-						Volver a productos
-					</button>
-					<fieldset className="panel-bloque">
-						<legend>{producto.nombre || "Producto nuevo"}</legend>
-						<Campo ruta={`${ruta}.nombre`} etiqueta="Nombre" maximo={80} />
-						<Campo
-							ruta={`${ruta}.descripcion`}
-							etiqueta="Descripción"
-							tipo="textarea"
-							maximo={600}
-						/>
-						<Selector
-							ruta={`${ruta}.categoria`}
-							etiqueta="Categoría"
-							opciones={completarIdentificadores(contenido).categorias.map(
-								(c) => ({ valor: c.id, nombre: c.nombre }),
-							)}
-						/>
-						<Campo
-							ruta={`${ruta}.orden`}
-							etiqueta="Orden en el menú"
-							tipo="number"
-						/>
-						<Casilla ruta={`${ruta}.vigente`} etiqueta="Mostrar en el sitio" />
-						<Casilla
-							ruta={`${ruta}.destacado`}
-							etiqueta="Destacar en el inicio"
-						/>
+			<CatalogoEditable
+				agregar={agregar}
+				contenido={contenido}
+				seleccionar={seleccionar}
+			/>
+			{producto && (
+				<FichaPanel
+					directa
+					seccion="Productos"
+					titulo={producto.nombre || "Producto nuevo"}
+					alCerrar={() => seleccionar(null)}
+				>
+					<Selector
+						ruta={`${ruta}.categoria`}
+						etiqueta="Categoría"
+						opciones={completarIdentificadores(contenido).categorias.map(
+							(c) => ({ valor: c.id, nombre: c.nombre }),
+						)}
+					/>
+					<Campo ruta={`${ruta}.nombre`} etiqueta="Nombre" maximo={80} />
+					<Campo
+						ruta={`${ruta}.descripcion`}
+						etiqueta="Descripción"
+						tipo="textarea"
+						maximo={600}
+					/>
+
+					<details>
+						<summary>Imagen</summary>
 						<FotoProducto key={ruta} ruta={ruta} cliente={cliente} />
+					</details>
+					<Casilla ruta={`${ruta}.vigente`} etiqueta="Mostrar en el sitio" />
+					<Casilla
+						ruta={`${ruta}.destacado`}
+						etiqueta="Destacar en el inicio"
+					/>
+					<Campo
+						ruta={`${ruta}.orden`}
+						etiqueta="Orden en el menú"
+						tipo="number"
+					/>
+
+					<details>
+						<summary>Presentaciones · {producto.presentaciones.length}</summary>
 						<Presentaciones indice={seleccion ?? 0} />
-						<Opciones indice={seleccion ?? 0} />
+					</details>
+
+					<details>
+						<summary>
+							Características · {producto.caracteristicas.length}
+						</summary>
 						<ListaCampos
 							ruta={`${ruta}.caracteristicas`}
 							titulo="Característica"
@@ -151,19 +151,29 @@ export function Productos({
 								</div>
 							))}
 						</ListaCampos>
-					</fieldset>
-				</div>
+					</details>
+					<details>
+						<summary>
+							Grupos de opciones · {producto.grupos_opciones.length}
+						</summary>
+						<Opciones indice={seleccion ?? 0} />
+					</details>
+				</FichaPanel>
 			)}
 		</section>
 	);
 }
 function CatalogoEditable({
+	agregar,
 	contenido,
 	seleccionar,
 }: {
 	contenido: Contenido;
 	seleccionar: (indice: number) => void;
+	agregar: () => void;
 }) {
+	const [consulta, setConsulta] = useState("");
+	const [categoriaElegida, setCategoriaElegida] = useState("");
 	const categorias = [...contenido.categorias].sort(
 		(a, b) => a.orden - b.orden,
 	);
@@ -178,6 +188,13 @@ function CatalogoEditable({
 	);
 	const sinCategoria = { nombre: "Sin categoría", indices: [] as number[] };
 	contenido.productos.forEach((producto, indice) => {
+		if (
+			(categoriaElegida && categoriaElegida !== producto.categoria) ||
+			!producto.nombre
+				.toLocaleLowerCase("es")
+				.includes(consulta.trim().toLocaleLowerCase("es"))
+		)
+			return;
 		const grupo = grupos.get(producto.categoria) ?? sinCategoria;
 		grupo.indices.push(indice);
 	});
@@ -185,54 +202,81 @@ function CatalogoEditable({
 		(grupo) => grupo.indices.length > 0,
 	);
 
-	if (gruposVisibles.length === 0)
-		return (
-			<p>
-				Aún no hay productos. Agrega el primero para que aparezca en el sitio.
-			</p>
-		);
-
 	return (
-		<div className="panel-productos-cuadricula">
-			{gruposVisibles.map(({ nombre, indices }) => (
-				<section
-					key={indices[0]}
-					className="panel-categoria"
-					aria-labelledby={`grupo-productos-${indices[0]}`}
+		<>
+			<div className="mesa-filtros">
+				<label>
+					<span className="oculto">Buscar producto</span>
+					<input
+						type="search"
+						placeholder="Buscar por nombre…"
+						value={consulta}
+						onChange={(e) => setConsulta(e.target.value)}
+					/>
+				</label>
+				<label>
+					<span className="oculto">Filtrar por categoría</span>
+					<select
+						value={categoriaElegida}
+						onChange={(e) => setCategoriaElegida(e.target.value)}
+					>
+						<option value="">Todas las categorías</option>
+						{categorias.map((c) => (
+							<option key={c.id} value={c.id}>
+								{c.nombre}
+							</option>
+						))}
+					</select>
+				</label>
+				<button
+					className="boton"
+					type="button"
+					aria-label="Agregar producto"
+					onClick={agregar}
 				>
-					<div className="panel-categoria-cabecera">
-						<h3 id={`grupo-productos-${indices[0]}`}>{nombre}</h3>
-						<img
-							src="/marca/sticker-simbolo.svg"
-							width="48"
-							height="42"
-							alt=""
-						/>
-					</div>
-					<ul>
-						{indices.map((indice) => {
-							const producto = contenido.productos[indice];
-							const nombreProducto = producto.nombre || "Producto nuevo";
-							return (
-								<li key={indice}>
-									<button
-										aria-label={`Editar ${nombreProducto}${producto.vigente ? "" : " (oculto)"}`}
-										type="button"
-										onClick={() => seleccionar(indice)}
-									>
-										<span>
-											{nombreProducto}
-											{!producto.vigente && <small> · Oculto</small>}
-										</span>
-										<Icono nombre="derecha" />
-									</button>
-								</li>
-							);
-						})}
-					</ul>
-				</section>
-			))}
-		</div>
+					+ Agregar
+				</button>
+			</div>
+			{!gruposVisibles.length && (
+				<p role="status">No hay productos que coincidan.</p>
+			)}
+			<div className="catalogo-filas">
+				{gruposVisibles.map(({ nombre, indices }) => (
+					<section
+						key={indices[0]}
+						className="catalogo-grupo"
+						aria-labelledby={`grupo-productos-${indices[0]}`}
+					>
+						<h3 className="oculto" id={`grupo-productos-${indices[0]}`}>
+							{nombre}
+						</h3>
+						<ul>
+							{indices.map((indice) => {
+								const producto = contenido.productos[indice];
+								const nombreProducto = producto.nombre || "Producto nuevo";
+								return (
+									<li key={indice}>
+										<button
+											aria-label={`Editar ${nombreProducto}${producto.vigente ? "" : " (oculto)"}`}
+											type="button"
+											onClick={() => seleccionar(indice)}
+										>
+											<span>
+												<strong>{nombreProducto}</strong>
+												<small>{nombre}</small>
+											</span>
+											<span>
+												{producto.vigente ? "En el menú" : "Oculto"} ↗
+											</span>
+										</button>
+									</li>
+								);
+							})}
+						</ul>
+					</section>
+				))}
+			</div>
+		</>
 	);
 }
 

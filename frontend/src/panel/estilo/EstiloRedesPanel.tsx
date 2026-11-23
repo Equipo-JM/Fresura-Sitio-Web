@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { type FormEvent, useState } from "react";
 import type { Database } from "../../tipos/database.types";
+import { FichaPanel } from "../FichaPanel";
 import { useReferenciasEstilo } from "./useReferenciasEstilo";
 
 const REDES = {
@@ -55,44 +56,46 @@ export function EstiloRedesPanel({
 				imitar el tono, los ganchos y los hashtags, nunca para copiar precios ni
 				promociones.
 			</p>
-			<form className="panel-bloque estilo-formulario" onSubmit={enviar}>
-				<label>
-					Red
-					<select name="red" defaultValue="instagram">
-						{Object.entries(REDES).map(([valor, nombre]) => (
-							<option key={valor} value={valor}>
-								{nombre}
-							</option>
-						))}
-					</select>
-				</label>
-				<label>
-					Formato
-					<select name="formato" defaultValue="video">
-						{Object.entries(FORMATOS).map(([valor, nombre]) => (
-							<option key={valor} value={valor}>
-								{nombre}
-							</option>
-						))}
-					</select>
-				</label>
-				<label>
-					Enlace de la publicación (opcional)
-					<input name="enlace" type="url" placeholder="https://" />
-				</label>
-				<label>
-					Fecha de publicación (opcional)
-					<input name="publicada_en" type="date" />
-				</label>
-				<label>
-					Texto o descripción
-					<textarea name="texto" rows={5} maxLength={3000} required />
-				</label>
-				<button className="boton" type="submit" disabled={guardando}>
-					{guardando ? "Guardando…" : "Guardar referencia"}
-				</button>
-				<div role="status">{aviso}</div>
-			</form>
+			<FichaPanel seccion="Estilo de redes" titulo="Agregar referencia">
+				<form className="panel-bloque estilo-formulario" onSubmit={enviar}>
+					<label>
+						Red
+						<select name="red" defaultValue="instagram">
+							{Object.entries(REDES).map(([valor, nombre]) => (
+								<option key={valor} value={valor}>
+									{nombre}
+								</option>
+							))}
+						</select>
+					</label>
+					<label>
+						Formato
+						<select name="formato" defaultValue="video">
+							{Object.entries(FORMATOS).map(([valor, nombre]) => (
+								<option key={valor} value={valor}>
+									{nombre}
+								</option>
+							))}
+						</select>
+					</label>
+					<label>
+						Enlace de la publicación (opcional)
+						<input name="enlace" type="url" placeholder="https://" />
+					</label>
+					<label>
+						Fecha de publicación (opcional)
+						<input name="publicada_en" type="date" />
+					</label>
+					<label>
+						Texto o descripción
+						<textarea name="texto" rows={5} maxLength={3000} required />
+					</label>
+					<button className="boton" type="submit" disabled={guardando}>
+						{guardando ? "Guardando…" : "Guardar referencia"}
+					</button>
+					<div role="status">{aviso}</div>
+				</form>
+			</FichaPanel>
 			{estilo.error && (
 				<p className="panel-aviso" role="alert">
 					{estilo.error}

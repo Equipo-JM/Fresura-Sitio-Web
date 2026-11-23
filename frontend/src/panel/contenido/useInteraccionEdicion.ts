@@ -20,7 +20,21 @@ export function useFocoError(
 		const control = formulario.current?.querySelector<HTMLElement>(
 			`[data-campo="${destino.ruta}"]`,
 		);
-		if (control) control.focus();
-		else document.getElementById(`error-${destino.ruta}`)?.focus();
+		const objetivo =
+			control ?? document.getElementById(`error-${destino.ruta}`);
+		if (!objetivo) return;
+		for (const otro of formulario.current?.querySelectorAll<HTMLDialogElement>(
+			"dialog[open]",
+		) ?? []) {
+			if (!otro.contains(objetivo)) otro.close();
+		}
+		const ficha = objetivo.closest("dialog");
+		if (ficha && !ficha.open) ficha.showModal();
+		let grupo = objetivo.closest("details");
+		while (grupo) {
+			grupo.open = true;
+			grupo = grupo.parentElement?.closest("details") ?? null;
+		}
+		objetivo.focus();
 	}, [formulario, destino]);
 }

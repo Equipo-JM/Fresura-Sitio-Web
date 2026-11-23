@@ -183,7 +183,7 @@ describe("pantalla de versiones", () => {
 				name: "Todo el contenido fue aprobado por Fresura",
 			});
 			if (aprobado) fireEvent.click(casilla);
-			fireEvent.click(screen.getByRole("button", { name: "Publicar" }));
+			fireEvent.click(screen.getByRole("button", { name: "Publicar cambios" }));
 			expect(
 				screen.getByRole("button", { name: "Publicando…" }),
 			).toBeDisabled();
@@ -247,13 +247,13 @@ describe("pantalla de versiones", () => {
 			</MemoryRouter>,
 		);
 		fireEvent.click(
-			await screen.findByRole("button", { name: "Descartar borrador" }),
+			await screen.findByRole("button", { name: "Descartar cambios" }),
 		);
 		expect(
-			screen.getByRole("heading", { name: "¿Descartar el borrador?" }),
+			screen.getByRole("heading", { name: "¿Descartar los cambios?" }),
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole("dialog", { name: "¿Descartar el borrador?" }),
+			screen.getByRole("dialog", { name: "¿Descartar los cambios?" }),
 		).toBeInTheDocument();
 		fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
 		expect(consulta.delete).not.toHaveBeenCalled();
@@ -275,9 +275,7 @@ describe("pantalla de versiones", () => {
 				name: "Volver a la versión anterior",
 			}),
 		);
-		expect(
-			screen.getByText("Tienes un borrador sin publicar"),
-		).toBeInTheDocument();
+		expect(screen.getByText("Tienes cambios sin publicar")).toBeInTheDocument();
 		expect(invoke).not.toHaveBeenCalled();
 		fireEvent.click(screen.getByRole("button", { name: "Sí, volver" }));
 		expect(await screen.findByText("¡Listo!")).toBeInTheDocument();
