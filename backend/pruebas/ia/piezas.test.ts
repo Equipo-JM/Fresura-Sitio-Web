@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { esquemaContenido } from "../../supabase/functions/_shared/esquemas/contenido";
 import {
+	CONTINUIDAD_CLIP_SEEDANCE,
 	erroresPieza,
 	HERRAMIENTA_PIEZA,
 	type Pieza,
 	promptPieza,
 	TIPOS_PIEZA,
+	VOZ_PRESENTADORA_SEEDANCE,
 } from "../../supabase/functions/_shared/esquemas/pieza";
 import {
 	crearHerramientasAgente,
@@ -102,8 +104,7 @@ describe("piezas de contenido del agente", () => {
 			bloques: [
 				{
 					etiqueta: "Prompt",
-					texto:
-						"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece. Video vertical 9:16. La presentadora dice: «¡Arma tu Fresita hoy!»",
+					texto: `@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece.\nDuración del clip: 15 segundos.\nVideo vertical 9:16. La presentadora dice: «¡Arma tu Fresita hoy!» ${VOZ_PRESENTADORA_SEEDANCE}\n${CONTINUIDAD_CLIP_SEEDANCE}`,
 				},
 				{ etiqueta: "Cómo usar", texto: "Abre AI Video en Dreamina." },
 			],
@@ -143,11 +144,53 @@ describe("piezas de contenido del agente", () => {
 			"@fresura es la presentadora de Fresura en este video; conserva su cara, cabello y ropa en todas las escenas donde aparece.",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain(
-			"Si el guion dura más de 15 segundos, resúmelo a 15",
+			"para 60 s usa 0–15, 15–30, 30–45 y 45–60",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain(
 			"El chat ya no genera videos: si en mensajes anteriores aparecen «crear video»",
 		);
+	});
+
+	it("exige la duración de cada clip y la instrucción completa para el diálogo", () => {
+		const conDialogo: Pieza = {
+			tipo: "prompt_seedance",
+			titulo: "Apertura",
+			red: "instagram",
+			bloques: [
+				{
+					etiqueta: "Prompt",
+					texto:
+						"@fresura mira a cámara.\nDuración del clip: 16 segundos.\nLa presentadora dice: «Arma tu Fresura».",
+				},
+			],
+		};
+		expect(erroresPieza(conDialogo)).toEqual([
+			expect.stringContaining("1 a 15 s"),
+			expect.stringContaining(VOZ_PRESENTADORA_SEEDANCE),
+			expect.stringContaining(CONTINUIDAD_CLIP_SEEDANCE),
+		]);
+		const soloProducto: Pieza = {
+			...conDialogo,
+			bloques: [
+				{
+					etiqueta: "Prompt",
+					texto: `Duración del clip: 5 segundos.\nUna cuchara corta la crema.\n${CONTINUIDAD_CLIP_SEEDANCE}`,
+				},
+			],
+		};
+		expect(erroresPieza(soloProducto)).toEqual([]);
+		expect(
+			erroresPieza({
+				...soloProducto,
+				bloques: [
+					{
+						etiqueta: "Prompt",
+						texto:
+							"Duración del clip: 5 segundos.\nUna cuchara corta la crema.",
+					},
+				],
+			}),
+		).toEqual([expect.stringContaining(CONTINUIDAD_CLIP_SEEDANCE)]);
 	});
 
 	it("copia solo el prompt, sin las indicaciones para la administradora", () => {
