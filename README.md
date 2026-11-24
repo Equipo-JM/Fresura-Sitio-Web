@@ -17,7 +17,7 @@ El repositorio pasó de tener `src/`, `public/`, `supabase/` y `pruebas/` en la 
 - **Ramas abiertas de antes del cambio:** trae `main` a tu rama (`git merge origin/main`). Git reconoce los archivos movidos y aplica tus cambios en su ruta nueva; si un archivo tuyo es nuevo y quedó en `src/`, `supabase/` o `pruebas/`, muévelo a su carpeta nueva con `git mv`. Después ejecuta `npm ci` y `npm test`.
 - **Editor:** si VS Code tenía abierto el servidor de desarrollo o la extensión de Vitest, reinícialos para que lean las rutas nuevas.
 
-**Pendiente de comprobar:** el primer despliegue real de las funciones con la ruta nueva (`npm run functions:deploy -- ia`), porque `functions deploy` no tiene simulación. Las migraciones sí se comprobaron con `npm run db:push -- --dry-run`, y el frontend con `wrangler dev`. Al hacerlo, revisar que la función responde 401 sin sesión.
+**Verificado en `fresura-prueba`:** el 16 de noviembre se aplicaron las migraciones y se desplegaron `panel` e `ia` desde la estructura nueva. Ambas funciones respondieron 401 sin sesión. El 22 de noviembre se volvieron a desplegar con el contrato actualizado para reels y reseñas.
 
 ## Requisitos
 
@@ -29,7 +29,7 @@ El repositorio pasó de tener `src/`, `public/`, `supabase/` y `pruebas/` en la 
 npm ci
 ```
 
-Para el frontend, copiar `.env.example` como `.env.local` en la raíz del repositorio y completar las dos variables `VITE_`.
+Para el frontend, copiar `.env.example` como `.env.local` en la raíz del repositorio y completar `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` con los valores del entorno de Supabase que corresponda.
 
 ## Comandos
 
@@ -53,8 +53,10 @@ La CLI de Supabase busca la carpeta `supabase/` donde se ejecuta. Como está en 
 | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `frontend/src/sitio/`                          | Páginas públicas                                                                                                                                                                                             |
 | `frontend/src/panel/`                          | Panel `/admin`                                                                                                                                                                                               |
-| `frontend/src/panel/agente/`                   | Chat con AI SDK v7, historial bajo RLS y tarjetas que se guardan como borrador mediante el servicio de guiones                                                                                               |
-| `frontend/src/panel/guiones/`                  | Formulario, editor, estados y prompts de video; servicio y hook con cliente del panel inyectado                                                                                                              |
+| `frontend/src/panel/guiones/`                  | Punto de entrada del Estudio creativo. Mantiene el chat abierto al pasar a la biblioteca o a Estilo de redes.                                                                                                |
+| `frontend/src/panel/agente/`                   | Chat con AI SDK v7, historial protegido por RLS y tarjetas de guiones y piezas de contenido.                                                                                                                 |
+| `frontend/src/panel/biblioteca/`               | Guarda piezas por acción del administrador y permite consultarlas, copiarlas y borrarlas.                                                                                                                    |
+| `frontend/src/panel/estilo/`                   | Gestiona las publicaciones de referencia que el agente usa para adaptar su estilo.                                                                                                                           |
 | `frontend/src/compartido/`                     | Lo que usan el sitio y el panel                                                                                                                                                                              |
 | `frontend/public/`                             | Lo que se publica tal cual: contenido de respaldo, marca, fotos de ejemplo, `_headers` y `robots.txt`                                                                                                        |
 | `frontend/pruebas/`                            | Pruebas de pantallas, carrito y lectura del contenido; `datos/` tiene el contenido de prueba                                                                                                                 |
@@ -145,7 +147,7 @@ Las dos validan el JWT en su código (`verify_jwt = false` en `backend/supabase/
 npm run supabase -- secrets set GEMINI_API_KEY=<clave> IA_MODELO=gemini-3.1-flash-lite IA_MODELO_RESPALDO=gemini-3.5-flash-lite ORIGENES_PERMITIDOS=http://localhost:5173
 ```
 
-En desarrollo, los dos modelos son Flash-Lite (3.1 el principal y 3.5 el respaldo) para no gastar el cupo de 3.8 Flash, que se reserva para la entrega, cuando `IA_MODELO=gemini-3.8-flash`. La función pasa una vez al respaldo si el principal agota su cupo diario o responde 503 por saturación; el registro guarda el tipo de fallo y el código HTTP de Gemini, nunca su mensaje. El chat del agente (`POST /chat`) usa `IA_MODELO_AGENTE` si existe; es opcional y en desarrollo no hace falta, porque `IA_MODELO` ya es Flash-Lite. En el chat el paso al respaldo vale para cada llamada del turno, no solo la primera: el agente encadena hasta 6 pasos y Gemini puede saturarse a mitad del turno. Cada turno tiene un límite de 100 s. `ORIGENES_PERMITIDOS` lleva también la dirección del sitio desplegado, separada por comas. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEYS`, `SUPABASE_SECRET_KEYS` y `SUPABASE_JWKS` los pone Supabase; `panel` usa la clave `default` de `SUPABASE_SECRET_KEYS` para publicar y restaurar.
+En desarrollo, los dos modelos son Flash-Lite (3.1 el principal y 3.5 el respaldo) para no gastar el cupo de 3.8 Flash, que se reserva para la entrega, cuando `IA_MODELO=gemini-3.8-flash`. La función pasa una vez al respaldo si el principal agota su cupo diario o responde 503 por saturación; el registro guarda el tipo de fallo y el código HTTP de Gemini, nunca su mensaje. El chat del agente (`POST /chat`) usa `IA_MODELO_AGENTE` si existe; es opcional y en desarrollo no hace falta, porque `IA_MODELO` ya es Flash-Lite. El chat conserva el modelo que respondió y prueba el otro si el activo se satura en un paso posterior. Espera hasta 15 s para abrir la primera conexión de cada paso y hasta 30 s en los intentos siguientes. Si persiste un 503, permite un único intento adicional por turno tras una pausa de 1 s. El límite total sigue siendo de 100 s para sus seis pasos. El panel recibe las tarjetas en cuanto el agente valida la entrega. `ORIGENES_PERMITIDOS` lleva también la dirección del sitio desplegado, separada por comas. `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEYS`, `SUPABASE_SECRET_KEYS` y `SUPABASE_JWKS` los pone Supabase; `panel` usa la clave `default` de `SUPABASE_SECRET_KEYS` para publicar y restaurar.
 
 `panel/index.ts` conecta el acceso y el cliente; `panel/rutas.ts` recibe el cliente para probar las operaciones sin una base real. `POST /publicar` exige `{revision, contenido_real}`; `POST /restaurar`, `{}`. Ambas devuelven `{publicada_en}`. La publicación valida el contrato completo antes de llamar a `publicar_borrador`; si cambia la aprobación a `real`, guarda con control de revisión antes de publicar. Con `contenido_real: false` conserva el estado del borrador (hipótesis pendiente de confirmación por Miguel, DD-26).
 
@@ -161,14 +163,15 @@ npm run functions:deploy -- panel
 
 Además del guion, el agente entrega con la herramienta `entregar_pieza` publicaciones por red, carruseles, prompts de foto (Gemini), prompts de video para Seedance en Dreamina (con la presentadora `@fresura` o solo escenas), variantes de gancho, ideas, calendarios y revisiones. Cada tipo sigue el formato de su herramienta (`ia/skills/piezas.ts`), se valida con `_shared/esquemas/pieza.ts` y llega al panel en `message.metadata.piezas`. La tarjeta copia solo el prompt y abre la herramienta en otra pestaña; ninguna de estas herramientas se llama por API ni tiene costo para el proyecto.
 
-El panel tiene tres vistas: **Chat**, **Biblioteca** (tabla `biblioteca_piezas`: guardar desde el chat para tenerlo a mano, copiar y borrar, sin estados de aprobación; RF-18) y **Estilo de redes** (tabla `referencias_estilo`: publicaciones recientes de Fresura pegadas a mano). El agente lee las 12 referencias más recientes con `ver_estilo_redes` para imitar el estilo, sin tomar de ahí datos comerciales. La columna `origen` deja lista la importación con la API de Meta, que está pendiente.
+El **Estudio creativo** reúne **Chat**, **Biblioteca** (tabla `biblioteca_piezas`: guardar desde el chat, consultar, copiar y borrar; RF-18) y **Estilo de redes** (tabla `referencias_estilo`: publicaciones recientes de Fresura agregadas a mano). El agente lee las 12 referencias más recientes con `ver_estilo_redes` para adaptar el estilo y consulta el contenido publicado para los datos comerciales. La columna `origen` deja lista la importación con la API de Meta, que está pendiente.
 
 ## Videos en Dreamina
 
-Dreamina (CapCut) no tiene API oficial, así que el chat no genera videos: entrega la pieza **Prompt de Seedance** (`prompt_seedance`) para copiar y pegar en AI Video con el modelo Dreamina Seedance, con el botón **Copiar y abrir Dreamina**.
+El chat entrega una tarjeta **Prompt de Seedance** (`prompt_seedance`) por clip, con el botón **Copiar y abrir Dreamina**. Para videos de más de 15 segundos, divide el guion completo en tramos de hasta 15 s y rotula cada tarjeta con el orden y el rango de montaje. Un Reel de 60 s recibe cuatro tarjetas.
 
-- **Con la presentadora:** es el personaje `@fresura`, guardado en la cuenta de Dreamina con la foto de una persona real que dio su permiso. El prompt nombra a `@fresura` una sola vez, al inicio: pegado como texto no queda enlazado, así que se borra, se escribe @ y se elige fresura en la lista. En la barra de Dreamina hay que elegir 9:16.
-- **Solo escenas:** sin personas reconocibles.
+- **Con la presentadora.** El prompt empieza con `@fresura`. Al pegarlo en Dreamina, vuelve a vincular el personaje escribiendo @ y seleccionando **fresura** en la lista. Cada clip con diálogo pide una voz natural en español de Colombia, frases completas, pausas breves y el mismo timbre y acento entre clips.
+- **Solo escenas.** El prompt describe tomas sin personas reconocibles. Todos los clips incluyen indicaciones para enlazar los cambios de plano o escena con una acción o un movimiento que continúe.
+- En **AI Video**, elige **Seedance 2.5** si aparece en la cuenta o **Seedance 2.0** como alternativa. Selecciona 9:16 y la duración del clip en Dreamina. Monta los resultados en el orden de las tarjetas.
 
 AI Avatar de Dreamina no está disponible en Colombia. No hay secretos ni tablas para video: las migraciones `20261119200000_quitar_d_id_heygen.sql` y `20261119220000_quitar_avatar_dreamina.sql` quitaron lo que usaban D-ID y AI Avatar.
 
