@@ -45,7 +45,9 @@ export function separarPromptsDreamina(texto: string): Fragmento[] {
 		if (
 			tituloClip.test(marca) ||
 			instrucciones.test(marca) ||
-			/^¿(?:quieres que|te gustar[ií]a que|te paso|continuamos con|seguimos con)\b/i.test(marca)
+			/^¿(?:quieres que|te gustar[ií]a que|te paso|continuamos con|seguimos con)\b/i.test(
+				marca,
+			)
 		) {
 			cerrar();
 			esPrompt = false;
