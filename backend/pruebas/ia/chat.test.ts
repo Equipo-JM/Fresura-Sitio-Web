@@ -3,10 +3,19 @@ import { APICallError, type ModelMessage } from "ai";
 import { MockLanguageModelV3, simulateReadableStream } from "ai/test";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+	CONTINUIDAD_CLIP_SEEDANCE,
+	type Pieza,
+	VOZ_PRESENTADORA_SEEDANCE,
+} from "../../supabase/functions/_shared/esquemas/pieza";
+import { MAXIMO_PASOS_AGENTE } from "../../supabase/functions/ia/agente/agente";
+import {
 	filasDeMensajes,
 	reconstruirMensajes,
 } from "../../supabase/functions/ia/agente/memoria";
-import { crearRutaChat } from "../../supabase/functions/ia/skills/chat";
+import {
+	crearRutaChat,
+	modeloConRespaldo,
+} from "../../supabase/functions/ia/skills/chat";
 import ejemplo from "../datos/contenido-1.0.1.ejemplo.json";
 import { guionDePrueba } from "../datos/guion";
 
@@ -48,15 +57,20 @@ function respuestaHerramienta(
 	entrada: unknown,
 	llamada: string,
 ) {
+	return respuestaHerramientas([{ nombre, entrada, llamada }]);
+}
+function respuestaHerramientas(
+	llamadas: { nombre: string; entrada: unknown; llamada: string }[],
+) {
 	return {
 		stream: simulateReadableStream({
 			chunks: [
-				{
+				...llamadas.map(({ nombre, entrada, llamada }) => ({
 					type: "tool-call" as const,
 					toolCallId: llamada,
 					toolName: nombre,
 					input: JSON.stringify(entrada),
-				},
+				})),
 				{
 					type: "finish" as const,
 					finishReason: { unified: "tool-calls" as const, raw: undefined },
@@ -157,7 +171,7 @@ const fallosProveedor = [
 		estado: 503,
 		mensajeProveedor: "Saturado: dato privado",
 		mensajePanel:
-			"No se pudo generar el guion. Inténtalo de nuevo en unos minutos.",
+			"Gemini está saturado en este momento. Puedes reintentar este mensaje.",
 	},
 ];
 
@@ -340,8 +354,271 @@ describe("POST /chat", () => {
 		);
 		const texto = await (await p.pedir()).text();
 		expect(p.crearModelo).toHaveBeenCalledTimes(1);
-		expect(texto).toContain("No se pudo generar el guion.");
+		expect(texto).toContain("Gemini está saturado");
 		expect(texto).not.toContain("privado");
+	});
+	it("mantiene el respaldo del 503 hasta entregar el Reel de cuatro escenas", async () => {
+		const registro = vi.spyOn(console, "error").mockImplementation(() => {});
+		const base = guionDePrueba();
+		const escenas = [...base.escenas, base.escenas[2]].map((escena, i) => ({
+			...escena,
+			inicio_s: i * 15,
+			fin_s: (i + 1) * 15,
+		}));
+		const principal = vi
+			.fn()
+			.mockResolvedValueOnce(
+				respuestaHerramienta(
+					"ver_producto",
+					{ producto_id: instruccion.producto_id },
+					"producto",
+				),
+			)
+			.mockRejectedValue(falloProveedor(503, "Saturado"));
+		const respaldo = vi
+			.fn()
+			.mockResolvedValueOnce(
+				respuestaHerramienta("ver_estilo_redes", {}, "estilo"),
+			)
+			.mockResolvedValueOnce(
+				respuestaHerramienta(
+					"entregar_guion",
+					{
+						instruccion: { ...instruccion, red: "instagram", duracion_s: 60 },
+						guion: { ...base, escenas },
+					},
+					"guion",
+				),
+			)
+			.mockResolvedValueOnce(respuestaTexto("Aquí tienes el guion."));
+		const modeloPrincipal = new MockLanguageModelV3({ doStream: principal });
+		const p = preparar(modeloPrincipal);
+		p.crearModelo
+			.mockReturnValueOnce(modeloPrincipal)
+			.mockReturnValueOnce(new MockLanguageModelV3({ doStream: respaldo }));
+		const texto = await (
+			await p.pedir({
+				conversacion_id: id,
+				mensaje:
+					"Quiero solo el guion de un Reel de 60 segundos en cuatro bloques de 15 sobre Arma tu Fresota, con presentadora al inicio y al final.",
+			})
+		).text();
+		expect(texto).toContain('"tarjetaGuion"');
+		expect(texto).toContain('"duracion_s":60');
+		expect(texto).toContain('"inicio_s":45,"fin_s":60');
+		expect(texto).not.toContain('"piezas"');
+		expect(principal).toHaveBeenCalledTimes(2);
+		expect(respaldo).toHaveBeenCalledTimes(3);
+		expect(registro).toHaveBeenCalledTimes(1);
+	});
+	it("entrega los cuatro prompts del Reel en orden y conserva la voz donde hay diálogo", async () => {
+		const base = guionDePrueba();
+		const tomas = [
+			"Plano medio de la presentadora con el vaso.",
+			"Plano detalle de las fresas frescas.",
+			"Macro de una cuchara que toma crema.",
+			"La presentadora acerca el vaso a cámara.",
+		];
+		const dialogos = ["¿Ya armaste la tuya?", "", "", "¡Arma tu Fresura!"];
+		const escenas = tomas.map((que_se_ve, i) => ({
+			inicio_s: i * 15,
+			fin_s: (i + 1) * 15,
+			que_se_ve,
+			texto_pantalla: "",
+			voz: dialogos[i],
+		}));
+		const piezas = escenas.map(
+			(escena, i): Pieza => ({
+				tipo: "prompt_seedance",
+				titulo: `Clip ${i + 1} de 4 · ${escena.inicio_s}–${escena.fin_s} s`,
+				red: "instagram",
+				bloques: [
+					{
+						etiqueta: "Prompt",
+						texto: [
+							...(escena.voz
+								? ["@fresura es la presentadora de Fresura en este video."]
+								: []),
+							"Duración del clip: 15 segundos.",
+							escena.que_se_ve,
+							CONTINUIDAD_CLIP_SEEDANCE,
+							...(escena.voz
+								? [
+										`La presentadora dice: «${escena.voz}».`,
+										VOZ_PRESENTADORA_SEEDANCE,
+									]
+								: []),
+						].join("\n"),
+					},
+					{
+						etiqueta: "Cómo usar",
+						texto: "Abre Dreamina, elige 9:16 y genera 15 segundos.",
+					},
+				],
+			}),
+		);
+		const modelo = new MockLanguageModelV3({
+			doStream: [
+				respuestaHerramienta(
+					"ver_producto",
+					{ producto_id: instruccion.producto_id },
+					"producto",
+				),
+				respuestaHerramienta(
+					"entregar_guion",
+					{
+						instruccion: { ...instruccion, red: "instagram", duracion_s: 60 },
+						guion: { ...base, escenas },
+					},
+					"guion",
+				),
+				respuestaHerramientas(
+					piezas.map((entrada, i) => ({
+						nombre: "entregar_pieza",
+						entrada,
+						llamada: `clip-${i + 1}`,
+					})),
+				),
+				respuestaTexto("Aquí tienes los cuatro clips."),
+			],
+		});
+		const p = preparar(modelo);
+		const sse = await (
+			await p.pedir({
+				conversacion_id: id,
+				mensaje:
+					"Haz un Reel de 60 segundos de Arma tu Fresota con la presentadora al principio y al final y los prompts de Dreamina.",
+			})
+		).text();
+		const eventos = sse
+			.split("\n")
+			.filter((fila) => fila.startsWith("data: {"))
+			.map((fila) => JSON.parse(fila.slice(6)));
+		const metadatos = eventos.findLast(
+			(evento) => evento.type === "finish",
+		)?.messageMetadata;
+		expect(metadatos.tarjetaGuion.guion.escenas).toEqual(escenas);
+		expect(metadatos.piezas).toEqual(piezas);
+		expect(modelo.doStreamCalls).toHaveLength(4);
+		const resultados = p.guardados.flatMap(({ contenido }) =>
+			contenido.role === "tool" ? contenido.content : [],
+		);
+		expect(
+			resultados
+				.filter((parte) => parte.type === "tool-result")
+				.map(({ toolCallId }) => toolCallId),
+		).toEqual(["producto", "guion", "clip-1", "clip-2", "clip-3", "clip-4"]);
+	});
+
+	it("recupera el principal si el respaldo empezó a fallar tras consultar datos", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const principal = new MockLanguageModelV3({
+			doStream: vi
+				.fn()
+				.mockRejectedValueOnce(falloProveedor(503, "saturado"))
+				.mockResolvedValueOnce(respuestaTexto("Recuperado")),
+		});
+		const respaldo = new MockLanguageModelV3({
+			doStream: vi
+				.fn()
+				.mockResolvedValueOnce(respuestaHerramienta("ver_negocio", {}, "a"))
+				.mockRejectedValueOnce(falloProveedor(503, "saturado")),
+		});
+		const p = preparar(principal);
+		p.crearModelo.mockReturnValueOnce(principal).mockReturnValueOnce(respaldo);
+		expect(await (await p.pedir()).text()).toContain('"delta":"Recuperado"');
+		expect(principal.doStreamCalls).toHaveLength(2);
+		expect(respaldo.doStreamCalls).toHaveLength(2);
+	});
+	it("conserva el guion validado cuando se satura Gemini al redactar el cierre", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const p = preparar(
+			new MockLanguageModelV3({
+				doStream: vi
+					.fn()
+					.mockResolvedValueOnce(
+						respuestaHerramienta(
+							"ver_producto",
+							{ producto_id: instruccion.producto_id },
+							"a",
+						),
+					)
+					.mockResolvedValueOnce(
+						respuestaHerramienta(
+							"entregar_guion",
+							{ instruccion, guion: guionDePrueba() },
+							"b",
+						),
+					)
+					.mockRejectedValue(falloProveedor(503, "saturado")),
+			}),
+		);
+		const texto = await (await p.pedir()).text();
+		expect(texto).toContain(
+			'"type":"message-metadata","messageMetadata":{"tarjetaGuion"',
+		);
+		expect(texto).toContain("Gemini está saturado");
+		expect(p.guardados.map((f) => f.rol)).toEqual([
+			"administrador",
+			"agente",
+			"herramienta",
+			"agente",
+			"herramienta",
+		]);
+	});
+	it("usa el respaldo a los 15 segundos si el principal no abre el flujo", async () => {
+		vi.useFakeTimers();
+		try {
+			const lento = new MockLanguageModelV3({
+				doStream: ({ abortSignal }) =>
+					new Promise((_, rechazar) =>
+						abortSignal?.addEventListener("abort", () =>
+							rechazar(abortSignal.reason),
+						),
+					),
+			});
+			const respaldo = new MockLanguageModelV3({ doStream: respuestaTexto() });
+			const modelo = modeloConRespaldo(lento, () => respaldo, vi.fn());
+			const turno = modelo.doStream({ prompt: [] });
+			await vi.advanceTimersByTimeAsync(14999);
+			expect(respaldo.doStreamCalls).toHaveLength(0);
+			await vi.advanceTimersByTimeAsync(1);
+			await turno;
+			expect(respaldo.doStreamCalls).toHaveLength(1);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+	it("se recupera de dos 503 consecutivos sin repetir el mensaje", async () => {
+		vi.spyOn(console, "error").mockImplementation(() => {});
+		const abrir = vi
+			.fn()
+			.mockRejectedValueOnce(falloProveedor(503, "temporal"))
+			.mockRejectedValueOnce(falloProveedor(503, "temporal"))
+			.mockResolvedValueOnce(respuestaTexto("Listo"));
+		const p = preparar(new MockLanguageModelV3({ doStream: abrir }));
+		expect(await (await p.pedir()).text()).toContain('"delta":"Listo"');
+		expect(abrir).toHaveBeenCalledTimes(3);
+		expect(p.guardados.map((f) => f.rol)).toEqual(["administrador", "agente"]);
+	});
+	it("convierte un turno agotado sin texto ni piezas en un error recuperable", async () => {
+		const registro = vi.spyOn(console, "error").mockImplementation(() => {});
+		const p = preparar(
+			new MockLanguageModelV3({
+				doStream: Array.from({ length: MAXIMO_PASOS_AGENTE }, (_, i) =>
+					respuestaHerramienta("ver_estilo_redes", {}, `estilo-${i}`),
+				),
+			}),
+		);
+		const texto = await (await p.pedir()).text();
+		expect(texto).toContain(
+			'"type":"error","errorText":"El guion salió incompleto. Inténtalo de nuevo."',
+		);
+		expect(texto).not.toContain('"type":"finish"');
+		expect(p.guardados.map((fila) => fila.rol)).toEqual(["administrador"]);
+		expect(registro).toHaveBeenCalledWith(
+			expect.stringContaining('"tipo":"ia_estructura"'),
+		);
 	});
 
 	it("RF-18: entrega la tarjeta del producto y solo escribe en la conversación", async () => {

@@ -9,11 +9,12 @@ import {
 import {
 	erroresPieza,
 	esquemaPieza,
+	MAXIMO_DURACION_SEEDANCE,
 	type Pieza,
 } from "../../_shared/esquemas/pieza.ts";
 import { PERFIL_AVATAR_FRESURA } from "../../_shared/esquemas/prompt-video.ts";
 import type { ReferenciaEstilo } from "../../_shared/esquemas/referencia.ts";
-import { PERFIL_MARCA } from "../skills/marca.ts";
+import { ESTILO_DIALOGO_GUION, PERFIL_MARCA } from "../skills/marca.ts";
 import {
 	INSTRUCCIONES_GUION_PRESENTADORA,
 	INSTRUCCIONES_PIEZAS,
@@ -55,9 +56,10 @@ Cómo trabajas:
 - Antes de redactar un guion, una publicación, un carrusel o ganchos, consulta ver_estilo_redes en el turno e imita el estilo de esas publicaciones: largo, ganchos, emojis, hashtags y llamados a la acción. No copies frases completas ni tomes de ahí precios, sedes o promociones: esos datos salen solo de las demás herramientas. Si no hay referencias, guíate por el perfil de marca.
 - Usa ver_negocio para marca, contacto, redes y preguntas frecuentes; ver_sedes para dirección, horario y cobertura; ver_promociones para ofertas. Nunca inventes datos ni presentes una idea de campaña como una oferta confirmada.
 - Si el producto que piden es ambiguo (varios se llaman igual), pregunta cuál antes de escribir, mostrando categoría y tamaño.
-- Si falta la red o la duración, ofrécelas una decisión a la vez. Las redes son Instagram, TikTok y Facebook. Las duraciones son 15, 30 o 60 segundos.
+- Si pide un Reel y no indica otra red, usa Instagram. Si falta la red o la duración, ofrécelas una decisión a la vez. Las redes son Instagram, TikTok y Facebook. Los guiones nuevos pueden durar 15, 30 o 60 segundos. Si conviertes un guion existente en prompts para Dreamina, respeta su duración y divide todos sus tramos.
 - Si el guion se centra en un producto, consulta su ficha con ver_producto antes de entregarlo.
 - Entrega el guion solo con entregar_guion y las demás piezas con entregar_pieza. Si devuelven errores, corrígelos (consulta de nuevo los datos que pidan) y vuelve a llamarlas sin mencionárselo a la persona: no hables de errores, validaciones ni inconvenientes técnicos.
+- Diálogo o voz del guion. ${ESTILO_DIALOGO_GUION}
 - La voz de todas las escenas suma como máximo el 80 % de 20 caracteres por segundo de duración.
 - Una vez entregado el guion, invita a pedir un ajuste por chat. Si pide un cambio, conserva lo que ya eligió y entrega otra versión en el mismo hilo. No remitas a botones de revisión, aprobación o generación de video. No publicas contenido.
 - No pidas ni repitas datos personales. Puedes usar el contacto comercial publicado.
@@ -144,7 +146,7 @@ export function crearHerramientasAgente(
 		}),
 		entregar_pieza: tool({
 			description:
-				"Entrega una pieza de contenido distinta del guion: publicación, carrusel, prompt de foto, avatar de Dreamina, prompt de Seedance, variantes de gancho, ideas, calendario o revisión. Valida el formato y los precios y sedes mencionados; si devuelve errores, corrígelos y vuelve a llamarla. No guarda nada.",
+				"Entrega una pieza de contenido distinta del guion: publicación, carrusel, prompt de foto, un solo clip de Seedance, variantes de gancho, ideas, calendario o revisión. Valida el formato y los precios y sedes mencionados; si devuelve errores, corrígelos y vuelve a llamarla. No guarda nada.",
 			inputSchema: esquemaPieza,
 			execute: async (pieza) => {
 				// La revisión cita los datos equivocados del texto revisado para señalarlos.
@@ -175,11 +177,25 @@ export function crearHerramientasAgente(
 					contenido,
 					productosConsultados: estado.productosConsultados,
 				});
-				if (resultado.ok) {
-					estado.guionEntregado = resultado;
-					return { ok: true };
-				}
-				return resultado;
+				if (!resultado.ok) return resultado;
+				const duracion = resultado.instruccion.duracion_s;
+				const maximo = MAXIMO_DURACION_SEEDANCE;
+				if (
+					duracion > maximo &&
+					resultado.guion.escenas.some(
+						({ inicio_s, fin_s }, i) =>
+							inicio_s !== i * maximo ||
+							fin_s !== Math.min((i + 1) * maximo, duracion),
+					)
+				)
+					return {
+						ok: false,
+						errores: [
+							`Divide todo el guion de ${duracion} s en escenas consecutivas de ${maximo} s. Agrupa las tomas de cada tramo en su escena.`,
+						],
+					};
+				estado.guionEntregado = resultado;
+				return { ok: true };
 			},
 		}),
 	};

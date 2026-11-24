@@ -668,7 +668,7 @@ describe("chat del panel", () => {
 		);
 		expect(confirmar).not.toHaveBeenCalled();
 	});
-	it("avisa cuando termina sin texto ni tarjeta", async () => {
+	it("permite reintentar un turno vacío y omite la burbuja sin contenido", async () => {
 		const simulado = simular();
 		simulado.responder(() =>
 			flujo([
@@ -680,5 +680,12 @@ describe("chat del panel", () => {
 		expect(
 			await screen.findByText(/El agente no pudo completar la respuesta/),
 		).toBeInTheDocument();
+		expect(
+			screen.queryByText("Agente", { exact: true }),
+		).not.toBeInTheDocument();
+		simulado.responder(() => respuesta());
+		fireEvent.click(screen.getByRole("button", { name: "Intentar de nuevo" }));
+		expect(await screen.findByText("Vamos a preparar tu guion")).toBeVisible();
+		expect(simulado.peticiones).toHaveLength(2);
 	});
 });

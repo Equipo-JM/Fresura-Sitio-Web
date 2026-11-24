@@ -27,6 +27,17 @@ export type TipoPieza = (typeof TIPOS_PIEZA)[number];
  */
 export const PERSONAJE_DREAMINA = "@fresura";
 
+/** Límite por generación que usa el equipo de Fresura en Dreamina. */
+export const MAXIMO_DURACION_SEEDANCE = 15;
+
+/** Dirección de voz que viaja en cada prompt con diálogo de la presentadora. */
+export const VOZ_PRESENTADORA_SEEDANCE =
+	"La presentadora habla a cámara con una voz natural y cálida, en español de Colombia, como si le recomendara el postre a una amiga. Usa tuteo, un ritmo conversado, pausas breves y una entonación espontánea. Di frases cortas y completas con palabras comunes y fáciles de pronunciar. Evita la cadencia robótica y el tono de locución. Sincroniza sus labios con cada frase y conserva el mismo timbre, acento y ritmo entre clips.";
+
+/** Dirección de ritmo y continuidad que se copia con cada clip de Dreamina. */
+export const CONTINUIDAD_CLIP_SEEDANCE =
+	"El clip se siente natural de principio a fin. Si hay diálogo, termina cada frase dentro del clip y deja solo pausas breves y naturales, sin silencios incómodos. Si cambia el plano principal o la escena, enlaza las tomas con un gesto, una mirada o un movimiento que continúe de una a otra. Evita los saltos bruscos.";
+
 /** Dreamina (CapCut): videos con Seedance. No tiene API oficial. */
 const URL_DREAMINA = "https://dreamina.capcut.com/ai-tool/ai-video";
 
@@ -107,6 +118,25 @@ export function erroresPieza(pieza: Pieza): string[] {
 		for (const bloque of pieza.bloques) {
 			if (/^c[oó]mo usar/i.test(bloque.etiqueta)) continue;
 			const menciones = bloque.texto.split(PERSONAJE_DREAMINA).length - 1;
+			const duracion = Number(
+				bloque.texto.match(/^Duración del clip: (\d+) segundos?\.$/im)?.[1],
+			);
+			if (!(duracion >= 1 && duracion <= MAXIMO_DURACION_SEEDANCE))
+				errores.push(
+					`Indica una duración de 1 a ${MAXIMO_DURACION_SEEDANCE} s en una línea «Duración del clip: N segundos.» y entrega solo un clip por pieza.`,
+				);
+			if (
+				menciones > 0 &&
+				/\b(?:la presentadora|ella) dice\s*:/i.test(bloque.texto) &&
+				!bloque.texto.includes(VOZ_PRESENTADORA_SEEDANCE)
+			)
+				errores.push(
+					`Incluye esta indicación completa en el bloque «Prompt» de cada clip con diálogo: ${VOZ_PRESENTADORA_SEEDANCE}`,
+				);
+			if (!bloque.texto.includes(CONTINUIDAD_CLIP_SEEDANCE))
+				errores.push(
+					`Incluye esta indicación completa en el bloque «Prompt» de cada clip: ${CONTINUIDAD_CLIP_SEEDANCE}`,
+				);
 			if (/presentadora/i.test(bloque.texto) && menciones === 0)
 				errores.push(
 					`La presentadora es el personaje ${PERSONAJE_DREAMINA} guardado en Dreamina: escríbelo al inicio del prompt.`,

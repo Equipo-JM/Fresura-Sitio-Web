@@ -4,7 +4,7 @@ import {
 	objetivoCaracteresVoz,
 } from "../../_shared/esquemas/guion.ts";
 import type { PromptGuion } from "../proveedor/generar.ts";
-import { PERFIL_MARCA } from "./marca.ts";
+import { ESTILO_DIALOGO_GUION, PERFIL_MARCA } from "./marca.ts";
 
 /**
  * Arma lo que se envía al modelo para generar un guion (DT-01, sección 25):
@@ -136,6 +136,6 @@ export function armarPromptGuion(
 
 	return {
 		sistema: SISTEMA,
-		usuario: `Escribe el guion de un video vertical de ${instruccion.duracion_s} segundos para ${instruccion.red}. La voz de todas las escenas suma como máximo ${objetivoCaracteresVoz(instruccion.duracion_s)} caracteres, para que se alcance a decir.\n\n<datos>\n${json}\n</datos>`,
+		usuario: `Escribe el guion de un video vertical de ${instruccion.duracion_s} segundos para ${instruccion.red}. La voz de todas las escenas suma como máximo ${objetivoCaracteresVoz(instruccion.duracion_s)} caracteres, para que se alcance a decir. ${ESTILO_DIALOGO_GUION}\n\n<datos>\n${json}\n</datos>`,
 	};
 }

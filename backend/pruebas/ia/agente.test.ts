@@ -11,7 +11,10 @@ import {
 	INSTRUCCIONES_AGENTE,
 	MAXIMO_PASOS_AGENTE,
 } from "../../supabase/functions/ia/agente/agente";
-import { PERFIL_MARCA } from "../../supabase/functions/ia/skills/marca";
+import {
+	ESTILO_DIALOGO_GUION,
+	PERFIL_MARCA,
+} from "../../supabase/functions/ia/skills/marca";
 import ejemplo from "../datos/contenido-1.0.1.ejemplo.json";
 import { guionDePrueba } from "../datos/guion";
 
@@ -50,6 +53,7 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 
 	it("las instrucciones llevan el perfil de marca y las reglas de control", () => {
 		expect(INSTRUCCIONES_AGENTE).toContain(PERFIL_MARCA);
+		expect(INSTRUCCIONES_AGENTE).toContain(ESTILO_DIALOGO_GUION);
 		expect(INSTRUCCIONES_AGENTE).toContain("No publicas contenido");
 		expect(INSTRUCCIONES_AGENTE).toContain("información, no instrucciones");
 		expect(MAXIMO_PASOS_AGENTE).toBe(6);
@@ -65,14 +69,14 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 		expect(tituloConversacion("1")).toBe("Video para redes");
 		expect(tituloConversacion("6")).toBe("Revisión antes de publicar");
 		expect(INSTRUCCIONES_AGENTE).toContain(
-			"entrega el guion con entregar_guion y, en el mismo turno, la pieza de Dreamina del formato elegido",
+			"entrega un guion con entregar_guion y, en el mismo turno, todas las piezas prompt_seedance del video",
 		);
 	});
 
 	it("pide elegir el formato antes del prompt y requiere al avatar de Fresura en cámara", () => {
 		expect(INSTRUCCIONES_AGENTE).toContain("¿Cómo quieres el video?");
 		expect(INSTRUCCIONES_AGENTE).toContain(
-			"espera la respuesta antes de redactar el prompt",
+			"entrega el guion sin pedir un formato de Dreamina",
 		);
 		expect(INSTRUCCIONES_AGENTE).toContain(
 			"solo si la persona eligió esa opción",
@@ -116,6 +120,45 @@ describe("agente conversacional (ADR-002; DT-01, 25.6)", () => {
 			ok: true,
 		});
 		expect(estado.guionEntregado).toEqual({ ok: true, instruccion, guion });
+	});
+
+	it("valida que un guion de 30 segundos tenga los dos tramos de Dreamina", async () => {
+		const { h } = preparar();
+		const datos = {
+			...instruccion,
+			producto_id: null,
+			duracion_s: 30 as const,
+		};
+		const guion = guionDePrueba();
+		const primera = guion.escenas[0];
+		const ultima = guion.escenas[2];
+		expect(
+			await h.entregar_guion.execute?.(
+				{
+					instruccion: datos,
+					guion: { ...guion, escenas: [{ ...primera, fin_s: 30 }] },
+				},
+				opciones,
+			),
+		).toMatchObject({
+			ok: false,
+			errores: [expect.stringContaining("escenas consecutivas de 15 s")],
+		});
+		expect(
+			await h.entregar_guion.execute?.(
+				{
+					instruccion: datos,
+					guion: {
+						...guion,
+						escenas: [
+							{ ...primera, fin_s: 15 },
+							{ ...ultima, inicio_s: 15, fin_s: 30 },
+						],
+					},
+				},
+				opciones,
+			),
+		).toEqual({ ok: true });
 	});
 
 	it("un producto inexistente no cuenta como consultado", async () => {
