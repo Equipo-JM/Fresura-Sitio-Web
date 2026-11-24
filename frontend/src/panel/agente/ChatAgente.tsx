@@ -1,10 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { INICIO_CHAT } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
-import { textoPieza } from "../../../../backend/supabase/functions/_shared/esquemas/pieza";
+import {
+	promptPieza,
+	textoPieza,
+} from "../../../../backend/supabase/functions/_shared/esquemas/pieza";
 import type { Database } from "../../tipos/database.types";
 import { GuardarEnBiblioteca } from "../biblioteca/GuardarEnBiblioteca";
 import { crearServicioBiblioteca } from "../biblioteca/servicioBiblioteca";
+import { separarPromptsDreamina } from "./promptsDreamina";
 import { cuerpoGuion, leerPiezas, leerTarjeta } from "./servicioConversaciones";
 import { TarjetaPieza } from "./TarjetaPieza";
 import { useChatAgente } from "./useChatAgente";
@@ -254,6 +258,15 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 							const tarjeta = leerTarjeta(m.metadata?.tarjetaGuion);
 							const piezas = leerPiezas(m.metadata?.piezas);
 							const partes = m.parts.filter((parte) => parte.type === "text");
+							const terminado = !chat.ocupado || m.id !== ultimo?.id;
+							const textoChat = partes.map((p) => p.text).join("\n\n");
+							const fragmentos =
+								m.role === "assistant" && terminado && textoChat
+									? separarPromptsDreamina(textoChat)
+									: [{ inicio: 0, texto: textoChat, esPrompt: false }];
+							const promptsEntregados = piezas
+								.filter((p) => p.tipo === "prompt_seedance")
+								.map(promptPieza);
 							const cuerpo = tarjeta ? cuerpoGuion(tarjeta.guion) : "";
 							const ficha = tarjeta
 								? `${tarjeta.instruccion.red} · ${tarjeta.instruccion.duracion_s} segundos`
@@ -280,11 +293,25 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 									key={m.id}
 								>
 									<strong>{m.role === "user" ? "Tú" : "Agente"}</strong>
-									{partes.map((p) => (
-										<p className="agente-texto" key={p.type + p.text}>
-											{p.text}
-										</p>
-									))}
+									{fragmentos.map((f) =>
+										f.esPrompt ? (
+											promptsEntregados.includes(f.texto) ? null : (
+												<TarjetaPieza
+													key={f.inicio}
+													pieza={{
+														tipo: "prompt_seedance",
+														titulo: "Prompt para Dreamina",
+														red: null,
+														bloques: [{ etiqueta: "Prompt", texto: f.texto }],
+													}}
+												/>
+											)
+										) : f.texto ? (
+											<p className="agente-texto" key={f.inicio}>
+												{f.texto}
+											</p>
+										) : null,
+									)}
 									{m.metadata?.aviso && (
 										<p className="panel-aviso">{m.metadata.aviso.mensaje}</p>
 									)}
@@ -321,11 +348,9 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 											}
 										/>
 									))}
-									{m.role === "assistant" &&
-										textoCompleto &&
-										(!chat.ocupado || m.id !== ultimo?.id) && (
-											<CopiarRespuesta texto={textoCompleto} />
-										)}
+									{m.role === "assistant" && textoCompleto && terminado && (
+										<CopiarRespuesta texto={textoCompleto} />
+									)}
 								</article>
 							);
 						})}

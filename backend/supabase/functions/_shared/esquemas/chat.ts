@@ -8,7 +8,7 @@ export const esquemaChat = z.strictObject({
 
 /** Opciones de bienvenida, compartidas para que el agente pueda interpretar una respuesta numérica. */
 export const INICIO_CHAT = `¡Hola! Soy tu asistente de redes y contenido de Fresura. ¿Qué creamos hoy?
-1. Video para redes (guion y pieza para Dreamina: con la presentadora o solo escenas)
+1. Video para redes (guion y pieza para Dreamina: con presentadora, solo escenas o ambas)
 2. Publicación con texto y hashtags
 3. Carrusel para Instagram o Facebook
 4. Prompt para fotos con IA (Gemini)
