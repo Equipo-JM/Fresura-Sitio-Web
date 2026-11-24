@@ -169,7 +169,7 @@ El **Estudio creativo** reúne **Chat**, **Biblioteca** (tabla `biblioteca_pieza
 
 El chat entrega una tarjeta **Prompt de Seedance** (`prompt_seedance`) por clip, con el botón **Copiar y abrir Dreamina**. Para videos de más de 15 segundos, divide el guion completo en tramos de hasta 15 s y rotula cada tarjeta con el orden y el rango de montaje. Un Reel de 60 s recibe cuatro tarjetas.
 
-- **Con la presentadora.** El prompt empieza con `@fresura`. Al pegarlo en Dreamina, vuelve a vincular el personaje escribiendo @ y seleccionando **fresura** en la lista. Cada clip con diálogo pide una voz natural en español de Colombia, frases completas, pausas breves y el mismo timbre y acento entre clips.
+- **Con la presentadora.** El prompt empieza con `@fresura`. Al pegarlo en Dreamina, vuelve a vincular el personaje escribiendo @ y seleccionando **fresura** en la lista. Cada clip con diálogo pide una voz natural en español de Colombia, palabras fáciles de pronunciar, frases breves y completas, pausas breves y el mismo timbre y acento entre clips.
 - **Solo escenas.** El prompt describe tomas sin personas reconocibles. Todos los clips incluyen indicaciones para enlazar los cambios de plano o escena con una acción o un movimiento que continúe.
 - En **AI Video**, elige **Seedance 2.5** si aparece en la cuenta o **Seedance 2.0** como alternativa. Selecciona 9:16 y la duración del clip en Dreamina. Monta los resultados en el orden de las tarjetas.
 

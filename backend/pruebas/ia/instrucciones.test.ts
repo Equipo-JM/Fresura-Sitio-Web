@@ -15,6 +15,7 @@ import {
 	fechaColombia,
 } from "../../supabase/functions/ia/skills/instrucciones";
 import { armarPromptVideo } from "../../supabase/functions/ia/skills/instrucciones-video";
+import { ESTILO_DIALOGO_GUION } from "../../supabase/functions/ia/skills/marca";
 import ejemplo from "../datos/contenido-1.0.1.ejemplo.json";
 import { guionDePrueba } from "../datos/guion";
 
@@ -120,6 +121,7 @@ describe("límite de la voz (DT-01, 25.4)", () => {
 			producto,
 		);
 		expect(usuario).toContain("240 caracteres");
+		expect(usuario).toContain(ESTILO_DIALOGO_GUION);
 	});
 
 	it("el prompt de avatar da el máximo exacto y permite resumir la voz", () => {

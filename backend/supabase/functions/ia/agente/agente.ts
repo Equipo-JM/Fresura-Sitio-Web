@@ -14,7 +14,7 @@ import {
 } from "../../_shared/esquemas/pieza.ts";
 import { PERFIL_AVATAR_FRESURA } from "../../_shared/esquemas/prompt-video.ts";
 import type { ReferenciaEstilo } from "../../_shared/esquemas/referencia.ts";
-import { PERFIL_MARCA } from "../skills/marca.ts";
+import { ESTILO_DIALOGO_GUION, PERFIL_MARCA } from "../skills/marca.ts";
 import {
 	INSTRUCCIONES_GUION_PRESENTADORA,
 	INSTRUCCIONES_PIEZAS,
@@ -59,6 +59,7 @@ Cómo trabajas:
 - Si pide un Reel y no indica otra red, usa Instagram. Si falta la red o la duración, ofrécelas una decisión a la vez. Las redes son Instagram, TikTok y Facebook. Los guiones nuevos pueden durar 15, 30 o 60 segundos. Si conviertes un guion existente en prompts para Dreamina, respeta su duración y divide todos sus tramos.
 - Si el guion se centra en un producto, consulta su ficha con ver_producto antes de entregarlo.
 - Entrega el guion solo con entregar_guion y las demás piezas con entregar_pieza. Si devuelven errores, corrígelos (consulta de nuevo los datos que pidan) y vuelve a llamarlas sin mencionárselo a la persona: no hables de errores, validaciones ni inconvenientes técnicos.
+- Diálogo o voz del guion. ${ESTILO_DIALOGO_GUION}
 - La voz de todas las escenas suma como máximo el 80 % de 20 caracteres por segundo de duración.
 - Una vez entregado el guion, invita a pedir un ajuste por chat. Si pide un cambio, conserva lo que ya eligió y entrega otra versión en el mismo hilo. No remitas a botones de revisión, aprobación o generación de video. No publicas contenido.
 - No pidas ni repitas datos personales. Puedes usar el contacto comercial publicado.

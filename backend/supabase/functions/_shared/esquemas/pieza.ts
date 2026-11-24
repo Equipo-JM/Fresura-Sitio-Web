@@ -32,7 +32,7 @@ export const MAXIMO_DURACION_SEEDANCE = 15;
 
 /** Dirección de voz que viaja en cada prompt con diálogo de la presentadora. */
 export const VOZ_PRESENTADORA_SEEDANCE =
-	"La presentadora habla a cámara con una voz natural y cálida, en español de Colombia, como si le recomendara el postre a una amiga. Usa tuteo, un ritmo conversado, pausas breves y una entonación espontánea. Evita la cadencia robótica y el tono de locución. Sincroniza sus labios con cada frase y conserva el mismo timbre, acento y ritmo entre clips.";
+	"La presentadora habla a cámara con una voz natural y cálida, en español de Colombia, como si le recomendara el postre a una amiga. Usa tuteo, un ritmo conversado, pausas breves y una entonación espontánea. Di frases cortas y completas con palabras comunes y fáciles de pronunciar. Evita la cadencia robótica y el tono de locución. Sincroniza sus labios con cada frase y conserva el mismo timbre, acento y ritmo entre clips.";
 
 /** Dirección de ritmo y continuidad que se copia con cada clip de Dreamina. */
 export const CONTINUIDAD_CLIP_SEEDANCE =

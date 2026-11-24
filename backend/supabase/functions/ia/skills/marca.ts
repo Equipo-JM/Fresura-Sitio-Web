@@ -19,3 +19,7 @@ Voz:
 - Tutea y habla directo a quien ve el video, con frases cortas y alguna pregunta.
 - Puedes usar, sin repetirlas en cada pieza, frases de la marca como «Ven, date un gusto bonito... como tú» o «Ponle tu toque único».
 - Evita los clichés publicitarios y los superlativos sin respaldo, como «el mejor» o «único en el mundo».`;
+
+/** Pautas para que el texto que se dice en cámara sea fácil de pronunciar. */
+export const ESTILO_DIALOGO_GUION =
+	"Usa palabras cortas, comunes y fáciles de decir en español de Colombia. Escribe frases completas y breves, con una idea por frase. Evita palabras rebuscadas y trabalenguas. Conserva los nombres publicados de la marca y sus productos. Puedes decir «Elige lo que más te guste» o «Ponle tu salsa favorita».";
