@@ -84,7 +84,8 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 		ultimo?.role === "assistant" &&
 		!ultimo.parts.some((p) => p.type === "text" && p.text.trim()) &&
 		!ultimo.metadata?.tarjetaGuion &&
-		!ultimo.metadata?.piezas?.length;
+		!ultimo.metadata?.piezas?.length &&
+		!ultimo.metadata?.aviso;
 	function enviar() {
 		if (chat.ocupado || !texto.trim()) return;
 		seguirHilo.current = true;
@@ -92,7 +93,10 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 		setTexto("");
 	}
 	return (
-		<section className="panel-seccion" aria-labelledby="chat-titulo">
+		<section
+			className="panel-seccion agente-seccion"
+			aria-labelledby="chat-titulo"
+		>
 			<h2 id="chat-titulo">Conversar con el agente</h2>
 			<div className="agente-distribucion">
 				<button
@@ -238,7 +242,10 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 						aria-label="Mensajes del agente"
 					>
 						{!chat.conversacionActiva && chat.mensajes.length === 0 && (
-							<article className="panel-bloque agente-mensaje">
+							<article
+								className="panel-bloque agente-mensaje"
+								data-autor="assistant"
+							>
 								<strong>Agente</strong>
 								<p className="agente-texto">{INICIO_CHAT}</p>
 							</article>
@@ -260,6 +267,12 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 							]
 								.filter((parte) => parte?.trim())
 								.join("\n\n");
+							if (
+								m.role === "assistant" &&
+								!textoCompleto &&
+								!m.metadata?.aviso
+							)
+								return null;
 							return (
 								<article
 									className="panel-bloque agente-mensaje"
@@ -320,9 +333,9 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 							<p>{consultando ? "Consultando datos…" : "Escribiendo…"}</p>
 						)}
 					</div>
-					{chat.error && (
+					{(chat.error || sinRespuesta) && (
 						<div className="panel-aviso" role="alert">
-							<p>{chat.error}</p>
+							<p>{chat.error || "El agente no pudo completar la respuesta."}</p>
 							<button
 								className="boton secundario"
 								type="button"
@@ -332,12 +345,6 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 								Intentar de nuevo
 							</button>
 						</div>
-					)}
-					{sinRespuesta && (
-						<p role="status">
-							El agente no pudo completar la respuesta. Envía otro mensaje para
-							continuar.
-						</p>
 					)}
 					<form
 						onSubmit={(e) => {

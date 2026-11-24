@@ -73,22 +73,27 @@ export function EscritorioPanel({
 							Abrir catálogo
 						</button>
 					</section>
-					<section>
-						<h2>Publicación</h2>
-						<p>
-							{versiones.publicada?.publicada_en
-								? "En el sitio desde el " +
-									new Intl.DateTimeFormat("es-CO", {
-										dateStyle: "long",
-										timeZone: "America/Bogota",
-									}).format(new Date(versiones.publicada.publicada_en))
-								: "Sin fecha de publicación"}
-						</p>
-						<h3>
+					<section className="mesa-publicacion">
+						<header>
+							<h2>Publicación</h2>
+							<p>
+								{versiones.publicada?.publicada_en
+									? "En el sitio desde el " +
+										new Intl.DateTimeFormat("es-CO", {
+											dateStyle: "long",
+											timeZone: "America/Bogota",
+										}).format(new Date(versiones.publicada.publicada_en))
+									: "Sin fecha de publicación"}
+							</p>
+						</header>
+						<p
+							className="mesa-publicacion-estado"
+							data-borrador={!!versiones.borrador}
+						>
 							{versiones.borrador
 								? "Cambios guardados"
 								: "Sin cambios pendientes"}
-						</h3>
+						</p>
 						<button
 							type="button"
 							className="boton secundario"
