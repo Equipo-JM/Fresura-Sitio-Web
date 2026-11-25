@@ -73,8 +73,9 @@ export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 					const caja = vaso.getBoundingClientRect();
 					const centroX = caja.left + caja.width / 2;
 					const centroY = caja.top + caja.height / 2;
+					const lugares = piezas.map((pieza) => pieza.getBoundingClientRect());
 					piezas.forEach((pieza, indice) => {
-						const lugar = pieza.getBoundingClientRect();
+						const lugar = lugares[indice];
 						const sentido = Number(pieza.dataset.sentido ?? 1);
 						linea.from(
 							pieza,
@@ -198,16 +199,23 @@ export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 
 				if (costados.length > 0) {
 					// Profundidad: lo cercano se mueve más que lo lejano, con el puntero y al bajar.
-					const capas = costados.map((costado) => ({
-						profundidad: Number(costado.dataset.profundidad ?? 1),
-						capa: costado.querySelector<HTMLElement>(
+					const capas = costados.flatMap((costado) => {
+						const capa = costado.querySelector<HTMLElement>(
 							".portada-costado-profundidad",
-						),
-					}));
-					const seguidores = capas.flatMap(({ capa, profundidad }) => {
-						if (!capa) return [];
-						gsap.to(capa, {
-							yPercent: -35 * profundidad,
+						);
+						return capa
+							? [
+									{
+										capa,
+										profundidad: Number(costado.dataset.profundidad ?? 1),
+									},
+								]
+							: [];
+					});
+					gsap.to(
+						capas.map(({ capa }) => capa),
+						{
+							yPercent: (indice: number) => -35 * capas[indice].profundidad,
 							ease: "none",
 							scrollTrigger: {
 								trigger: raiz,
@@ -215,31 +223,26 @@ export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 								end: "bottom top",
 								scrub: true,
 							},
-						});
-						return [
-							{
-								profundidad,
-								x: gsap.quickTo(capa, "x", {
-									duration: 0.9,
-									ease: "power3.out",
-								}),
-								y: gsap.quickTo(capa, "y", {
-									duration: 0.9,
-									ease: "power3.out",
-								}),
-							},
-						];
-					});
+						},
+					);
+					const seguidores = capas.map(({ capa, profundidad }) => ({
+						profundidad,
+						x: gsap.quickTo(capa, "x", { duration: 0.9, ease: "power3.out" }),
+						y: gsap.quickTo(capa, "y", { duration: 0.9, ease: "power3.out" }),
+					}));
 					const escena = raiz.querySelector<HTMLElement>(".portada-escena");
 					const escenaX = escena
 						? gsap.quickTo(escena, "x", { duration: 1.2, ease: "power3.out" })
 						: null;
-					const alMover = (evento: PointerEvent) => {
-						if (evento.pointerType !== "mouse") return;
+					let cuadro = 0;
+					let punteroX = 0;
+					let punteroY = 0;
+					const actualizarPuntero = () => {
+						cuadro = 0;
 						const caja = raiz.getBoundingClientRect();
 						// De -1 a 1 desde el centro de la portada.
-						const nx = ((evento.clientX - caja.left) / caja.width) * 2 - 1;
-						const ny = ((evento.clientY - caja.top) / caja.height) * 2 - 1;
+						const nx = ((punteroX - caja.left) / caja.width) * 2 - 1;
+						const ny = ((punteroY - caja.top) / caja.height) * 2 - 1;
 						for (const seguidor of seguidores) {
 							seguidor.x(nx * 28 * seguidor.profundidad);
 							seguidor.y(ny * 18 * seguidor.profundidad);
@@ -247,9 +250,17 @@ export function useEntradaPortada(portada: RefObject<HTMLElement | null>) {
 						// La escena central se mueve poco y al revés: refuerza la distancia.
 						escenaX?.(nx * -8);
 					};
+					const alMover = (evento: PointerEvent) => {
+						if (evento.pointerType !== "mouse") return;
+						punteroX = evento.clientX;
+						punteroY = evento.clientY;
+						if (!cuadro) cuadro = requestAnimationFrame(actualizarPuntero);
+					};
 					raiz.addEventListener("pointermove", alMover);
-					quitarEscucha = () =>
+					quitarEscucha = () => {
+						cancelAnimationFrame(cuadro);
 						raiz.removeEventListener("pointermove", alMover);
+					};
 				}
 
 				ScrollTrigger.create({
