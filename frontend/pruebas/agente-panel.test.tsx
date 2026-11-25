@@ -516,6 +516,64 @@ describe("chat del panel", () => {
 			},
 		]);
 	});
+	it.each(["historial", "en vivo"])(
+		"recupera los dos controles de Dreamina para un prompt mixto en %s",
+		async (origen) => {
+			const prompt =
+				"@fresura es la presentadora de Fresura en este video.\nDuración del clip: 15 segundos.\nElla mira a cámara. Corte a las fresas. La presentadora dice (voz en off): «¿Cuál te gusta?»";
+			const texto = `${prompt}\n\n**Cómo usar:**\n1. Abrir Dreamina.\n\n¿Quieres que te pase el último clip?`;
+			const copiar = vi.fn().mockResolvedValue(undefined);
+			vi.stubGlobal(
+				"navigator",
+				Object.create(navigator, {
+					clipboard: { value: { writeText: copiar } },
+				}),
+			);
+			if (origen === "historial") {
+				simular(
+					[{ ...conversacion, titulo: "Reel mixto" }],
+					[
+						{
+							id: "anterior",
+							contenido: { role: "assistant", content: texto },
+						},
+					],
+				);
+				fireEvent.click(
+					await screen.findByRole("button", { name: "Reel mixto" }),
+				);
+			} else {
+				const simulado = simular();
+				simulado.responder(() =>
+					flujo([
+						{ type: "start", messageId: "mixto" },
+						{ type: "text-start", id: "texto" },
+						{ type: "text-delta", id: "texto", delta: texto },
+						{ type: "text-end", id: "texto" },
+						{ type: "finish", finishReason: "stop" },
+					]),
+				);
+				enviar("Quiero presentadora y escenas");
+			}
+			fireEvent.click(
+				await screen.findByRole("button", { name: "Copiar prompt" }),
+			);
+			expect(copiar).toHaveBeenLastCalledWith(prompt);
+			const enlace = screen.getByRole("link", {
+				name: /Copiar y abrir Dreamina/,
+			});
+			expect(enlace).toHaveAttribute(
+				"href",
+				"https://dreamina.capcut.com/ai-tool/ai-video",
+			);
+			fireEvent.click(enlace);
+			expect(copiar).toHaveBeenLastCalledWith(prompt);
+			fireEvent.click(
+				screen.getByRole("button", { name: "Copiar respuesta completa" }),
+			);
+			expect(copiar).toHaveBeenLastCalledWith(texto);
+		},
+	);
 	it("permite copiar un prompt escrito en el chat aunque el navegador bloquee el portapapeles", async () => {
 		const simulado = simular();
 		const prompt =

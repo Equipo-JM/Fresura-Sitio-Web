@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Pieza } from "../../backend/supabase/functions/_shared/esquemas/pieza";
+import { separarPromptsDreamina } from "../src/panel/agente/promptsDreamina";
 import {
 	convertirHistorial,
 	leerPiezas,
@@ -131,5 +132,34 @@ describe("piezas de contenido en el chat", () => {
 			"Antojo de jueves\n\nTexto\n¿Ya tienes antojo?\n\nHashtags\n#Fresura",
 		);
 		expect(await screen.findByText("Texto copiado.")).toBeVisible();
+	});
+});
+
+describe("prompts de Dreamina escritos como texto", () => {
+	it("separa cada clip y conserva las tomas del producto anteriores a la duración", () => {
+		const primero =
+			"@fresura es la presentadora de Fresura en este video.\nDuración del clip: 15 segundos.\nElla saluda.";
+		const segundo =
+			"Plano detalle de las fresas.\nDuración del clip: 7 segundos.";
+		const texto = [
+			"**Clip 1 de 2**",
+			primero,
+			"**Clip 2 de 2**",
+			"Prompt para Dreamina:",
+			segundo,
+			"**Cómo usar:**",
+			"Abre Dreamina.",
+		].join("\n");
+		expect(
+			separarPromptsDreamina(texto)
+				.filter((f) => f.esPrompt)
+				.map((f) => f.texto),
+		).toEqual([primero, segundo]);
+	});
+	it("conserva una conversación sobre herramientas sin crear tarjetas de video", () => {
+		const texto = "Puedes usar Dreamina con @fresura. ¿Quieres solo escenas?";
+		expect(separarPromptsDreamina(texto)).toEqual([
+			{ inicio: 0, texto, esPrompt: false },
+		]);
 	});
 });
