@@ -1,12 +1,19 @@
 import type { ModelMessage } from "ai";
+import {
+	type FormatoDreamina,
+	PREGUNTA_FORMATO,
+} from "../../_shared/dreamina.ts";
+import {
+	leerTarjeta,
+	type TarjetaGuion,
+} from "../../_shared/esquemas/guion.ts";
 
-/** Las opciones numeradas forman parte del historial y permiten retomar la decisión. */
-export const PREGUNTA_FORMATO =
-	"¿Cómo quieres el video? 1. Con la presentadora (@fresura) en cámara. 2. Solo escenas, sin personas. 3. Alternar la presentadora y escenas del producto.";
+export { PREGUNTA_FORMATO };
 
-type Formato = "con presentadora" | "solo escenas" | "mixto";
-
-function eleccion(texto: string, enPregunta: boolean): Formato | undefined {
+function eleccion(
+	texto: string,
+	enPregunta: boolean,
+): FormatoDreamina | undefined {
 	if (
 		/[?¿]/.test(texto) ||
 		/\b(?:no se si|con o sin|si o no|1 o 2)\b/.test(texto)
@@ -43,14 +50,31 @@ function eleccion(texto: string, enPregunta: boolean): Formato | undefined {
 
 /** Solo las decisiones de la persona habilitan la entrega. Un guion no elige el formato. */
 export function turnoVideo(mensajes: readonly ModelMessage[]) {
-	let formato: Formato | undefined;
+	let formato: FormatoDreamina | undefined;
 	let pregunta = false;
+	let guion: TarjetaGuion | undefined;
+	let convertir = false;
+	const llamadasGuion = new Map<string, TarjetaGuion>();
 	let video = false;
 	let generar = false;
 	let primerMensaje = true;
 	for (const mensaje of mensajes) {
 		if (mensaje.role === "system") continue;
 		if (mensaje.role === "tool") {
+			for (const parte of mensaje.content) {
+				if (
+					parte.type === "tool-result" &&
+					parte.toolName === "entregar_guion" &&
+					parte.output.type === "json" &&
+					typeof parte.output.value === "object" &&
+					parte.output.value !== null &&
+					"ok" in parte.output.value &&
+					parte.output.value.ok === true
+				) {
+					guion = llamadasGuion.get(parte.toolCallId);
+					convertir = false;
+				}
+			}
 			if (
 				mensaje.content.some(
 					(p) =>
@@ -73,13 +97,15 @@ export function turnoVideo(mensajes: readonly ModelMessage[]) {
 						.flatMap((p) => (p.type === "text" ? [p.text] : []))
 						.join("\n");
 		if (mensaje.role === "assistant") {
-			if (
-				typeof mensaje.content !== "string" &&
-				mensaje.content.some(
-					(p) => p.type === "tool-call" && p.toolName === "entregar_guion",
-				)
-			)
-				video = true;
+			if (typeof mensaje.content !== "string") {
+				for (const parte of mensaje.content) {
+					if (parte.type !== "tool-call" || parte.toolName !== "entregar_guion")
+						continue;
+					video = true;
+					const tarjeta = leerTarjeta(parte.input);
+					if (tarjeta) llamadasGuion.set(parte.toolCallId, tarjeta);
+				}
+			}
 			if (contenido.trim()) pregunta = contenido.includes(PREGUNTA_FORMATO);
 			continue;
 		}
@@ -106,7 +132,10 @@ export function turnoVideo(mensajes: readonly ModelMessage[]) {
 			/^(?:¿?c[oó]mo (?:se |funciona|uso|abro)|¿?qu[eé] es |(?:hola|gracias|listo)[.! ]*$)/.test(
 				texto,
 			);
-		if (nuevo || otraPieza) formato = undefined;
+		if (nuevo || otraPieza) {
+			formato = undefined;
+			guion = undefined;
+		}
 		video =
 			!otraPieza &&
 			(video || pregunta || mencionaVideo || (primerMensaje && texto === "1"));
@@ -114,6 +143,18 @@ export function turnoVideo(mensajes: readonly ModelMessage[]) {
 		const [peticion] = texto.split(/(?:guion|escena \d+|que se ve)\s*:/);
 		const opcion = eleccion(peticion, pregunta);
 		if (video && opcion) formato = opcion;
+		// Solo convertir literalmente si se pidió usar el guion tal cual. Los ajustes creativos siguen en el agente.
+		const convertirTalCual =
+			/^(?:(?:quiero|vamos a|puedes) )?(?:(?:hacerlo|hacer este video|usarlo|pasarlo|convertirlo|prepararlo|llevarlo) (?:en|a|para) |(?:dame |genera |generame |prepara )?(?:los? |el )?prompts? (?:de |para )?|(?:en|para) )?(?:dreamina|seedance)[.! ]*$/.test(
+				texto,
+			);
+		const soloEleccion =
+			/^(?:(?:la |opcion )?[123]|si|no|(?:con |sin )?(?:la )?presentadora(?: en camara)?|solo escenas(?:, sin personas)?|alternar (?:la )?presentadora y escenas(?: del producto)?|ambas|ambos|mixto)[.! ]*$/.test(
+				texto,
+			);
+		convertir = Boolean(
+			guion && (convertirTalCual || (convertir && soloEleccion)),
+		);
 		if (soloGuion || !video || consulta) generar = false;
 		else if (
 			mencionaVideo ||
@@ -125,5 +166,5 @@ export function turnoVideo(mensajes: readonly ModelMessage[]) {
 		pregunta = false;
 		primerMensaje = false;
 	}
-	return { formato, generar };
+	return { formato, generar, guionParaDreamina: convertir ? guion : undefined };
 }

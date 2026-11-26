@@ -486,6 +486,55 @@ describe("chat del panel", () => {
 			"POST /functions/v1/ia/chat",
 		]);
 	});
+	it("permite copiar y abrir Dreamina desde el guion aunque falle el turno siguiente", async () => {
+		const simulado = simular();
+		simulado.responder(() => respuesta({ tarjetaGuion: tarjeta }));
+		enviar();
+		const tipo = await screen.findByLabelText(
+			"¿Cómo quieres el video en Dreamina?",
+		);
+		await screen.findByRole("button", { name: "Copiar respuesta completa" });
+		simulado.responder(() =>
+			flujo([
+				{ type: "start", messageId: "fallo" },
+				{
+					type: "error",
+					errorText: "El guion salió incompleto. Inténtalo de nuevo.",
+				},
+			]),
+		);
+		enviar("quiero hacerlo en dreamina");
+		expect(await screen.findByRole("alert")).toHaveTextContent(
+			"El guion salió incompleto",
+		);
+		expect(
+			screen.getByRole("button", { name: "Copiar y abrir Dreamina" }),
+		).toBeDisabled();
+		const copiar = vi.fn().mockResolvedValue(undefined);
+		vi.stubGlobal(
+			"navigator",
+			Object.create(navigator, { clipboard: { value: { writeText: copiar } } }),
+		);
+		for (const formato of ["con presentadora", "solo escenas", "mixto"]) {
+			fireEvent.change(tipo, { target: { value: formato } });
+			const clips = screen.getAllByRole("link", {
+				name: /Copiar y abrir Dreamina/,
+			});
+			expect(clips).toHaveLength(2);
+			expect(clips[0]).toHaveAttribute("target", "_blank");
+			expect(clips[0]).toHaveAttribute(
+				"href",
+				"https://dreamina.capcut.com/ai-tool/ai-video",
+			);
+			fireEvent.click(clips[0]);
+			expect(copiar.mock.lastCall?.[0]).toContain(tarjeta.guion.escenas[0].voz);
+			expect(copiar.mock.lastCall?.[0].includes("@fresura")).toBe(
+				formato !== "solo escenas",
+			);
+			expect(copiar.mock.lastCall?.[0]).not.toContain("Cómo usar");
+		}
+		expect(simulado.peticiones).toHaveLength(2);
+	});
 	it("RF-18: guardar el guion es una acción explícita y aprobar ocurre en la biblioteca", async () => {
 		const simulado = simular();
 		simulado.responder(() => respuesta({ tarjetaGuion: tarjeta }));
