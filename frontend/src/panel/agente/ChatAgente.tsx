@@ -74,6 +74,7 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 	}, [chat.mensajes, chat.ocupado]);
 	const [confirmacion, setConfirmacion] = useState<string | null>(null);
 	const ultimo = chat.mensajes.at(-1);
+	let solicitud = "";
 	const consultando =
 		ultimo?.role === "assistant" &&
 		ultimo.parts.some(
@@ -260,9 +261,10 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 							const partes = m.parts.filter((parte) => parte.type === "text");
 							const terminado = !chat.ocupado || m.id !== ultimo?.id;
 							const textoChat = partes.map((p) => p.text).join("\n\n");
+							if (m.role === "user") solicitud = textoChat;
 							const fragmentos =
 								m.role === "assistant" && terminado && textoChat
-									? separarPromptsDreamina(textoChat)
+									? separarPromptsDreamina(textoChat, solicitud)
 									: [{ inicio: 0, texto: textoChat, esPrompt: false }];
 							const promptsEntregados = piezas
 								.filter((p) => p.tipo === "prompt_seedance")

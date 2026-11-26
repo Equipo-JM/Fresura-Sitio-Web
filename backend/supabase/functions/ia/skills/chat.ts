@@ -3,11 +3,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import {
 	createUIMessageStream,
 	createUIMessageStreamResponse,
+	hasToolCall,
 	isStepCount,
 	type ModelMessage,
 	streamText,
+	tool,
 	wrapLanguageModel,
 } from "ai";
+import { z } from "zod";
 import {
 	esquemaChat,
 	esTituloProvisional,
@@ -31,6 +34,7 @@ import {
 	INSTRUCCIONES_AGENTE,
 	MAXIMO_PASOS_AGENTE,
 } from "../agente/agente.ts";
+import { PREGUNTA_FORMATO, turnoVideo } from "../agente/formatoVideo.ts";
 import {
 	cargarMensajes,
 	guardarMensajes,
@@ -261,7 +265,10 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 		if (!contenido.success) throw new Error("contenido_no_valido");
 		const nuevo: ModelMessage = { role: "user", content: mensaje };
 		await guardarMensajes(cliente, id, [nuevo]);
+		const mensajes = [...historial, nuevo];
+		const video = turnoVideo(mensajes);
 		const estado: EstadoAgente = {
+			formatoVideo: video.formato,
 			productosConsultados: new Set(),
 		};
 		const hoy = fechaColombia(new Date());
@@ -273,6 +280,11 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 		);
 		const instrucciones = [
 			INSTRUCCIONES_AGENTE,
+			...(video.generar && video.formato
+				? [
+						`Formato elegido para este video: ${video.formato}. Si falta un dato imprescindible, usa preguntar_dato_video. Cuando puedas entregar, usa entregar_pieza por cada clip.`,
+					]
+				: []),
 			// El calendario y las fechas especiales se cuentan desde hoy en Colombia.
 			`Hoy es ${hoy} (hora de Colombia).`,
 			...(contenido.data.estado === "ejemplo"
@@ -285,6 +297,25 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			onError: () => RESPUESTAS_ERROR_IA.ia_tiempo.mensaje,
 			execute: async ({ writer }) => {
 				writer.write({ type: "start", messageId: crypto.randomUUID() });
+				function escribirTexto(mensaje: string) {
+					const idTexto = crypto.randomUUID();
+					writer.write({ type: "text-start", id: idTexto });
+					writer.write({ type: "text-delta", id: idTexto, delta: mensaje });
+					writer.write({ type: "text-end", id: idTexto });
+				}
+				if (video.generar && !video.formato) {
+					await guardarMensajes(cliente, id, [
+						{ role: "assistant", content: PREGUNTA_FORMATO },
+					]);
+					escribirTexto(PREGUNTA_FORMATO);
+					writer.write({ type: "finish", finishReason: "stop" });
+					return;
+				}
+				let preguntaVideo: string | undefined;
+				const textosSinTarjeta = new Set<string>();
+				const esperaTarjeta = () =>
+					video.generar &&
+					!estado.piezasEntregadas?.some((p) => p.tipo === "prompt_seedance");
 				let fallo: unknown;
 				let texto = "";
 				const hayEntrega = () =>
@@ -303,9 +334,32 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 							),
 					),
 					system: instrucciones,
-					messages: [...historial, nuevo],
-					tools: herramientas,
-					stopWhen: isStepCount(MAXIMO_PASOS_AGENTE),
+					messages: mensajes,
+					tools: {
+						...herramientas,
+						...(video.generar
+							? {
+									preguntar_dato_video: tool({
+										description:
+											"Pregunta por un dato que falta para preparar el video. Escribe una pregunta breve con opciones, sin incluir prompts.",
+										inputSchema: z.object({
+											pregunta: z.string().trim().min(1).max(400),
+										}),
+										execute: async ({ pregunta }) => {
+											preguntaVideo = pregunta;
+											return { ok: true };
+										},
+									}),
+								}
+							: {}),
+					},
+					prepareStep: () => ({
+						toolChoice: esperaTarjeta() ? "required" : "auto",
+					}),
+					stopWhen: [
+						isStepCount(MAXIMO_PASOS_AGENTE),
+						hasToolCall("preguntar_dato_video"),
+					],
 					// El middleware controla el único reintento adicional por turno.
 					maxRetries: 0,
 					// Un turno encadena hasta MAXIMO_PASOS_AGENTE llamadas y, con Gemini saturado,
@@ -356,12 +410,31 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 							continue;
 						}
 						if (fallo !== undefined) continue;
+						if (parte.type === "text-start" && esperaTarjeta())
+							textosSinTarjeta.add(parte.id);
+						if (
+							(parte.type === "text-start" ||
+								parte.type === "text-delta" ||
+								parte.type === "text-end") &&
+							textosSinTarjeta.has(parte.id)
+						) {
+							if (parte.type === "text-end") textosSinTarjeta.delete(parte.id);
+							continue;
+						}
 						if (parte.type === "text-delta") {
 							texto += parte.delta;
 							if (parte.delta.trim()) primerContenidoMs ??= Date.now() - inicio;
 						}
 						if (parte.type === "finish") {
-							if (!texto.trim() && !hayEntrega()) {
+							if (preguntaVideo) {
+								escribirTexto(preguntaVideo);
+								texto += preguntaVideo;
+								completados.push({ role: "assistant", content: preguntaVideo });
+							}
+							if (
+								(esperaTarjeta() && !preguntaVideo) ||
+								(!texto.trim() && !hayEntrega())
+							) {
 								fallo = new ErrorIa(
 									parte.finishReason === "content-filter"
 										? "ia_bloqueado"
