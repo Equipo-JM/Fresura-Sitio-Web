@@ -285,6 +285,79 @@ describe("POST /chat", () => {
 			expect(p.guardados.some((f) => f.contenido.role === "tool")).toBe(true);
 		},
 	);
+	it.each(["1", "2", "3"])(
+		"convierte el guion del historial al pedir «quiero hacerlo en dreamina» y elegir %s",
+		async (opcion) => {
+			const guion = guionDePrueba();
+			const historial: ModelMessage[] = [
+				{ role: "user", content: "Solo el guion de un reel" },
+				{
+					role: "assistant",
+					content: [
+						{
+							type: "tool-call",
+							toolName: "entregar_guion",
+							toolCallId: "g",
+							input: { instruccion, guion },
+						},
+					],
+				},
+				{
+					role: "tool",
+					content: [
+						{
+							type: "tool-result",
+							toolName: "entregar_guion",
+							toolCallId: "g",
+							output: { type: "json", value: { ok: true } },
+						},
+					],
+				},
+			];
+			const p = preparar(undefined, historial);
+			const preguntar = await p.pedir({
+				conversacion_id: id,
+				mensaje: "quiero hacerlo en dreamina",
+			});
+			expect(await preguntar.text()).toContain(PREGUNTA_FORMATO);
+			historial.push(...p.guardados.map((f) => f.contenido));
+			const elegir = await p.pedir({ conversacion_id: id, mensaje: opcion });
+			const flujo = await elegir.text();
+			expect(flujo).toContain('"tipo":"prompt_seedance"');
+			expect(flujo).not.toContain('"type":"error"');
+			expect(flujo).toContain(guion.escenas[0].voz);
+			expect(flujo.includes("@fresura")).toBe(opcion !== "2");
+			expect(p.crearModelo).not.toHaveBeenCalled();
+			const ultimo = p.guardados.at(-1)?.contenido;
+			expect(ultimo?.role).toBe("tool");
+		},
+	);
+	it("completa las tarjetas si el modelo entrega el guion y termina sin los prompts", async () => {
+		const modelo = new MockLanguageModelV3({
+			doStream: [
+				respuestaHerramienta(
+					"entregar_guion",
+					{
+						instruccion: { ...instruccion, producto_id: null },
+						guion: guionDePrueba(),
+					},
+					"guion",
+				),
+				respuestaTexto("Aquí tienes el guion."),
+			],
+		});
+		const p = preparar(modelo);
+		const sse = await (
+			await p.pedir({
+				conversacion_id: id,
+				mensaje:
+					"Quiero el guion y los prompts de un Reel de fresas con la presentadora.",
+			})
+		).text();
+		expect(sse).toContain('"tarjetaGuion":');
+		expect(sse).toContain('"tipo":"prompt_seedance"');
+		expect(sse).not.toContain('"type":"error"');
+	});
 	it("permite preguntar por un dato después de elegir el formato", async () => {
 		const pregunta = "¿Qué producto mostramos?";
 		const modelo = new MockLanguageModelV3({

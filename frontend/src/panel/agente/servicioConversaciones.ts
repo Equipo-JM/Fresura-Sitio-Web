@@ -5,10 +5,9 @@ import {
 	tituloConversacion,
 } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import {
-	crearEsquemaGuion,
-	esquemaInstruccionGuardada,
 	type Guion,
-	type InstruccionGuion,
+	leerTarjeta,
+	type TarjetaGuion,
 } from "../../../../backend/supabase/functions/_shared/esquemas/guion";
 import {
 	esquemaPieza,
@@ -16,8 +15,7 @@ import {
 } from "../../../../backend/supabase/functions/_shared/esquemas/pieza";
 import type { Database } from "../../tipos/database.types";
 
-/** Entrega validada; guardarla sigue siendo una acción explícita de la administradora. */
-export type TarjetaGuion = { instruccion: InstruccionGuion; guion: Guion };
+export { leerTarjeta, type TarjetaGuion };
 /** Metadatos enviados al terminar el flujo, nunca texto de herramientas internas. */
 export type MensajeAgente = UIMessage<{
 	tarjetaGuion?: TarjetaGuion;
@@ -38,24 +36,6 @@ export type PaginaConversaciones = {
 	filas: Conversacion[];
 	hayAnteriores: boolean;
 };
-
-/** Valida también las entregas recuperadas de la memoria antes de ofrecer guardarlas. */
-export function leerTarjeta(valor: unknown): TarjetaGuion | undefined {
-	if (
-		!valor ||
-		typeof valor !== "object" ||
-		!("instruccion" in valor) ||
-		!("guion" in valor)
-	)
-		return;
-	const instruccion = esquemaInstruccionGuardada.safeParse(valor.instruccion);
-	if (!instruccion.success) return;
-	const guion = crearEsquemaGuion(instruccion.data.duracion_s).safeParse(
-		valor.guion,
-	);
-	if (guion.success)
-		return { instruccion: instruccion.data, guion: guion.data };
-}
 
 /** Valida las piezas del flujo o de la memoria; descarta las que no cumplen el contrato. */
 export function leerPiezas(valor: unknown): Pieza[] {

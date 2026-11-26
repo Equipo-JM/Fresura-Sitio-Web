@@ -11,12 +11,19 @@ import {
 	wrapLanguageModel,
 } from "ai";
 import { z } from "zod";
+import { piezasDesdeGuion } from "../../_shared/dreamina.ts";
 import {
 	esquemaChat,
 	esTituloProvisional,
 	tituloConversacion,
 } from "../../_shared/esquemas/chat.ts";
 import { esquemaContenido } from "../../_shared/esquemas/contenido.ts";
+import type { TarjetaGuion } from "../../_shared/esquemas/guion.ts";
+import {
+	erroresPieza,
+	esquemaPieza,
+	type Pieza,
+} from "../../_shared/esquemas/pieza.ts";
 import {
 	esquemaReferenciaEstilo,
 	MAXIMO_REFERENCIAS_AGENTE,
@@ -97,6 +104,28 @@ function tarjetas(estado: EstadoAgente) {
 			? { piezas: estado.piezasEntregadas }
 			: {}),
 	};
+}
+
+/** Conserva el mismo contrato de historial que las tarjetas entregadas por el modelo. */
+function memoriaPiezas(piezas: Pieza[]): ModelMessage[] {
+	const llamadas = piezas.map((input) => ({
+		type: "tool-call" as const,
+		toolName: "entregar_pieza",
+		toolCallId: crypto.randomUUID(),
+		input,
+	}));
+	return [
+		{ role: "assistant", content: llamadas },
+		{
+			role: "tool",
+			content: llamadas.map(({ toolCallId, toolName }) => ({
+				type: "tool-result",
+				toolCallId,
+				toolName,
+				output: { type: "json", value: { ok: true } },
+			})),
+		},
+	];
 }
 
 /** Cambia de modelo antes de abrir el flujo, sin repetir texto ni herramientas ya emitidos. */
@@ -263,6 +292,8 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 			);
 		const contenido = esquemaContenido.safeParse(data.json);
 		if (!contenido.success) throw new Error("contenido_no_valido");
+		const precios = preciosPublicados(contenido.data);
+		const sedes = contenido.data.negocio.sedes.map((sede) => sede.nombre);
 		const nuevo: ModelMessage = { role: "user", content: mensaje };
 		await guardarMensajes(cliente, id, [nuevo]);
 		const mensajes = [...historial, nuevo];
@@ -311,6 +342,36 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 					writer.write({ type: "finish", finishReason: "stop" });
 					return;
 				}
+				function convertirGuion(tarjeta: TarjetaGuion) {
+					if (!video.formato) return;
+					const piezas = piezasDesdeGuion(tarjeta, video.formato);
+					if (
+						piezas.every(
+							(pieza) =>
+								esquemaPieza.safeParse(pieza).success &&
+								!erroresPieza(pieza).length &&
+								!validarTextoContraDatos(pieza.bloques[0].texto, precios, sedes)
+									.length,
+						)
+					)
+						return piezas;
+				}
+				if (video.generar && video.guionParaDreamina) {
+					const piezas = convertirGuion(video.guionParaDreamina);
+					if (piezas) {
+						await guardarMensajes(cliente, id, memoriaPiezas(piezas));
+						writer.write({
+							type: "message-metadata",
+							messageMetadata: { piezas },
+						});
+						writer.write({
+							type: "finish",
+							finishReason: "stop",
+							messageMetadata: { piezas },
+						});
+						return;
+					}
+				}
 				let preguntaVideo: string | undefined;
 				const textosSinTarjeta = new Set<string>();
 				const esperaTarjeta = () =>
@@ -354,7 +415,9 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 							: {}),
 					},
 					prepareStep: () => ({
-						toolChoice: esperaTarjeta() ? "required" : "auto",
+						// Con un guion válido, el servidor puede completar los clips al cerrar el turno.
+						toolChoice:
+							esperaTarjeta() && !estado.guionEntregado ? "required" : "auto",
 					}),
 					stopWhen: [
 						isStepCount(MAXIMO_PASOS_AGENTE),
@@ -432,6 +495,23 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 								completados.push({ role: "assistant", content: preguntaVideo });
 							}
 							if (
+								esperaTarjeta() &&
+								!preguntaVideo &&
+								estado.guionEntregado &&
+								parte.finishReason !== "content-filter" &&
+								parte.finishReason !== "error"
+							) {
+								const piezas = convertirGuion(estado.guionEntregado);
+								if (piezas) {
+									estado.piezasEntregadas = [
+										...(estado.piezasEntregadas ?? []),
+										...piezas,
+									];
+									completados.push(...memoriaPiezas(piezas));
+									hastaEntrega = completados.length;
+								}
+							}
+							if (
 								(esperaTarjeta() && !preguntaVideo) ||
 								(!texto.trim() && !hayEntrega())
 							) {
@@ -443,11 +523,7 @@ export function crearRutaChat(opciones: OpcionesRutaChat): ManejadorRuta {
 								continue;
 							}
 							terminado = true;
-							const errores = validarTextoContraDatos(
-								texto,
-								preciosPublicados(contenido.data),
-								contenido.data.negocio.sedes.map((sede) => sede.nombre),
-							);
+							const errores = validarTextoContraDatos(texto, precios, sedes);
 							const tipoAviso = errores.some((error) =>
 								error.startsWith("La sede"),
 							)

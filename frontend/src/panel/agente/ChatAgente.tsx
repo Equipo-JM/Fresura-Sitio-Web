@@ -1,5 +1,9 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+	FORMATOS_DREAMINA,
+	PREGUNTA_FORMATO,
+} from "../../../../backend/supabase/functions/_shared/dreamina";
 import { INICIO_CHAT } from "../../../../backend/supabase/functions/_shared/esquemas/chat";
 import {
 	promptPieza,
@@ -8,6 +12,7 @@ import {
 import type { Database } from "../../tipos/database.types";
 import { GuardarEnBiblioteca } from "../biblioteca/GuardarEnBiblioteca";
 import { crearServicioBiblioteca } from "../biblioteca/servicioBiblioteca";
+import { DreaminaDesdeGuion } from "./DreaminaDesdeGuion";
 import { separarPromptsDreamina } from "./promptsDreamina";
 import { cuerpoGuion, leerPiezas, leerTarjeta } from "./servicioConversaciones";
 import { TarjetaPieza } from "./TarjetaPieza";
@@ -314,6 +319,26 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 											</p>
 										) : null,
 									)}
+									{m === ultimo &&
+										m.role === "assistant" &&
+										textoChat.trim() === PREGUNTA_FORMATO && (
+											<div className="agente-acciones">
+												{Object.values(FORMATOS_DREAMINA).map((etiqueta, i) => (
+													<button
+														key={etiqueta}
+														className="boton secundario compacto"
+														type="button"
+														disabled={chat.ocupado}
+														onClick={() => {
+															seguirHilo.current = true;
+															void chat.enviar(String(i + 1));
+														}}
+													>
+														{etiqueta}
+													</button>
+												))}
+											</div>
+										)}
 									{m.metadata?.aviso && (
 										<p className="panel-aviso">{m.metadata.aviso.mensaje}</p>
 									)}
@@ -322,6 +347,9 @@ export function ChatAgente({ cliente }: { cliente: SupabaseClient<Database> }) {
 											<h3>{tarjeta.guion.titulo}</h3>
 											<p>{ficha}</p>
 											<p className="agente-texto">{cuerpo}</p>
+											{!promptsEntregados.length && (
+												<DreaminaDesdeGuion tarjeta={tarjeta} />
+											)}
 											<div className="agente-acciones">
 												<GuardarEnBiblioteca
 													guardar={() =>
