@@ -19,6 +19,7 @@ import {
 	INSTRUCCIONES_GUION_PRESENTADORA,
 	INSTRUCCIONES_PIEZAS,
 } from "../skills/piezas.ts";
+import { PREGUNTA_FORMATO, type turnoVideo } from "./formatoVideo.ts";
 import {
 	entregarGuion,
 	listarProductos,
@@ -77,6 +78,7 @@ ${PERFIL_AVATAR_FRESURA}`;
 export type EstadoAgente = {
 	/** Ids consultados con `ver_producto` en el turno actual. */
 	productosConsultados: Set<string>;
+	formatoVideo?: ReturnType<typeof turnoVideo>["formato"];
 	/** Último guion válido entregado en el turno, para mostrarlo como tarjeta. */
 	guionEntregado?: Extract<ResultadoEntrega, { ok: true }>;
 	/** Piezas válidas entregadas en el turno, en orden. */
@@ -149,6 +151,26 @@ export function crearHerramientasAgente(
 				"Entrega una pieza de contenido distinta del guion: publicación, carrusel, prompt de foto, un solo clip de Seedance, variantes de gancho, ideas, calendario o revisión. Valida el formato y los precios y sedes mencionados; si devuelve errores, corrígelos y vuelve a llamarla. No guarda nada.",
 			inputSchema: esquemaPieza,
 			execute: async (pieza) => {
+				if (pieza.tipo === "prompt_seedance" && !estado.formatoVideo)
+					return {
+						ok: false,
+						errores: [
+							`Pregunta y espera la elección de la persona: ${PREGUNTA_FORMATO}`,
+						],
+					};
+				if (
+					pieza.tipo === "prompt_seedance" &&
+					estado.formatoVideo === "solo escenas" &&
+					pieza.bloques.some(
+						(b) => !/^cómo usar/i.test(b.etiqueta) && /@fresura/i.test(b.texto),
+					)
+				)
+					return {
+						ok: false,
+						errores: [
+							"La persona eligió solo escenas. Quita el personaje del prompt.",
+						],
+					};
 				// La revisión cita los datos equivocados del texto revisado para señalarlos.
 				const errores = [
 					...erroresPieza(pieza),

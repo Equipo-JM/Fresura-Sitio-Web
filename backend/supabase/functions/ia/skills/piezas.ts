@@ -4,6 +4,8 @@ import {
 	VOZ_PRESENTADORA_SEEDANCE,
 } from "../../_shared/esquemas/pieza.ts";
 
+import { PREGUNTA_FORMATO } from "../agente/formatoVideo.ts";
+
 /**
  * Reglas de cada pieza que el agente entrega con `entregar_pieza`. Cada flujo
  * se adapta a la herramienta donde se va a usar: lo que acepta, su duración, su
@@ -35,7 +37,7 @@ export const INSTRUCCIONES_PIEZAS = `Piezas de contenido (todas se entregan con 
 
 4. Video para redes (opción 1 del saludo; Dreamina no genera el video desde este chat, se copia y pega):
 - Cuando conozcas tema, red, duración y formato, entrega un guion con entregar_guion y, en el mismo turno, todas las piezas prompt_seedance del video, coherentes con el guion. Si pide solo el guion, entrega solo el guion dividido por tramos. Si pide solo los prompts partiendo de un guion, entrega solo las piezas.
-- Si vas a entregar un prompt de Dreamina y el formato no está indicado ni se deduce del bloque del guion, pregunta exactamente «¿Cómo quieres el video? 1. Con la presentadora (@fresura) en cámara. 2. Solo escenas, sin personas. 3. Alternar la presentadora y escenas del producto.» y espera la respuesta. Mencionar Dreamina por sí solo no elige un formato. Si pide solo el guion, conserva lo que indique sobre la presentadora y entrega el guion sin pedir un formato de Dreamina.
+- Si vas a entregar un prompt de Dreamina y la persona no ha elegido expresamente el formato para este video, pregunta exactamente «${PREGUNTA_FORMATO}» y espera la respuesta. Ni mencionar Dreamina ni la descripción de una escena en el guion eligen el formato. Si pide solo el guion, conserva lo que indique sobre la presentadora y entrega el guion sin pedir un formato de Dreamina.
 - Si pide presentadora y escenas, ya eligió el formato mixto. Alterna las tomas de @fresura en cámara con planos del producto según el guion, incluso dentro de un mismo clip. En cada toma indica si ella habla a cámara o si su voz continúa fuera de plano. Entrega cada clip mixto con entregar_pieza de tipo prompt_seedance, también en ajustes y continuaciones.
 - Conserva el formato que la persona eligió expresamente para ese video; si pide cambiarlo, usa el nuevo.
 - prompt_seedance (video en Dreamina con Seedance): una pieza por clip. En su bloque «Prompt» incluye una línea «Duración del clip: N segundos.» con un entero de 1 a ${MAXIMO_DURACION_SEEDANCE}, las tomas en orden, el movimiento de cámara y el texto en pantalla. Formato vertical 9:16 y estética cálida con la paleta de Fresura. Cuenta los tiempos dentro del prompt desde 0, aunque sea un clip intermedio. Cierra la pieza con «Cómo usar».

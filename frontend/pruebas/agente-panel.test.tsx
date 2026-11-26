@@ -593,6 +593,9 @@ describe("chat del panel", () => {
 			Object.create(navigator, { clipboard: { value: { writeText: copiar } } }),
 		);
 		enviar("Dame las indicaciones para Dreamina");
+		expect(
+			await screen.findByRole("link", { name: /Copiar y abrir Dreamina/ }),
+		).toHaveAttribute("href", "https://dreamina.capcut.com/ai-tool/ai-video");
 		fireEvent.click(
 			await screen.findByRole("button", { name: "Copiar respuesta completa" }),
 		);

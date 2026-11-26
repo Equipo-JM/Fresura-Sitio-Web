@@ -8,6 +8,7 @@ import {
 	VOZ_PRESENTADORA_SEEDANCE,
 } from "../../supabase/functions/_shared/esquemas/pieza";
 import { MAXIMO_PASOS_AGENTE } from "../../supabase/functions/ia/agente/agente";
+import { PREGUNTA_FORMATO } from "../../supabase/functions/ia/agente/formatoVideo";
 import {
 	filasDeMensajes,
 	reconstruirMensajes,
@@ -213,14 +214,96 @@ describe("POST /chat", () => {
 		expect(p.guardados.map((f) => f.rol)).toEqual(["administrador", "agente"]);
 		expect(p.guardados[0].contenido.content).toBe("Hola");
 	});
-	it("«crear video» ya no tiene un flujo propio: lo responde el modelo", async () => {
-		const p = preparar();
-		const respuesta = await p.pedir({
-			conversacion_id: id,
-			mensaje: "crear video",
+	it.each([
+		"1",
+		"crear video",
+		"Dame los prompts de Dreamina de este guion",
+		"Dame los prompts para Dreamina. Guion: Reel con presentadora en la tienda.",
+		"Haz otro Reel",
+	])(
+		"pregunta por la presentadora antes de generar para «%s»",
+		async (mensaje) => {
+			const historial: ModelMessage[] =
+				mensaje === "1"
+					? []
+					: [
+							{
+								role: "assistant",
+								content: "Guion: la presentadora mira a cámara.",
+							},
+						];
+			const p = preparar(undefined, historial);
+			const respuesta = await p.pedir({ conversacion_id: id, mensaje });
+			expect(await respuesta.text()).toContain(PREGUNTA_FORMATO);
+			expect(p.crearModelo).not.toHaveBeenCalled();
+			expect(p.guardados.at(-1)?.contenido.content).toBe(PREGUNTA_FORMATO);
+		},
+	);
+	it.each([
+		["1", "con presentadora", "@fresura es la presentadora."],
+		["2", "solo escenas", "Solo el producto."],
+		[
+			"3",
+			"mixto",
+			"@fresura presenta el postre y la cámara pasa a un plano detalle.",
+		],
+	])(
+		"retoma el formato %s y entrega el prompt como tarjeta",
+		async (opcion, formato, toma) => {
+			const pieza: Pieza = {
+				tipo: "prompt_seedance",
+				titulo: "Clip 1",
+				red: "instagram",
+				bloques: [
+					{
+						etiqueta: "Prompt",
+						texto: `${toma}\nDuración del clip: 15 segundos.\n${CONTINUIDAD_CLIP_SEEDANCE}`,
+					},
+				],
+			};
+			const modelo = new MockLanguageModelV3({
+				doStream: [
+					respuestaHerramienta("entregar_pieza", pieza, "clip"),
+					respuestaTexto("Aquí tienes el clip."),
+				],
+			});
+			const p = preparar(modelo, [
+				{
+					role: "user",
+					content: "Quiero los prompts de un reel de 15 segundos sobre fresas.",
+				},
+				{ role: "assistant", content: PREGUNTA_FORMATO },
+			]);
+			const sse = await (
+				await p.pedir({ conversacion_id: id, mensaje: opcion })
+			).text();
+			expect(modelo.doStreamCalls[0].toolChoice).toEqual({ type: "required" });
+			expect(JSON.stringify(modelo.doStreamCalls[0].prompt)).toContain(
+				`Formato elegido para este video: ${formato}`,
+			);
+			expect(sse).toContain('"piezas":[');
+			expect(p.guardados.some((f) => f.contenido.role === "tool")).toBe(true);
+		},
+	);
+	it("permite preguntar por un dato después de elegir el formato", async () => {
+		const pregunta = "¿Qué producto mostramos?";
+		const modelo = new MockLanguageModelV3({
+			doStream: respuestaHerramienta(
+				"preguntar_dato_video",
+				{ pregunta },
+				"dato",
+			),
 		});
-		expect(await respuesta.text()).toContain('"delta":"Hola"');
-		expect(p.crearModelo).toHaveBeenCalled();
+		const p = preparar(modelo);
+		const sse = await (
+			await p.pedir({
+				conversacion_id: id,
+				mensaje: "Quiero un Reel solo escenas",
+			})
+		).text();
+		expect(sse).toContain(`"delta":"${pregunta}"`);
+		expect(p.guardados.at(-1)?.contenido.content).toBe(pregunta);
+		expect(sse).not.toContain('"piezas":');
 	});
 	it("añade aviso de precio sin registrar el texto", async () => {
 		const registro = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -667,7 +750,7 @@ describe("POST /chat", () => {
 		const texto = await (
 			await p.pedir({
 				conversacion_id: id,
-				mensaje: "Un video de la sede U Nacional",
+				mensaje: "Solo el guion de un video de la sede U Nacional",
 			})
 		).text();
 		expect(texto).toContain('"tarjetaGuion"');

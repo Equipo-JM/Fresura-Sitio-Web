@@ -1,6 +1,6 @@
 const tituloClip = /^(?:clip|tramo)\s+\d+\b/i;
 const etiquetaPrompt =
-	/^prompt(?:\s+(?:para\s+)?(?:Dreamina|Seedance)(?:\s+[\d.]+)?)?\s*:?$/i;
+	/^prompt(?:\s+\d+)?(?:\s+(?:para\s+)?(?:Dreamina|Seedance)(?:\s+[\d.]+)?)?\s*:?$/i;
 const inicioAvatar = /^@fresura\s+es la presentadora\b/i;
 const duracion = /^duraci[oó]n del clip\s*:\s*\d+\s*(?:s\b|segundos?\b)/i;
 const continuidad = /^El clip se siente natural de principio a fin\b/i;
@@ -9,9 +9,14 @@ const instrucciones = /^c[oó]mo usar\b/i;
 type Fragmento = { inicio: number; texto: string; esPrompt: boolean };
 
 /** Reconoce entregas antiguas en texto sin incluir las instrucciones de uso en la copia. */
-export function separarPromptsDreamina(texto: string): Fragmento[] {
+export function separarPromptsDreamina(
+	texto: string,
+	solicitud = "",
+): Fragmento[] {
 	const partes: Fragmento[] = [];
-	const mencionaHerramienta = /\b(?:Dreamina|Seedance)\b/i.test(texto);
+	const mencionaHerramienta =
+		/\b(?:Dreamina|Seedance)\b/i.test(texto) ||
+		/\b(?:dreamina|seedance|prompts? (?:de|para) v[ií]deo)\b/i.test(solicitud);
 	let bloque: string[] = [];
 	let inicio = 0;
 	let esPrompt = false;
@@ -33,7 +38,17 @@ export function separarPromptsDreamina(texto: string): Fragmento[] {
 			.trim();
 		const avatar = inicioAvatar.test(marca);
 		const tiempo = duracion.test(marca);
+		const inicioVideo =
+			mencionaHerramienta &&
+			/^(?:video vertical|formato vertical|plano (?:detalle|medio|general)|primer plano)\b/i.test(
+				marca,
+			);
 		const delimitadorCodigo = /^`{3}/.test(marca);
+		if (delimitadorCodigo && mencionaHerramienta && !esPrompt) {
+			cerrar();
+			esPrompt = true;
+			continue;
+		}
 		if (delimitadorCodigo && esPrompt) {
 			if (bloque.some((l) => l.trim())) {
 				cerrar();
@@ -54,6 +69,7 @@ export function separarPromptsDreamina(texto: string): Fragmento[] {
 		}
 		if (
 			etiqueta ||
+			inicioVideo ||
 			avatar ||
 			((tiempo || continuidad.test(marca)) && mencionaHerramienta)
 		) {
